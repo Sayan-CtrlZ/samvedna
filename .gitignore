@@ -17,11 +17,10 @@ node_modules/
 client/node_modules/
 .Python
 build/
+client/build/
 develop-eggs/
 dist/
-# client/dist is served directly by backend main.py
-!client/dist/
-!client/dist/**
+client/dist/
 downloads/
 eggs/
 .eggs/

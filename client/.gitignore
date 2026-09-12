@@ -8,9 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-# dist is kept for direct FastAPI serving
-!dist/**
+dist/
 dist-ssr
+build/
 *.local
 
 # Editor directories and files
