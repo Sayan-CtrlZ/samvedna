@@ -21,34 +21,59 @@ export default function ChatAssistant({
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
 
+  const deduplicateMessages = (msgList) => {
+    if (!Array.isArray(msgList)) return [defaultWelcomeMessage];
+    const seenIds = new Set();
+    const result = [];
+    for (const m of msgList) {
+      if (m && m.id && !seenIds.has(m.id)) {
+        seenIds.add(m.id);
+        result.push(m);
+      }
+    }
+    return result.length > 0 ? result : [defaultWelcomeMessage];
+  };
+
   const [messages, setMessages] = useState(() => {
     try {
       const saved = sessionStorage.getItem(`samvedna_chat_${selectedVictimId}`);
       if (!saved) return [defaultWelcomeMessage];
       const parsed = JSON.parse(saved);
-      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : [defaultWelcomeMessage];
+      return deduplicateMessages(parsed);
     } catch (e) {
       return [defaultWelcomeMessage];
     }
   });
+
   const [inputText, setInputText] = useState('');
   const [isListeningSpeech, setIsListeningSpeech] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const lastProcessedCheckinIdRef = useRef(null);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(`samvedna_chat_${selectedVictimId}`, JSON.stringify(messages));
+      sessionStorage.setItem(`samvedna_chat_${selectedVictimId}`, JSON.stringify(deduplicateMessages(messages)));
     } catch (e) {
       console.warn('Chat storage warning:', e);
     }
   }, [messages, selectedVictimId]);
 
-  // Sync Voice Check-in results directly into the chat conversation
+  // Sync Voice Check-in results directly into the chat conversation (without duplicating text chat)
   useEffect(() => {
     if (latestVoiceResult) {
+      const checkinId = latestVoiceResult.checkin_id || latestVoiceResult._ts;
+
+      // Skip if already processed or if this was triggered via Web_Text_Chat
+      if (!checkinId || lastProcessedCheckinIdRef.current === checkinId || latestVoiceResult.channel === 'Web_Text_Chat') {
+        lastProcessedCheckinIdRef.current = checkinId;
+        return;
+      }
+
+      lastProcessedCheckinIdRef.current = checkinId;
+
       const userText =
         latestVoiceResult.transcript && latestVoiceResult.transcript.trim()
           ? latestVoiceResult.transcript
@@ -60,9 +85,11 @@ export default function ChatAssistant({
         latestVoiceResult.ai_response ||
         'Thank you for sharing your voice check-in. Your emotional stability and distress indicators have been assessed.';
 
-      const ts = latestVoiceResult._ts || Date.now();
+      const userMsgId = `voice-user-${checkinId}`;
+      const assistantMsgId = `voice-assistant-${checkinId}`;
+
       const userMessage = {
-        id: `voice-user-${latestVoiceResult.checkin_id || ts}`,
+        id: userMsgId,
         sender: 'user',
         isVoice: true,
         text: userText,
@@ -70,13 +97,22 @@ export default function ChatAssistant({
       };
 
       const assistantMessage = {
-        id: `voice-assistant-${latestVoiceResult.checkin_id || ts}`,
+        id: assistantMsgId,
         sender: 'assistant',
         text: assistantText,
         time: latestVoiceResult.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        composite_dds: latestVoiceResult.composite_dds,
+        risk_level: latestVoiceResult.risk_level,
+        threat_detected: latestVoiceResult.nlp_metrics?.witness_threat_detected || false,
+        is_sos_active: latestVoiceResult.is_sos_active || false,
       };
 
-      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === userMsgId || m.id === assistantMsgId)) {
+          return prev;
+        }
+        return [...prev, userMessage, assistantMessage];
+      });
     }
   }, [latestVoiceResult]);
 
@@ -310,8 +346,10 @@ export default function ChatAssistant({
 
       if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
       const data = await response.json();
+      const checkinId = data.checkin_id || `chat-${Date.now()}`;
+      lastProcessedCheckinIdRef.current = checkinId;
 
-      const assistantMessageId = `assistant-${Date.now()}`;
+      const assistantMessageId = `assistant-${checkinId}`;
       const assistantMessage = {
         id: assistantMessageId,
         sender: 'assistant',
@@ -323,10 +361,15 @@ export default function ChatAssistant({
         is_sos_active: data.is_sos_active || false,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === assistantMessageId)) {
+          return prev;
+        }
+        return [...prev, assistantMessage];
+      });
 
       if (onCheckinComplete) {
-        onCheckinComplete(data);
+        onCheckinComplete({ ...data, checkin_id: checkinId, channel: 'Web_Text_Chat' });
       }
     } catch (err) {
       console.error('Chat error:', err);
