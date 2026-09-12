@@ -2,127 +2,165 @@
 
 @layer utilities {
   /* ==========================================================================
-     Neumorphic (Soft UI) Surfaces & Shadows
-     Base canvas color: #e9eef5
-     Dark ambient shadow: #c5d0e0
-     Light highlight: #ffffff
+     Tactile 3D Elevated Buttons
      ========================================================================== */
-
-  .neu-flat {
-    background: #e9eef5;
-    box-shadow: 8px 8px 18px #c5d0e0, -8px -8px 18px #ffffff;
-    border-radius: 1.25rem;
-  }
-
-  .neu-card {
-    background: #e9eef5;
-    box-shadow: 7px 7px 16px #c7d2e3, -7px -7px 16px #ffffff;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-  }
-
-  .neu-card-sm {
-    background: #e9eef5;
-    box-shadow: 4px 4px 10px #c9d4e4, -4px -4px 10px #ffffff;
+  .btn-3d {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.1s ease-in-out;
     border-radius: 0.875rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
   }
 
-  .neu-btn {
-    background: #e9eef5;
-    box-shadow: 5px 5px 12px #c5d0e0, -5px -5px 12px #ffffff;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Primary Indigo 3D */
+  .btn-3d-indigo {
+    background-color: #4f46e5;
+    color: #ffffff;
+    border: 1px solid #4338ca;
+    border-bottom: 4px solid #312e81;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
   }
-
-  .neu-btn:hover {
-    box-shadow: 6px 6px 14px #bfcbdd, -6px -6px 14px #ffffff;
+  .btn-3d-indigo:hover:not(:disabled) {
+    background-color: #4338ca;
     transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-indigo:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
   }
 
-  .neu-btn:active {
-    box-shadow: inset 3px 3px 6px #c5d0e0, inset -3px -3px 6px #ffffff;
-    transform: translateY(0);
+  /* Crimson / Red SOS 3D */
+  .btn-3d-red {
+    background-color: #e11d48;
+    color: #ffffff;
+    border: 1px solid #be123c;
+    border-bottom: 4px solid #881337;
+    box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.35);
+  }
+  .btn-3d-red:hover:not(:disabled) {
+    background-color: #be123c;
+    transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-red:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: 0 1px 2px rgba(225, 29, 72, 0.2);
   }
 
-  .neu-btn-circle {
-    background: #e9eef5;
-    box-shadow: 6px 6px 14px #c5d0e0, -6px -6px 14px #ffffff;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Emerald Success / Send 3D */
+  .btn-3d-emerald {
+    background-color: #059669;
+    color: #ffffff;
+    border: 1px solid #047857;
+    border-bottom: 4px solid #064e3b;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
+  }
+  .btn-3d-emerald:hover:not(:disabled) {
+    background-color: #047857;
+    transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-emerald:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
   }
 
-  .neu-btn-circle:hover {
-    box-shadow: 8px 8px 16px #bfcbdd, -8px -8px 16px #ffffff;
+  /* Amber / Warning 3D */
+  .btn-3d-amber {
+    background-color: #d97706;
+    color: #ffffff;
+    border: 1px solid #b45309;
+    border-bottom: 4px solid #78350f;
+    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);
+  }
+  .btn-3d-amber:hover:not(:disabled) {
+    background-color: #b45309;
+    transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-amber:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
   }
 
-  .neu-btn-circle:active {
-    box-shadow: inset 4px 4px 8px #c5d0e0, inset -4px -4px 8px #ffffff;
+  /* Sky / Blue 3D */
+  .btn-3d-sky {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: 1px solid #0369a1;
+    border-bottom: 4px solid #075985;
+    box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
+  }
+  .btn-3d-sky:hover:not(:disabled) {
+    background-color: #0369a1;
+    transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-sky:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
   }
 
-  /* Inset / Pressed / Recessed */
+  /* Light / Neutral 3D */
+  .btn-3d-light {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-bottom: 4px solid #94a3b8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  .btn-3d-light:hover:not(:disabled) {
+    background-color: #f8fafc;
+    transform: translateY(-1px);
+    border-bottom-width: 5px;
+  }
+  .btn-3d-light:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+  }
+
+  /* Card and Recessed Insets */
+  .neu-card {
+    background: #ffffff;
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  }
+
   .neu-inset {
-    background: #e4ebf3;
-    box-shadow: inset 4px 4px 8px #c7d2e3, inset -4px -4px 8px #ffffff;
+    background: #f1f5f9;
     border-radius: 0.875rem;
+    border: 1px solid #e2e8f0;
   }
 
   .neu-inset-deep {
-    background: #e2e8f1;
-    box-shadow: inset 6px 6px 14px #c2cde0, inset -6px -6px 14px #ffffff;
-    border-radius: 1.25rem;
-  }
-
-  /* Active Pill / Tab */
-  .neu-pill-active {
-    background: #e9eef5;
-    box-shadow: inset 3px 3px 6px #c7d2e3, inset -3px -3px 6px #ffffff;
-    color: #4f46e5;
-  }
-
-  .neu-pill-inactive {
-    background: transparent;
-    color: #64748b;
-  }
-  .neu-pill-inactive:hover {
-    color: #1e293b;
-  }
-
-  /* Emergency SOS Neumorphic styling */
-  .neu-sos {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 6px 6px 14px rgba(220, 38, 38, 0.35), -5px -5px 12px #ffffff;
-    border: 1px solid rgba(254, 202, 202, 0.4);
-    color: #ffffff;
-    transition: all 0.2s ease;
-  }
-
-  .neu-sos:hover {
-    box-shadow: 8px 8px 18px rgba(220, 38, 38, 0.45), -6px -6px 14px #ffffff;
-    transform: translateY(-1px);
-  }
-
-  .neu-sos:active {
-    box-shadow: inset 3px 3px 6px #991b1b, inset -2px -2px 5px rgba(255, 255, 255, 0.2);
-    transform: translateY(0);
+    background: #f8fafc;
+    border-radius: 1.125rem;
+    border: 1px solid #e2e8f0;
   }
 }
 
-/* Custom soft scrollbar */
+/* Custom smooth scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #e4ebf3;
+  background: #f1f5f9;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c5d0e0;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #aab8ce;
+  background: #94a3b8;
 }

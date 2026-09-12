@@ -224,23 +224,50 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
     ]);
   };
 
+  const presetPrompts = [
+    {
+      label: 'Feeling Overwhelmed',
+      text: 'I am feeling completely overwhelmed and anxious right now.',
+      chipStyle: 'bg-[#fff1f2] text-rose-800 border-rose-300 border-b-rose-400 hover:bg-rose-100',
+    },
+    {
+      label: 'Threat / Intimidation',
+      text: 'Someone from the accused side is watching or threatening me.',
+      chipStyle: 'bg-[#fef2f2] text-red-800 border-red-300 border-b-red-400 hover:bg-red-100',
+    },
+    {
+      label: 'Court / Legal Help',
+      text: 'I need legal aid and information about witness protection for my upcoming trial.',
+      chipStyle: 'bg-[#fffbeb] text-amber-800 border-amber-300 border-b-amber-400 hover:bg-amber-100',
+    },
+    {
+      label: 'Feeling Calm & Safe',
+      text: 'I am feeling safe and calm today after speaking with my support circle.',
+      chipStyle: 'bg-[#ecfdf5] text-emerald-800 border-emerald-300 border-b-emerald-400 hover:bg-emerald-100',
+    },
+  ];
+
+  const handleSelectPreset = (text) => {
+    setInputText(text);
+  };
+
   return (
-    <div className="neu-card p-6 sm:p-7 flex flex-col h-[520px]">
+    <div className="bg-white border-2 border-sky-200/80 shadow-md shadow-sky-100/40 rounded-2xl p-6 sm:p-7 flex flex-col h-[560px]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/60 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-[inset_2px_2px_4px_#cad4e2,inset_-2px_-2px_4px_#ffffff]">
-            <MessageSquare className="w-4 h-4" />
+      <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center">
+            <MessageSquare className="w-5 h-5 text-sky-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-800">Support Assistant</h3>
-            <p className="text-[11px] text-slate-500">Confidential, supportive conversation</p>
+            <h3 className="text-sm sm:text-base font-black text-slate-900">Conversational Care Hub</h3>
+            <p className="text-[11px] text-slate-500 font-medium">Confidential, supportive empathetic care</p>
           </div>
         </div>
 
         <button
           onClick={handleResetChat}
-          className="neu-btn px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
+          className="btn-3d btn-3d-light px-3 py-1.5 text-xs text-slate-600 flex items-center gap-1"
           title="Clear Conversation"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -249,7 +276,7 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
       </div>
 
       {/* Recessed Chat Feed */}
-      <div className="neu-inset-deep flex-1 p-4 overflow-y-auto space-y-3.5 mb-4">
+      <div className="bg-[#f8fafc] border-2 border-slate-200 rounded-2xl flex-1 p-4 overflow-y-auto space-y-3.5 mb-3.5">
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
           const isSpeaking = speakingMessageId === msg.id;
@@ -262,18 +289,18 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
                   isUser
-                    ? 'bg-indigo-600 text-white shadow-[2px_2px_5px_#cad4e2]'
-                    : 'bg-white text-indigo-600 shadow-[2px_2px_5px_#cad4e2]'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-white text-indigo-600 border border-slate-200 shadow-sm'
                 }`}
               >
                 {isUser ? <User className="w-3.5 h-3.5" /> : <ShieldCheck className="w-4 h-4 text-indigo-600" />}
               </div>
 
               <div
-                className={`max-w-[82%] px-4 py-3 rounded-2xl text-xs sm:text-[13px] leading-relaxed ${
+                className={`max-w-[84%] px-4 py-3 rounded-2xl text-xs sm:text-[13px] leading-relaxed ${
                   isUser
-                    ? 'bg-indigo-600 text-white shadow-[4px_4px_10px_#cad4e2]'
-                    : 'bg-[#edf2f8] text-slate-800 shadow-[4px_4px_10px_#cad4e2,-3px_-3px_8px_#ffffff] border border-white/60'
+                    ? 'bg-indigo-600 text-white shadow-sm font-medium'
+                    : 'bg-white text-slate-900 border-2 border-slate-200/90 shadow-xs'
                 }`}
               >
                 <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -286,7 +313,7 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
                   {!isUser && (
                     <button
                       onClick={() => speakMessage(msg.id, msg.text)}
-                      className={`hover:text-indigo-600 flex items-center gap-1 transition-colors ${
+                      className={`hover:text-indigo-600 flex items-center gap-1 font-semibold transition-colors ${
                         isSpeaking ? 'text-indigo-600 font-bold' : ''
                       }`}
                       title={isSpeaking ? 'Stop listening' : 'Listen aloud'}
@@ -303,21 +330,38 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
         <div ref={messagesEndRef} />
       </div>
 
+      {/* 3D Quick Presets Pills */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-0.5">Quick Prompts:</span>
+        {presetPrompts.map((preset, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => handleSelectPreset(preset.text)}
+            className={`btn-3d text-[11px] px-2.5 py-1 rounded-lg font-bold border border-b-[3px] transition-transform active:translate-y-0.5 ${preset.chipStyle}`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+
       {/* Input Bar */}
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <button
           type="button"
           onClick={toggleSpeechInput}
           disabled={isTranscribing}
-          className={`neu-btn p-3 text-slate-600 flex-shrink-0 transition-all ${
-            isListeningSpeech ? 'text-rose-600 bg-rose-50 shadow-[inset_2px_2px_5px_#fecdd3]' : ''
+          className={`btn-3d p-3 flex-shrink-0 ${
+            isListeningSpeech
+              ? 'btn-3d-red animate-pulse'
+              : 'btn-3d-light text-slate-700'
           }`}
-          title={isTranscribing ? 'Transcribing...' : isListeningSpeech ? 'Click to stop & transcribe' : 'Speak message'}
+          title={isTranscribing ? 'Transcribing...' : isListeningSpeech ? 'Click to finish speaking' : 'Speak message'}
         >
           {isTranscribing ? (
             <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
           ) : isListeningSpeech ? (
-            <MicOff className="w-4 h-4 animate-pulse text-rose-600" />
+            <MicOff className="w-4 h-4 fill-current" />
           ) : (
             <Mic className="w-4 h-4" />
           )}
@@ -331,20 +375,17 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
             isTranscribing
               ? 'Transcribing your voice...'
               : isListeningSpeech
-              ? 'Listening... click mic again to finish'
-              : 'Type a message or concern...'
+              ? 'Listening... click mic again when finished'
+              : 'Type what you are experiencing...'
           }
           disabled={isProcessing || isTranscribing}
-          className="neu-inset flex-1 px-4 py-3 text-xs sm:text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-400 transition-all disabled:opacity-60"
+          className="bg-white border-2 border-slate-300 focus:border-indigo-500 rounded-xl flex-1 px-4 py-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition-all disabled:opacity-60 font-medium"
         />
 
         <button
           type="submit"
           disabled={!inputText.trim() || isProcessing}
-          className="neu-btn px-4 py-3 bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 hover:bg-indigo-700 disabled:opacity-40"
-          style={{
-            background: 'linear-gradient(135deg, #4f46e5, #4338ca)',
-          }}
+          className="btn-3d btn-3d-indigo px-5 py-3 text-xs sm:text-sm font-black flex items-center gap-1.5 disabled:opacity-40"
         >
           <Send className="w-4 h-4" />
           <span className="hidden sm:inline">Send</span>

@@ -6,34 +6,42 @@ export default function EmergencyHelplines() {
     {
       number: '14566',
       title: 'National Support Line',
-      desc: '24/7 Toll-Free Support for Atrocity Prevention & Care',
+      desc: '24/7 Atrocity Prevention & Care',
       icon: Shield,
-      accent: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      cardBg: 'bg-[#eff6ff]',
+      borderColor: 'border-blue-200 hover:border-blue-400',
+      iconBg: 'bg-blue-600 text-white',
+      btnClass: 'btn-3d btn-3d-sky',
     },
     {
       number: '112',
       title: 'Emergency Police',
-      desc: 'Immediate armed protection & emergency response',
+      desc: 'Immediate Protection & Dispatch',
       icon: Phone,
-      accent: 'text-rose-600',
-      bg: 'bg-rose-50',
+      cardBg: 'bg-[#fff1f2]',
+      borderColor: 'border-rose-200 hover:border-rose-400',
+      iconBg: 'bg-rose-600 text-white',
+      btnClass: 'btn-3d btn-3d-red',
     },
     {
       number: '14416',
       title: 'Tele-MANAS Mental Health',
-      desc: '24/7 confidential psychological counselling support',
+      desc: 'Confidential Crisis Counselling',
       icon: HeartPulse,
-      accent: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      cardBg: 'bg-[#ecfdf5]',
+      borderColor: 'border-emerald-200 hover:border-emerald-400',
+      iconBg: 'bg-emerald-600 text-white',
+      btnClass: 'btn-3d btn-3d-emerald',
     },
     {
       number: '15100',
       title: 'Free Legal Aid (NALSA)',
-      desc: 'Government legal counsel and court protection rights',
+      desc: 'Legal Counsel & Victim Rights',
       icon: Scale,
-      accent: 'text-amber-600',
-      bg: 'bg-amber-50',
+      cardBg: 'bg-[#fffbeb]',
+      borderColor: 'border-amber-200 hover:border-amber-400',
+      iconBg: 'bg-amber-600 text-white',
+      btnClass: 'btn-3d btn-3d-amber',
     },
   ];
 
@@ -45,18 +53,18 @@ export default function EmergencyHelplines() {
           <a
             key={line.number}
             href={`tel:${line.number}`}
-            className="neu-card p-4 flex items-center justify-between group transition-all hover:scale-[1.01]"
+            className={`${line.cardBg} border-2 ${line.borderColor} rounded-2xl p-4 flex items-center justify-between shadow-xs transition-all hover:scale-[1.01]`}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl ${line.bg} ${line.accent} flex items-center justify-center shadow-[inset_2px_2px_5px_#cad4e2,inset_-2px_-2px_5px_#ffffff]`}>
+              <div className={`w-10 h-10 rounded-xl ${line.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                 <Icon className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-800">{line.title}</h4>
-                <p className="text-[11px] text-slate-500 line-clamp-1">{line.desc}</p>
+                <h4 className="text-xs font-bold text-slate-900">{line.title}</h4>
+                <p className="text-[11px] text-slate-500 font-medium">{line.desc}</p>
               </div>
             </div>
-            <span className="text-sm font-extrabold text-slate-800 px-2.5 py-1 rounded-lg bg-[#e2e8f1] shadow-[inset_2px_2px_4px_#c7d2e3,inset_-2px_-2px_4px_#ffffff] group-hover:text-indigo-600 transition-colors">
+            <span className={`${line.btnClass} px-3 py-1.5 text-xs font-black ml-2 tracking-wide`}>
               {line.number}
             </span>
           </a>
