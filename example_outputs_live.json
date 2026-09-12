@@ -1,0 +1,74 @@
+{
+  "Hi": {
+    "text": "Hi",
+    "intent": "greeting",
+    "valence": "neutral",
+    "emotion": "neutral",
+    "arousal": "low",
+    "distress_level": "none",
+    "response_mode": "casual",
+    "confidence": 0.9,
+    "reason": "Text establishes primary semantic intent as 'greeting'. Greeting input classified as casual check-in.",
+    "response": "Hi there! Hope you’re having a good day."
+  },
+  "I'm so happy today!": {
+    "text": "I'm so happy today!",
+    "intent": "casual_conversation",
+    "valence": "positive",
+    "emotion": "happiness/joy",
+    "arousal": "high",
+    "distress_level": "none",
+    "response_mode": "positive",
+    "confidence": 0.63,
+    "reason": "Text establishes primary semantic intent as 'casual_conversation'. Positive user expression confirmed.",
+    "response": "That’s fantastic to hear! I hope the rest of your day stays just as bright."
+  },
+  "I'm really excited!": {
+    "text": "I'm really excited!",
+    "intent": "casual_conversation",
+    "valence": "positive",
+    "emotion": "excitement",
+    "arousal": "high",
+    "distress_level": "none",
+    "response_mode": "positive",
+    "confidence": 0.63,
+    "reason": "Text establishes primary semantic intent as 'casual_conversation'. Positive user expression confirmed.",
+    "response": "That’s wonderful—so glad you’re feeling excited! Enjoy every moment of it."
+  },
+  "Tell me what FastAPI is.": {
+    "text": "Tell me what FastAPI is.",
+    "intent": "information_seeking",
+    "valence": "neutral",
+    "emotion": "neutral",
+    "arousal": "low",
+    "distress_level": "none",
+    "response_mode": "neutral",
+    "confidence": 0.9,
+    "reason": "Text establishes primary semantic intent as 'information_seeking'. Informational request classified as neutral informative response mode.",
+    "response": "FastAPI is a modern, high‑performance Python web framework for building APIs that uses standard type hints to provide automatic validation, serialization, and interactive documentation. It’s built on Starlette and Pydantic, making it fast, developer‑friendly, and suitable for everything from small services to large applications."
+  },
+  "I'm worried about my exam.": {
+    "text": "I'm worried about my exam.",
+    "intent": "emotional_sharing",
+    "valence": "negative",
+    "emotion": "stress/anxiety",
+    "arousal": "medium",
+    "distress_level": "moderate",
+    "response_mode": "supportive",
+    "confidence": 0.71,
+    "reason": "Text establishes primary semantic intent as 'emotional_sharing'. Negative valence triggers compassionate supportive response.",
+    "response": "I hear how stressful the exam feels right now, and that’s completely understandable. Try breaking your study time into short, focused blocks with brief breaks—this can help calm the anxiety and boost your confidence. Remember, you’ve prepared for this, and taking one step at a time will get you through."
+  },
+  "I feel overwhelmed and don't know what to do.": {
+    "text": "I feel overwhelmed and don't know what to do.",
+    "intent": "distress_support_seeking",
+    "valence": "negative",
+    "emotion": "distress",
+    "arousal": "high",
+    "distress_level": "high",
+    "response_mode": "distress_support",
+    "confidence": 0.79,
+    "reason": "Text establishes primary semantic intent as 'distress_support_seeking'. Support-seeking intent triggers empathetic supportive guidance.",
+    "response": "I’m really sorry you’re feeling this way—you’re not alone in this. Try a quick grounding exercise: notice five things you can see, four you can touch, three you can hear, two you can smell, and one you can taste, then take a slow, deep breath. If the overwhelm becomes too intense, please consider calling the National Helpline at 14566 or, if you feel unsafe, dial 112 for immediate help."
+  }
+}
