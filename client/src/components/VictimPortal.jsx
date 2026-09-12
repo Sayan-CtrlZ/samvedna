@@ -22,7 +22,8 @@ export default function VictimPortal({
   cases = [],
   onCheckinSubmitted,
   activeVictimId = 'VIC-MH-2024-114',
-  onTriggerSos
+  onTriggerSos,
+  userLocation
 }) {
   const [selectedVictim, setSelectedVictim] = useState(() => {
     try {
@@ -286,9 +287,17 @@ export default function VictimPortal({
                 </p>
               </div>
               
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold">
-                <Lock className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
-                <span>Active Anonymous Intake Session</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold">
+                  <Lock className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
+                  <span>Active Anonymous Intake Session</span>
+                </div>
+                {userLocation && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-medium">
+                    <Globe className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0 animate-pulse" />
+                    <span>{userLocation}</span>
+                  </div>
+                )}
               </div>
             </div>
 

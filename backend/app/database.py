@@ -354,6 +354,7 @@ class AtrocityMonitoringDatabase:
                 "community": "SC/ST Atrocity Witness Intake",
                 "state": "Maharashtra",
                 "district": "Ahmednagar",
+                "location": "GPS: 19.0948° N, 74.7480° E (Ahmednagar, Maharashtra)",
                 "police_station": "District Central PS",
                 "fir_number": f"FIR-2026-{suffix[-4:]}",
                 "fir_date": datetime.now().strftime("%Y-%m-%d"),

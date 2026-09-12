@@ -49,6 +49,7 @@ async def process_victim_checkin(
     language: str = Form("hi"),
     scenario_preset: Optional[str] = Form(None),
     is_sos: bool = Form(False),
+    location: Optional[str] = Form(None),
     audio_file: Optional[UploadFile] = File(None)
 ):
     # Concurrency Protection: Prevent simultaneous check-in processing for the same victim
@@ -64,6 +65,8 @@ async def process_victim_checkin(
     _active_checkins.add(original_victim_id)
     try:
         victim = db.get_victim_by_id(victim_id)
+        if location and victim:
+            victim["location"] = location
         if not victim:
             victims = db.get_all_victims()
             if victims:
@@ -460,5 +463,24 @@ async def generate_text_to_speech(
             "provider": "browser_fallback",
             "reason": result.get("reason", "Sarvam TTS service unavailable")
         }
+
+@router.post("/location")
+async def update_victim_location(
+    victim_id: str = Form(...),
+    location: str = Form(...)
+):
+    """Updates live GPS location coordinates for active survivor session."""
+    victim = db.get_or_create_victim(victim_id)
+    victim["location"] = location
+    if "(" in location and ")" in location:
+        try:
+            parts = location.split("(")[1].split(")")[0].split(",")
+            if len(parts) >= 2:
+                victim["district"] = parts[0].strip()
+                victim["state"] = parts[1].strip()
+        except Exception:
+            pass
+    return {"status": "success", "location": location, "victim_id": victim_id}
+
 
 

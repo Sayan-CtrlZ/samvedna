@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Phone, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
 
-export default function EmergencySosModal({ isOpen, onClose }) {
+export default function EmergencySosModal({ isOpen, onClose, userLocation }) {
   const [isDispatched, setIsDispatched] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
@@ -10,9 +10,12 @@ export default function EmergencySosModal({ isOpen, onClose }) {
   const handleConfirmSos = async () => {
     setIsSending(true);
     try {
+      const activeVictimId = sessionStorage.getItem('samvedna_selected_victim') || 'VIC-2026-1001';
+      const activeLoc = userLocation || sessionStorage.getItem('samvedna_user_location') || 'GPS: 19.0948° N, 74.7480° E (Ahmednagar, Maharashtra)';
+
       const formData = new FormData();
-      formData.append('victim_id', 'VIC-MP-2024-881');
-      formData.append('location', 'Latitude: 26.4948, Longitude: 77.9940 (Morena, MP)');
+      formData.append('victim_id', activeVictimId);
+      formData.append('location', activeLoc);
 
       const res = await fetch('/api/v1/victim/sos', {
         method: 'POST',
@@ -61,8 +64,8 @@ export default function EmergencySosModal({ isOpen, onClose }) {
             </div>
 
             <div className="bg-[#fff1f2] border-2 border-rose-200 rounded-xl p-3.5 text-xs text-slate-700 text-left font-medium">
-              <span className="text-[10px] text-rose-700 uppercase block font-bold">Registered Victim Location</span>
-              <span className="font-semibold text-slate-900">Morena District, Madhya Pradesh (Latitude: 26.4948, Longitude: 77.9940)</span>
+              <span className="text-[10px] text-rose-700 uppercase block font-bold">Registered Victim Live Location</span>
+              <span className="font-semibold text-slate-900 font-mono">{userLocation || 'GPS: 19.0948° N, 74.7480° E (Ahmednagar, Maharashtra)'}</span>
             </div>
 
             <div className="space-y-3 pt-2">

@@ -48,6 +48,14 @@ export default function App() {
   const [metrics, setMetrics] = useState(null);
   const [cases, setCases] = useState([]);
 
+  const [userLocation, setUserLocation] = useState(() => {
+    try {
+      return sessionStorage.getItem('samvedna_user_location') || 'GPS: 19.0760° N, 72.8777° E (Ahmednagar, Maharashtra)';
+    } catch (e) {
+      return 'GPS: 19.0760° N, 72.8777° E (Ahmednagar, Maharashtra)';
+    }
+  });
+
   useEffect(() => {
     sessionStorage.setItem('samvedna_active_tab', activeTab);
   }, [activeTab]);
@@ -59,6 +67,53 @@ export default function App() {
   useEffect(() => {
     sessionStorage.setItem('samvedna_language', language);
   }, [language]);
+
+  // Request browser Geolocation access on app launch
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude.toFixed(4);
+          const lon = position.coords.longitude.toFixed(4);
+          let locString = `GPS: ${lat}° N, ${lon}° E`;
+
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            if (res.ok) {
+              const data = await res.json();
+              const addr = data.address || {};
+              const city = addr.city || addr.town || addr.village || addr.suburb || addr.county || 'District PS';
+              const state = addr.state || 'State';
+              locString = `GPS: ${lat}° N, ${lon}° E (${city}, ${state})`;
+            }
+          } catch (err) {
+            console.warn('Reverse geocode warning:', err);
+          }
+
+          setUserLocation(locString);
+          try {
+            sessionStorage.setItem('samvedna_user_location', locString);
+          } catch (e) {}
+
+          try {
+            const formData = new FormData();
+            formData.append('victim_id', selectedVictimId);
+            formData.append('location', locString);
+            fetch('/api/v1/victim/location', { method: 'POST', body: formData });
+          } catch (e) {}
+        },
+        (err) => {
+          console.warn('Geolocation access fallback:', err.message);
+          const fallbackLoc = 'GPS: 19.0948° N, 74.7480° E (Ahmednagar, Maharashtra)';
+          setUserLocation(fallbackLoc);
+          try {
+            sessionStorage.setItem('samvedna_user_location', fallbackLoc);
+          } catch (e) {}
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+  }, [selectedVictimId]);
 
   // Fetch metrics, cases, and alerts
   const loadDashboardData = async () => {
@@ -155,6 +210,7 @@ export default function App() {
             <VictimPortal
               cases={cases}
               activeVictimId={selectedVictimId}
+              userLocation={userLocation}
               onCheckinSubmitted={() => {
                 loadDashboardData();
               }}
@@ -169,6 +225,7 @@ export default function App() {
             <OfficialDashboard
               selectedVictimId={selectedVictimId}
               onSelectVictim={setSelectedVictimId}
+              userLocation={userLocation}
             />
           </main>
         )}
@@ -180,6 +237,7 @@ export default function App() {
               cases={cases}
               selectedVictimId={selectedVictimId}
               onSelectVictim={setSelectedVictimId}
+              userLocation={userLocation}
             />
           </main>
         )}
@@ -207,6 +265,7 @@ export default function App() {
       {/* Emergency SOS Modal */}
       <EmergencySosModal
         isOpen={isSosOpen}
+        userLocation={userLocation}
         onClose={() => {
           setIsSosOpen(false);
           loadDashboardData();

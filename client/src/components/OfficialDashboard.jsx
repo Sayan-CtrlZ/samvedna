@@ -28,7 +28,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 
-export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) {
+export default function OfficialDashboard({ selectedVictimId, onSelectVictim, userLocation }) {
   const [metrics, setMetrics] = useState(null);
   const [cases, setCases] = useState([]);
   const [activeCase, setActiveCase] = useState(null);
@@ -383,8 +383,15 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                       {activeCase.current_risk_level} PRIORITY
                     </span>
                   </h2>
-                  <p className="text-xs text-slate-500">
-                    Community: <span className="font-semibold text-slate-700">{activeCase.community}</span> • Age: {activeCase.age} • Gender: {activeCase.gender} • Jurisdiction: <span className="font-semibold text-slate-700">{activeCase.district}, {activeCase.state}</span>
+                  <p className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span>Community: <strong className="text-slate-700">{activeCase.community || 'SC/ST Atrocity Witness'}</strong></span>
+                    <span>•</span>
+                    <span>Jurisdiction: <strong className="text-slate-700">{activeCase.district}, {activeCase.state}</strong></span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 font-mono font-semibold text-indigo-700">
+                      <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{activeCase.location || userLocation || 'GPS: 19.0948° N, 74.7480° E (Ahmednagar, Maharashtra)'}</span>
+                    </span>
                   </p>
                 </div>
 

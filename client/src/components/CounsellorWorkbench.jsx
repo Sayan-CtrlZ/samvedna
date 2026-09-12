@@ -20,7 +20,8 @@ import {
 export default function CounsellorWorkbench({
   cases = [],
   selectedVictimId,
-  onSelectVictim
+  onSelectVictim,
+  userLocation
 }) {
   const [activeVictimId, setActiveVictimId] = useState(selectedVictimId || (cases[0]?.victim_id ?? 'VIC-MH-2024-114'));
   const [caseFile, setCaseFile] = useState(null);
