@@ -322,7 +322,7 @@ export default function VoiceCheckin({ onCheckinComplete, isProcessing, setIsPro
           </div>
         </div>
 
-        {audioBlob && !isRecording && (
+        {audioBlob && !isRecording && !isProcessing && (
           <button
             onClick={resetVoiceState}
             className="btn-3d btn-3d-light px-3 py-1.5 text-xs text-slate-600 flex items-center gap-1"
@@ -358,61 +358,69 @@ export default function VoiceCheckin({ onCheckinComplete, isProcessing, setIsPro
         )}
       </div>
 
-      {/* Primary Interaction Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-5">
-        {!isRecording ? (
-          <button
-            onClick={startRecording}
-            disabled={isProcessing}
-            className="btn-3d btn-3d-indigo px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5 disabled:opacity-50"
-          >
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-200 animate-ping"></div>
-            <Mic className="w-4 h-4" />
-            <span>{audioBlob ? 'Record Again' : 'Start Voice Check-in'}</span>
-          </button>
-        ) : (
-          <button
-            onClick={stopRecording}
-            className="btn-3d btn-3d-red px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5 animate-pulse"
-          >
-            <Square className="w-4 h-4 fill-current" />
-            <span>Stop Recording</span>
-          </button>
-        )}
+      {/* Primary Interaction Buttons or Active Analysis Banner */}
+      {isProcessing ? (
+        <div className="flex flex-col items-center justify-center p-5 bg-indigo-50/80 border-2 border-indigo-200 rounded-2xl mb-5 space-y-2.5">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-black text-indigo-900 tracking-wide">
+              Analyzing Voice Signal...
+            </span>
+          </div>
+          <p className="text-xs text-indigo-600 font-semibold text-center max-w-md">
+            Evaluating vocal tremor, pitch stability, and speech indicators. New voice inputs are paused until this analysis completes.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-5">
+          {!isRecording ? (
+            <button
+              onClick={startRecording}
+              className="btn-3d btn-3d-indigo px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5"
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-200 animate-ping"></div>
+              <Mic className="w-4 h-4" />
+              <span>{audioBlob ? 'Record Again' : 'Start Voice Check-in'}</span>
+            </button>
+          ) : (
+            <button
+              onClick={stopRecording}
+              className="btn-3d btn-3d-red px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5 animate-pulse"
+            >
+              <Square className="w-4 h-4 fill-current" />
+              <span>Stop Recording</span>
+            </button>
+          )}
 
-        {/* Upload Audio Option */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept="audio/*"
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isRecording || isProcessing}
-          className="btn-3d btn-3d-light px-5 py-3.5 text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-2 disabled:opacity-50"
-        >
-          <Upload className="w-4 h-4 text-slate-500" />
-          <span>Upload Audio File</span>
-        </button>
-
-        {/* Analyze Audio Button */}
-        {audioBlob && !isRecording && (
+          {/* Upload Audio Option */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept="audio/*"
+            className="hidden"
+          />
           <button
-            onClick={submitVoiceCheckin}
-            disabled={isProcessing}
-            className="btn-3d btn-3d-emerald px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5 disabled:opacity-50"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isRecording}
+            className="btn-3d btn-3d-light px-5 py-3.5 text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-2 disabled:opacity-50"
           >
-            {isProcessing ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
+            <Upload className="w-4 h-4 text-slate-500" />
+            <span>Upload Audio File</span>
+          </button>
+
+          {/* Analyze Audio Button */}
+          {audioBlob && !isRecording && (
+            <button
+              onClick={submitVoiceCheckin}
+              className="btn-3d btn-3d-emerald px-7 py-3.5 text-xs sm:text-sm font-black flex items-center gap-2.5"
+            >
               <CheckCircle2 className="w-4 h-4" />
-            )}
-            <span>{isProcessing ? 'Assessing Voice...' : 'Analyze My Check-in'}</span>
-          </button>
-        )}
-      </div>
+              <span>Analyze My Check-in</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Status Bar */}
       <div className="bg-[#f1f5f9] border border-slate-200 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
