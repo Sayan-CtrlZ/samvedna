@@ -17,7 +17,7 @@ import {
   HeartPulse,
   MessageSquare
 } from 'lucide-react';
-import { getApiUrl, DEFAULT_CASES } from '../utils/api';
+import { getApiUrl, safeFetchJson } from '../utils/api';
 
 export default function CounsellorWorkbench({
   cases = [],
@@ -25,7 +25,7 @@ export default function CounsellorWorkbench({
   onSelectVictim,
   userLocation
 }) {
-  const activeCases = cases.length > 0 ? cases : DEFAULT_CASES;
+  const activeCases = cases;
   const [activeVictimId, setActiveVictimId] = useState(() => {
     if (selectedVictimId && activeCases.some(c => c.victim_id === selectedVictimId)) {
       return selectedVictimId;
@@ -34,14 +34,13 @@ export default function CounsellorWorkbench({
       const saved = sessionStorage.getItem('samvedna_active_official_case');
       if (saved && activeCases.some(c => c.victim_id === saved)) return saved;
     } catch (e) {}
-    return activeCases[0]?.victim_id ?? 'VIC-MP-881';
+    return activeCases[0]?.victim_id || null;
   });
   const [caseFile, setCaseFile] = useState(null);
   const [officerNote, setOfficerNote] = useState('');
   const [noteSuccess, setNoteSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Helper: Format ISO date string into readable Date & Time
   const formatDateTime = (isoString) => {
     if (!isoString) return 'Just now';
     try {
@@ -60,7 +59,6 @@ export default function CounsellorWorkbench({
     return isoString;
   };
 
-  // Helper: Get Clean Code Name without # or 2024
   const getCleanCodeName = (item) => {
     if (!item) return 'SURVIVOR';
     let code = typeof item === 'string' ? item : (item.victim_code || item.code_name || item.victim_id || 'SURVIVOR');
@@ -74,20 +72,19 @@ export default function CounsellorWorkbench({
   const lineChartInstance = useRef(null);
 
   useEffect(() => {
-    if (selectedVictimId) {
+    if (selectedVictimId && activeCases.some(c => c.victim_id === selectedVictimId)) {
       setActiveVictimId(selectedVictimId);
     }
   }, [selectedVictimId]);
 
   const loadCaseFile = async (vId) => {
+    if (!vId) return;
     try {
-      const res = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${vId}`));
-      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        setCaseFile(await res.json());
+      const res = await safeFetchJson(`/api/v1/counsellor/case-file/${vId}`);
+      if (res.ok && res.data) {
+        setCaseFile(res.data);
       }
-    } catch (e) {
-      console.warn('Failed loading counsellor case-file:', e);
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {

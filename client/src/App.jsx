@@ -7,7 +7,7 @@ import AnalyticsView from './components/AnalyticsView';
 import VictimPortal from './components/VictimPortal';
 import AlertsDrawer from './components/AlertsDrawer';
 import EmergencySosModal from './components/EmergencySosModal';
-import { getApiUrl, DEFAULT_CASES } from './utils/api';
+import { getApiUrl, safeFetchJson } from './utils/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -46,7 +46,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(true);
   const [alerts, setAlerts] = useState([]);
   const [metrics, setMetrics] = useState(null);
-  const [cases, setCases] = useState(DEFAULT_CASES);
+  const [cases, setCases] = useState([]);
 
   const [userLocation, setUserLocation] = useState(() => {
     try {
@@ -128,7 +128,9 @@ export default function App() {
     }
   }, [selectedVictimId]);
 
-  // Fetch metrics, cases, and alerts safely
+  const isJsonEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  // Fetch metrics, cases, and alerts safely without triggering unnecessary re-renders
   const loadDashboardData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
@@ -138,13 +140,15 @@ export default function App() {
       ]);
 
       if (resMetrics.ok && resMetrics.data) {
-        setMetrics(resMetrics.data);
+        setMetrics(prev => isJsonEqual(prev, resMetrics.data) ? prev : resMetrics.data);
       }
       if (resCases.ok && resCases.data) {
-        setCases((resCases.data.cases && resCases.data.cases.length > 0) ? resCases.data.cases : DEFAULT_CASES);
+        const loadedCases = resCases.data.cases || [];
+        setCases(prev => isJsonEqual(prev, loadedCases) ? prev : loadedCases);
       }
       if (resAlerts.ok && resAlerts.data) {
-        setAlerts(resAlerts.data.alerts || []);
+        const loadedAlerts = resAlerts.data.alerts || [];
+        setAlerts(prev => isJsonEqual(prev, loadedAlerts) ? prev : loadedAlerts);
         setIsOnline(true);
       }
     } catch (e) {
@@ -154,8 +158,6 @@ export default function App() {
 
   useEffect(() => {
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 4000);
-    return () => clearInterval(interval);
   }, []);
 
   // Handle alert dispatching

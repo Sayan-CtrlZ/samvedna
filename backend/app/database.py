@@ -339,17 +339,22 @@ class AtrocityMonitoringDatabase:
         return self.victims[victim_id]
 
     def get_all_victims(self) -> List[Dict[str, Any]]:
-        # If database is connected, load official dockets directly from DB table
+        # Sync from Neon DB if connected and update local state cache
         try:
             from app.database_neon import neon_db
             if neon_db.is_connected:
                 db_dockets = neon_db.get_all_dockets()
                 if db_dockets:
-                    return db_dockets
+                    for d in db_dockets:
+                        vid = d["victim_id"]
+                        if vid in self.victims:
+                            self.victims[vid].update(d)
+                        else:
+                            self.victims[vid] = d
         except Exception:
             pass
 
-        # Fallback to in-memory (excluding transient unsubmitted sessions)
+        # Return consistent merged victims list (excluding transient unsubmitted intake sessions)
         return [
             v for v in self.victims.values()
             if v.get("current_risk_level") != "AWAITING INTAKE" or len(self.get_victim_checkins(v["victim_id"])) > 0

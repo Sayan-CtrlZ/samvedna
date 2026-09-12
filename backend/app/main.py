@@ -42,7 +42,7 @@ async def serve_ui(full_path: str = ""):
         raise HTTPException(status_code=404, detail="Not Found")
     client_index = os.path.join(client_dist_dir, "index.html")
     if os.path.exists(client_index):
-        return FileResponse(client_index)
+        return FileResponse(client_index, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
     return {"message": "SAMVEDNA Backend Active", "docs": "/docs"}
 
 @app.get("/health")

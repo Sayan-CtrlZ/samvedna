@@ -27,20 +27,12 @@ import {
   BadgeAlert,
   FileSpreadsheet
 } from 'lucide-react';
-import { getApiUrl, DEFAULT_CASES } from '../utils/api';
+import { getApiUrl, safeFetchJson } from '../utils/api';
 
 export default function OfficialDashboard({ selectedVictimId, onSelectVictim, userLocation }) {
   const [metrics, setMetrics] = useState(null);
-  const [cases, setCases] = useState(DEFAULT_CASES);
-  const [activeCase, setActiveCase] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem('samvedna_active_official_case');
-      const match = DEFAULT_CASES.find(c => c.victim_id === saved);
-      return match || DEFAULT_CASES[0];
-    } catch (e) {
-      return DEFAULT_CASES[0];
-    }
-  });
+  const [cases, setCases] = useState([]);
+  const [activeCase, setActiveCase] = useState(null);
   const [caseFile, setCaseFile] = useState(null);
   const [alertsFeed, setAlertsFeed] = useState([]);
   const [filterRisk, setFilterRisk] = useState('ALL');
@@ -89,7 +81,9 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
     }
   }, [activeCase?.victim_id]);
 
-  // Load summary metrics, cases, and live police alerts feed
+  const isJsonEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  // Load summary metrics, cases, and live police alerts feed without flickering
   const loadData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
@@ -99,24 +93,23 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       ]);
 
       if (resMetrics.ok && resMetrics.data) {
-        setMetrics(resMetrics.data);
+        setMetrics(prev => isJsonEqual(prev, resMetrics.data) ? prev : resMetrics.data);
       }
 
       if (resCases.ok && resCases.data) {
-        const loadedCases = (resCases.data.cases && resCases.data.cases.length > 0) ? resCases.data.cases : DEFAULT_CASES;
-        setCases(loadedCases);
+        const loadedCases = resCases.data.cases || [];
+        setCases(prev => isJsonEqual(prev, loadedCases) ? prev : loadedCases);
 
-        // Update activeCase only if explicitly matching selectedVictimId or activeCase not set
-        if (selectedVictimId) {
-          const match = loadedCases.find(c => c.victim_id === selectedVictimId);
-          if (match) {
-            setActiveCase(match);
-          }
+        if (loadedCases.length > 0) {
+          const match = selectedVictimId ? loadedCases.find(c => c.victim_id === selectedVictimId) : null;
+          const targetCase = match || loadedCases[0];
+          setActiveCase(prev => isJsonEqual(prev, targetCase) ? prev : targetCase);
         }
       }
 
       if (resAlerts.ok && resAlerts.data) {
-        setAlertsFeed(resAlerts.data.alerts || []);
+        const loadedFeed = resAlerts.data.alerts || [];
+        setAlertsFeed(prev => isJsonEqual(prev, loadedFeed) ? prev : loadedFeed);
       }
     } catch (err) {
       // Network errors handled gracefully by safeFetchJson
@@ -127,22 +120,18 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 3000);
-    return () => clearInterval(interval);
   }, [selectedVictimId]);
 
-  // When activeCase changes, load full case-file
+  // When activeCase changes, load full case-file directly from DB API
   useEffect(() => {
     if (!activeCase?.victim_id) return;
     async function loadCaseFile() {
       const res = await safeFetchJson(`/api/v1/counsellor/case-file/${activeCase.victim_id}`);
       if (res.ok && res.data) {
-        setCaseFile(res.data);
+        setCaseFile(prev => isJsonEqual(prev, res.data) ? prev : res.data);
       }
     }
     loadCaseFile();
-    const interval = setInterval(loadCaseFile, 3000);
-    return () => clearInterval(interval);
   }, [activeCase?.victim_id]);
 
   const handleSelect = (c) => {
