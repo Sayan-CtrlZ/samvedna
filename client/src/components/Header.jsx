@@ -116,18 +116,34 @@ export default function Header({
             </select>
           </div>
 
-          {/* Active Alerts Button (For Police & Magistrate / Clinical Officials) */}
+          {/* Active Alerts Button in Navbar (For Police & Magistrate / Clinical Officials) */}
           {activeTab !== 'VICTIM' && (
             <button
               onClick={onToggleAlertsDrawer}
-              className="px-3 py-1.5 rounded-lg bg-red-950/70 hover:bg-red-900/90 border border-red-500/40 text-red-100 text-xs font-semibold flex items-center space-x-1.5 transition-colors"
-              title="View Live Priority Police Alerts"
+              className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeAlertsCount > 0
+                  ? 'bg-rose-700 hover:bg-rose-800 border-rose-400 text-white shadow-lg ring-2 ring-rose-500/50'
+                  : 'bg-[#061024] hover:bg-slate-800 border-indigo-400/40 text-slate-200'
+              }`}
+              title="View Real-Time Police Emergency Dispatch Alerts"
             >
-              <Bell className="w-3.5 h-3.5 text-red-400" />
-              <span className="hidden sm:inline">Alerts</span>
-              {activeAlertsCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-bold">
-                  {activeAlertsCount}
+              <div className="relative flex items-center justify-center">
+                <Bell className={`w-3.5 h-3.5 ${activeAlertsCount > 0 ? 'text-white animate-bounce' : 'text-slate-400'}`} />
+                {activeAlertsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-200 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">Police Alerts</span>
+              {activeAlertsCount > 0 ? (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white text-rose-800 text-[10px] font-black shadow-xs">
+                  {activeAlertsCount} ACTIVE
+                </span>
+              ) : (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px]">
+                  0
                 </span>
               )}
             </button>

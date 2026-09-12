@@ -68,6 +68,19 @@ export default function App() {
     sessionStorage.setItem('samvedna_language', language);
   }, [language]);
 
+  // Clean up unsubmitted transient session on tab close or reload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (selectedVictimId) {
+        const data = new FormData();
+        data.append('victim_id', selectedVictimId);
+        navigator.sendBeacon('/api/v1/victim/reset', data);
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [selectedVictimId]);
+
   // Request browser Geolocation access on app launch
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -192,15 +205,6 @@ export default function App() {
 
       {/* Main Full-Width Application Body */}
       <div className="w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-5 flex-1 space-y-4">
-        {/* Live Police Priority Alerts Banner (For Official & Clinical Tabs) */}
-        {(activeTab === 'TRIAGE' || activeTab === 'COUNSELLOR') && (
-          <LiveAlertsBanner
-            alerts={alerts}
-            onAcknowledge={handleAcknowledgeAlert}
-            onSelectVictim={handleSelectVictim}
-          />
-        )}
-
         {/* Emergency Hotlines Strip (Only on Normal User / Survivor Intake Tab) */}
         {activeTab === 'VICTIM' && <EmergencyHelplines />}
 

@@ -271,7 +271,21 @@ class AtrocityMonitoringDatabase:
         return self.victims[victim_id]
 
     def get_all_victims(self) -> List[Dict[str, Any]]:
-        return list(self.victims.values())
+        # If database is connected, load official dockets directly from DB table
+        try:
+            from app.database_neon import neon_db
+            if neon_db.is_connected:
+                db_dockets = neon_db.get_all_dockets()
+                if db_dockets:
+                    return db_dockets
+        except Exception:
+            pass
+
+        # Fallback to in-memory (excluding transient unsubmitted sessions)
+        return [
+            v for v in self.victims.values()
+            if v.get("current_risk_level") != "AWAITING INTAKE" or len(self.get_victim_checkins(v["victim_id"])) > 0
+        ]
 
     def get_victim_by_id(self, victim_id: str) -> Optional[Dict[str, Any]]:
         return self.get_or_create_victim(victim_id)
@@ -291,6 +305,13 @@ class AtrocityMonitoringDatabase:
         self.victims[victim_id]["trend_status"] = checkin_data.get("risk_trajectory_label", "Updated via Live Intake")
         if checkin_data.get("transcript"):
             self.victims[victim_id]["summary"] = checkin_data["transcript"]
+
+        # Sync with Neon PostgreSQL if connected
+        try:
+            from app.database_neon import neon_db
+            neon_db.sync_victim_case(self.victims[victim_id])
+        except Exception:
+            pass
 
     def add_counsellor_note(self, victim_id: str, note_data: Dict[str, Any]):
         if victim_id not in self.counsellor_notes:

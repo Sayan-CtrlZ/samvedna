@@ -12,6 +12,32 @@ export default function AlertsDrawer({
 
   if (!isOpen) return null;
 
+  const formatDateTime = (isoString) => {
+    if (!isoString) return 'Just now';
+    try {
+      const d = new Date(isoString);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } catch (e) {}
+    return isoString;
+  };
+
+  const getCleanCodeName = (item) => {
+    if (!item) return 'SURVIVOR';
+    let code = typeof item === 'string' ? item : (item.victim_code || item.code_name || item.victim_id || 'SURVIVOR');
+    code = code.replace(/#/g, '')
+               .replace(/-2024-/g, '-')
+               .replace(/ \([^)]*\)/g, '');
+    return code;
+  };
+
   const handleAction = async (alertId) => {
     setAcknowledgingId(alertId);
     try {
@@ -87,12 +113,12 @@ export default function AlertsDrawer({
                           }}
                           className="text-xs font-bold text-slate-900 underline hover:text-indigo-600 font-mono"
                         >
-                          {alert.victim_id}
+                          {getCleanCodeName(alert)}
                         </button>
                       </div>
 
                       <span className="text-[10px] text-slate-400 font-medium">
-                        {alert.timestamp ? alert.timestamp.slice(11, 16) : ''}
+                        {formatDateTime(alert.timestamp)}
                       </span>
                     </div>
 
@@ -109,14 +135,14 @@ export default function AlertsDrawer({
                         <button
                           onClick={() => handleAction(alert.alert_id)}
                           disabled={acknowledgingId === alert.alert_id}
-                          className="mat-btn-danger px-3 py-1 text-xs"
+                          className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50"
                         >
-                          <UserCheck className="w-3 h-3" />
-                          <span>{acknowledgingId === alert.alert_id ? 'Dispatching...' : 'Dispatch Protection'}</span>
+                          <ShieldAlert className="w-3.5 h-3.5 text-rose-200 animate-pulse" />
+                          <span>{acknowledgingId === alert.alert_id ? 'Dispatching Unit...' : 'Dispatch Patrol Unit ➔'}</span>
                         </button>
                       ) : (
-                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Dispatched
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Dispatched & Enforced ✓
                         </span>
                       )}
                     </div>

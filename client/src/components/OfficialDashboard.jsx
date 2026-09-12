@@ -222,8 +222,39 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
     }
   };
 
+  const handleMarkResolved = async (victimId) => {
+    if (!victimId) return;
+    setIsActionLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('victim_id', victimId);
+      formData.append('officer_name', 'District SP / Special Protection Cell');
+      formData.append('resolution_notes', 'Statutory witness protection enforced & threat resolved.');
+
+      const res = await fetch('/api/v1/dashboard/case/resolve', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        setActionSuccess(`Protection Enforced & Case Marked as RESOLVED ✓`);
+        await loadData();
+        setTimeout(() => setActionSuccess(null), 5000);
+      }
+    } catch (e) {
+      console.error('Failed resolving case:', e);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const filteredCases = cases.filter((c) => {
-    const matchesFilter = filterRisk === 'ALL' || c.current_risk_level === filterRisk;
+    const matchesFilter =
+      filterRisk === 'ALL' ||
+      c.current_risk_level === filterRisk ||
+      (filterRisk === 'RESOLVED' && ['RESOLVED', 'CLOSED', 'ENFORCED'].includes(c.current_risk_level)) ||
+      (filterRisk === 'STABLE' && ['LOW', 'STABLE'].includes(c.current_risk_level));
+
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       (c.victim_code && c.victim_code.toLowerCase().includes(q)) ||
@@ -242,6 +273,10 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
         return 'badge-high';
       case 'MODERATE':
         return 'badge-moderate';
+      case 'RESOLVED':
+      case 'CLOSED':
+      case 'ENFORCED':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold';
       default:
         return 'badge-low';
     }
@@ -296,63 +331,6 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
         </div>
       </div>
 
-      {/* Realtime Police Emergency Dispatch Alerts Banner */}
-      {alertsFeed.length > 0 && (
-        <div className="gov-card p-3.5 bg-rose-50/70 border border-rose-300 space-y-2.5">
-          <div className="flex items-center justify-between border-b border-rose-200 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
-              </span>
-              <h3 className="text-xs font-bold text-rose-950 uppercase tracking-wider flex items-center gap-1.5">
-                <BadgeAlert className="w-4 h-4 text-rose-600" />
-                <span>Realtime Police Emergency Dispatch Alerts ({alertsFeed.length} Active Notifications)</span>
-              </h3>
-            </div>
-            <span className="text-[10px] font-mono text-rose-800 bg-white px-2 py-0.5 rounded border border-rose-200 font-bold flex items-center gap-1">
-              <Clock className="w-3 h-3 text-rose-600" />
-              {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
-            {alertsFeed.slice(0, 4).map((alt) => (
-              <div key={alt.alert_id} className="p-2.5 bg-white rounded-lg border border-rose-200 text-xs flex flex-col justify-between gap-1.5 shadow-2xs">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-rose-900 font-mono text-xs">{getCleanCodeName(alt)}</span>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">
-                      {alt.severity || 'EMERGENCY'}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-800 leading-tight">
-                    {alt.trigger_reason}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
-                    <span className="flex items-center gap-1 font-mono font-semibold text-indigo-700">
-                      <MapPin className="w-3 h-3 text-indigo-600" />
-                      <span>{alt.district ? `${alt.district}, ${alt.state}` : 'Live GPS Location'}</span>
-                    </span>
-                    <span className="font-mono text-slate-500">
-                      {formatDateTime(alt.timestamp)}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleAcknowledgeAlert(alt.alert_id)}
-                  className="w-full mt-1 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
-                >
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  <span>{alt.status === 'DISPATCHED' ? 'Patrol Dispatched ✓' : 'Dispatch Emergency Police Patrol'}</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* 2. Main Master-Detail Workstation */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* LEFT COLUMN: Priority Triage Roster (5 cols) */}
@@ -376,13 +354,13 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
 
           {/* Filter Pills */}
           <div className="flex items-center gap-1 mb-2.5 overflow-x-auto pb-1">
-            {['ALL', 'CRITICAL', 'HIGH', 'MODERATE'].map((filter) => (
+            {['ALL', 'CRITICAL', 'HIGH', 'MODERATE', 'STABLE', 'RESOLVED'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setFilterRisk(filter)}
                 className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all whitespace-nowrap ${
                   filterRisk === filter
-                    ? 'bg-[#0f2557] text-white'
+                    ? filter === 'RESOLVED' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-[#0f2557] text-white'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -714,62 +692,28 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                     <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   </button>
                 </div>
-              </div>
 
-              {/* Official Supervisory Note & Case Action Log */}
-              <div className="border-t border-slate-200 pt-3 space-y-2">
-                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
-                  Official Supervisory Directive / Case Observation
-                </span>
+                {/* Mark Case Resolved Action Button for Police Authorities */}
+                <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Status: <strong className={activeCase?.current_risk_level === 'RESOLVED' ? 'text-emerald-700 font-bold' : 'text-slate-800'}>{activeCase?.current_risk_level || 'ACTIVE'}</strong>
+                  </span>
 
-                <form onSubmit={handleAddNote} className="space-y-2">
-                  <textarea
-                    rows={2}
-                    value={officerNote}
-                    onChange={(e) => setOfficerNote(e.target.value)}
-                    placeholder="Enter official directive, witness vulnerability assessment, or police order details..."
-                    className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 text-slate-800 placeholder-slate-400 font-normal"
-                  />
-
-                  <div className="flex items-center justify-between">
-                    {noteSuccess ? (
-                      <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Directive logged in official case file.
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-slate-400">
-                        Appends directly to Special Court Case Docket
-                      </span>
-                    )}
-
+                  {activeCase?.current_risk_level !== 'RESOLVED' ? (
                     <button
-                      type="submit"
-                      disabled={!officerNote.trim()}
-                      className="btn-navy text-xs disabled:opacity-50"
+                      onClick={() => handleMarkResolved(activeCase?.victim_id)}
+                      disabled={isActionLoading}
+                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50"
                     >
-                      <Send className="w-3 h-3" />
-                      <span>Log Directive</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+                      <span>Mark Protection Enforced / Resolve Case ➔</span>
                     </button>
-                  </div>
-                </form>
-
-                {/* History of notes */}
-                {caseFile?.clinical_notes_history && caseFile.clinical_notes_history.length > 0 && (
-                  <div className="pt-2 space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Case Order Log:
+                  ) : (
+                    <span className="px-3 py-1 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Case Protection Resolved ✓
                     </span>
-                    {caseFile.clinical_notes_history.map((n, i) => (
-                      <div key={i} className="bg-slate-50 border border-slate-200 rounded p-2 text-xs">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold mb-0.5">
-                          <span>{n.counsellor_name}</span>
-                          <span>{n.timestamp ? n.timestamp.slice(0, 16).replace('T', ' ') : ''}</span>
-                        </div>
-                        <p className="text-slate-700">{n.clinical_observations}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </>
           ) : (

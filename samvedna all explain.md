@@ -507,4 +507,24 @@ Both test suites verify:
 - Composite Dynamic Distress Score fusion and spike detection.
 - Explainable AI factor breakdown.
 - SC/ST PoA Act statutory intervention matching.
-- All 8 FastAPI HTTP endpoints with 100% success rate.
+- All FastAPI HTTP endpoints with 100% success rate.
+
+---
+
+## 7. Enterprise Database Architecture & Statutory Compliance
+
+### 7.1. Neon PostgreSQL Authorities Cloud Database
+- **Module**: `backend/app/database_neon.py`
+- **Schema & Tables**:
+  - `authority_officers`: Nodal police officers, special magistrates, and Tele-MANAS counsellors.
+  - `authority_case_dockets`: Official Section 15A statutory victim dockets, risk levels, and vulnerability flags.
+  - `police_dispatch_alerts`: Real-time emergency police dispatch alerts roster.
+  - `statutory_directives`: Official protective directives (Armed Pickets, Relocation, Interim Relief).
+  - `authority_audit_logs`: Immutable audit trails for judicial compliance.
+- **Connection Environment Variable**: `NEON_DATABASE_URL` (with automatic fallback to local mode when unconfigured).
+
+### 7.2. Session Purging & Data Privacy Invariants
+- **Transient Session Isolation**: Unsubmitted survivor check-in sessions (`AWAITING INTAKE` with 0 DDS) are excluded from official police triage queues.
+- **Beacon Purging**: Browsers issue a `beforeunload` beacon (`POST /api/v1/victim/reset`) upon tab close/reload, purging unsubmitted temporary session data from RAM.
+- **Navbar Real-time Alerts**: Emergency alerts trigger real-time pulsing indicators in the top navigation bar (`Header.jsx`), opening a 1-click slide-over dispatch drawer (`AlertsDrawer.jsx`).
+

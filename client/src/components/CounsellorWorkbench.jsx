@@ -470,69 +470,6 @@ export default function CounsellorWorkbench({
             )}
           </div>
         </div>
-
-        {/* Clinical Care Notes Form (Full Width / 12 cols) */}
-        <div className="lg:col-span-12 gov-card p-4 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-            <div>
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <ClipboardList className="w-3.5 h-3.5 text-slate-600" />
-                <span>Tele-MANAS Psychiatric Consultation Record & Treatment Plan</span>
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Official clinical observations appended to the Section 15A Special Court file.
-              </p>
-            </div>
-            {noteSuccess && (
-              <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Clinical note recorded successfully.
-              </span>
-            )}
-          </div>
-
-          <form onSubmit={handleSaveNote} className="space-y-2.5">
-            <textarea
-              rows={2}
-              value={officerNote}
-              onChange={(e) => setOfficerNote(e.target.value)}
-              placeholder="Record clinical trauma observations, witness coping capacity, recommended pharmacological or psychotherapeutic care..."
-              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-purple-600 text-slate-800 placeholder-slate-400 font-normal"
-            />
-
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400">
-                Conducted under Rule 5(1)(e) PoA Rules & Tele-MANAS Protocol (14416)
-              </span>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !officerNote.trim()}
-                className="btn-navy text-xs disabled:opacity-50"
-              >
-                <Send className="w-3 h-3" />
-                <span>{isSubmitting ? 'Recording Note...' : 'Record Consultation Note'}</span>
-              </button>
-            </div>
-          </form>
-
-          {/* Past Notes History */}
-          {caseFile?.clinical_notes_history && caseFile.clinical_notes_history.length > 0 && (
-            <div className="pt-2 border-t border-slate-100 space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Historical Consultation Records:
-              </span>
-              {caseFile.clinical_notes_history.map((n, i) => (
-                <div key={i} className="bg-slate-50 border border-slate-200 rounded p-2 text-xs space-y-0.5">
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
-                    <span>{n.counsellor_name}</span>
-                    <span>{n.timestamp ? n.timestamp.slice(0, 16).replace('T', ' ') : ''}</span>
-                  </div>
-                  <p className="text-slate-700">{n.clinical_observations}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

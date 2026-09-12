@@ -49,3 +49,23 @@ async def acknowledge_alert(
         "action_taken": action_taken,
         "timestamp": datetime.now().isoformat()
     }
+
+@router.post("/resolve")
+async def resolve_alert(
+    alert_id: str = Form(...),
+    officer_name: str = Form("District SP / Special Protection Cell")
+):
+    updated = alert_hub.update_alert_status(alert_id, "RESOLVED", officer_name)
+    if not updated:
+        for a in db.alerts:
+            if a["alert_id"] == alert_id:
+                a["status"] = "RESOLVED"
+                a["assigned_officer"] = officer_name
+                updated = a
+                break
+    return {
+        "status": "RESOLVED",
+        "alert": updated,
+        "timestamp": datetime.now().isoformat()
+    }
+

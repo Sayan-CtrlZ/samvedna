@@ -161,11 +161,12 @@ samvedna/
 │   │   │   ├── voice_analytics.py     # Wiener-Khinchin FFT acoustic engine
 │   │   │   └── xai_explainer.py       # Causal factor attribution engine
 │   │   ├── config.py           # Centralized environment settings
-│   │   ├── database.py         # Mock in-memory database & longitudinal records
+│   │   ├── database.py         # In-memory session database & longitudinal records
+│   │   ├── database_neon.py    # Neon PostgreSQL Authority Database & Audit Trail
 │   │   └── main.py             # FastAPI application entry point
 │   ├── static/                 # Fallback static assets
 │   └── requirements.txt        # Backend dependency specification
-├── .env.example                # Environment configuration template
+├── .env.example                # Environment configuration template with NeonDB settings
 ├── .gitignore                  # Production Git ignore rules
 ├── Procfile                    # Deployment process configuration
 ├── render.yaml                 # Render cloud infrastructure blueprint
@@ -324,12 +325,14 @@ python test_system.py && python test_dds.py && python test_stt_bridge.py && pyth
 | `GET` | `/health` | System health check, active providers, and uptime status. |
 | `POST` | `/api/v1/victim/checkin` | Multipart endpoint accepting voice audio and/or text check-ins. Returns DDS score, biomarkers, and empathetic response. |
 | `POST` | `/api/v1/victim/sos` | Instant emergency distress trigger; dispatches priority alerts to district nodal triage. |
-| `POST` | `/api/v1/victim/reset` | Clears conversational memory buffer for the specified session ID. |
+| `POST` | `/api/v1/victim/reset` | Clears unsubmitted transient victim sessions upon browser tab unload or reset. |
+| `POST` | `/api/v1/victim/location` | Updates live GPS coordinates for an active survivor check-in session. |
 | `GET` | `/api/v1/victim/profile/{id}` | Retrieves historical check-in trajectories, demographics, and clinical notes. |
 | `GET` | `/api/v1/dashboard/metrics` | Returns aggregate district-wide vulnerability and active alert counts. |
-| `GET` | `/api/v1/dashboard/cases` | Returns priority-sorted victim queue with risk levels and recent escalation flags. |
-| `GET` | `/api/v1/counsellor/case-file/{id}` | Detailed clinical workbench with 4-week longitudinal trajectory and biomarker spectrograms. |
-| `POST` | `/api/v1/counsellor/intervene` | Requisitions statutory Section 15A protection, Tele-MANAS counselling, or financial relief. |
+| `GET` | `/api/v1/dashboard/cases` | Returns priority-sorted victim queue (excluding transient unsubmitted sessions). |
+| `GET` | `/api/v1/alerts/feed` | Real-time police emergency dispatch alerts feed. |
+| `POST` | `/api/v1/alerts/acknowledge` | Dispatches armed police patrol / statutory protection unit for an active alert. |
+| `GET` | `/api/v1/counsellor/case-file/{id}` | Detailed clinical workbench with longitudinal distress trajectories. |
 
 ---
 
@@ -337,12 +340,14 @@ python test_system.py && python test_dds.py && python test_stt_bridge.py && pyth
 
 1. **Zero-Disk Audio Invariant**:
    All uploaded audio frames are parsed in volatile RAM (`io.BytesIO`). No raw voice recordings are stored or persisted on server disk storage.
-2. **Deterministic Data Sovereignty**:
-   In high-security government installations, external API cascades can be isolated; the system functions completely on-premise using the local offline dynamic synthesizer.
-3. **Audit Trail Logging**:
-   All check-in traces are recorded with non-reidentifiable session keys, tracking confidence metrics, input modalities, and calculated distress vectors for clinical oversight.
-4. **Data Minimization**:
-   Personally Identifiable Information (PII) is decoupled from clinical acoustic biomarkers via hashed victim identification tokens.
+2. **Neon PostgreSQL Authority Cloud Database**:
+   Official authority case dockets (`authority_case_dockets`), police dispatch rosters (`police_dispatch_alerts`), statutory protection directives (`statutory_directives`), and immutability audit logs (`authority_audit_logs`) are synchronized with Neon PostgreSQL when `NEON_DATABASE_URL` is configured, with seamless offline fallback.
+3. **Session Purging & Data Isolation**:
+   Survivor check-in sessions remain transient until an active check-in or emergency SOS is submitted. Unsubmitted `AWAITING INTAKE` sessions are automatically purged on tab unload via `beforeunload` beacon (`/api/v1/victim/reset`).
+4. **Deterministic Data Sovereignty**:
+   In high-security government installations, external API cascades can be isolated; the system functions completely on-premise using local DSP heuristics and deterministic dynamic synthesis.
+5. **Data Minimization & Code Names**:
+   All victim records are anonymized using clean, standardized code names (`SURVIVOR-MP-881`, `VIC-MH-114`) decoupling PII from acoustic biomarkers.
 
 ---
 

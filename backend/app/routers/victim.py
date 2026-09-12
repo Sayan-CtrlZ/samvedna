@@ -482,5 +482,16 @@ async def update_victim_location(
             pass
     return {"status": "success", "location": location, "victim_id": victim_id}
 
+@router.post("/reset")
+async def reset_session(
+    victim_id: str = Form(...)
+):
+    """Clears temporary unsubmitted victim session from in-memory cache upon tab unload/reset."""
+    if victim_id in db.victims and db.victims[victim_id].get("current_risk_level") == "AWAITING INTAKE":
+        db.victims.pop(victim_id, None)
+        db.checkins.pop(victim_id, None)
+    return {"status": "success", "message": "Session reset"}
+
+
 
 
