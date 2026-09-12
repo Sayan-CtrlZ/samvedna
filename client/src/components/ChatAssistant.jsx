@@ -183,26 +183,100 @@ export default function ChatAssistant({
     }
   };
 
-  // Text-to-Speech (Read Aloud)
-  const speakMessage = (id, text) => {
-    if (!window.speechSynthesis) return;
+  // Sarvam AI Text-to-Speech (Bulbul v1) Read Aloud Integration
+  const activeAudioRef = useRef(null);
+  const [isTtsLoading, setIsTtsLoading] = useState(false);
 
-    if (speakingMessageId === id) {
-      window.speechSynthesis.cancel();
+  const fallbackBrowserTts = (id, text) => {
+    if (!window.speechSynthesis) {
       setSpeakingMessageId(null);
+      setIsTtsLoading(false);
       return;
     }
-
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
-    utterance.onend = () => setSpeakingMessageId(null);
-    utterance.onerror = () => setSpeakingMessageId(null);
+    utterance.onend = () => {
+      setSpeakingMessageId(null);
+      setIsTtsLoading(false);
+    };
+    utterance.onerror = () => {
+      setSpeakingMessageId(null);
+      setIsTtsLoading(false);
+    };
 
     setSpeakingMessageId(id);
+    setIsTtsLoading(false);
     window.speechSynthesis.speak(utterance);
+  };
+
+  const speakMessage = async (id, text) => {
+    // If user clicks on currently playing message -> stop playing
+    if (speakingMessageId === id) {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingMessageId(null);
+      setIsTtsLoading(false);
+      return;
+    }
+
+    // Stop any existing active playback
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    setSpeakingMessageId(id);
+    setIsTtsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('language', language);
+
+      const res = await fetch('/api/v1/victim/tts', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'success' && data.audio_base64) {
+          const audioUrl = `data:audio/wav;base64,${data.audio_base64}`;
+          const audio = new Audio(audioUrl);
+          activeAudioRef.current = audio;
+
+          audio.onended = () => {
+            setSpeakingMessageId(null);
+            setIsTtsLoading(false);
+            activeAudioRef.current = null;
+          };
+
+          audio.onerror = () => {
+            fallbackBrowserTts(id, text);
+          };
+
+          await audio.play();
+          setIsTtsLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Sarvam AI TTS call failed, invoking browser fallback:', err);
+    }
+
+    // Fallback if Sarvam API is unconfigured or failed
+    fallbackBrowserTts(id, text);
   };
 
   // Submit Text Message Check-in
@@ -385,10 +459,24 @@ export default function ChatAssistant({
                       className={`hover:text-indigo-600 flex items-center gap-1 font-semibold transition-colors ${
                         isSpeaking ? 'text-indigo-600 font-bold' : ''
                       }`}
-                      title={isSpeaking ? 'Stop listening' : 'Listen aloud'}
+                      title={isSpeaking ? 'Stop listening' : 'Listen with Sarvam AI Voice'}
                     >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>{isSpeaking ? 'Playing...' : 'Listen'}</span>
+                      {isSpeaking && isTtsLoading ? (
+                        <span className="flex items-center gap-1 text-indigo-600">
+                          <span className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                          <span>Sarvam AI...</span>
+                        </span>
+                      ) : isSpeaking ? (
+                        <span className="flex items-center gap-1 text-indigo-600 font-bold">
+                          <Volume2 className="w-3.5 h-3.5 animate-pulse text-indigo-600" />
+                          <span>Playing...</span>
+                        </span>
+                      ) : (
+                        <>
+                          <Volume2 className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Listen</span>
+                        </>
+                      )}
                     </button>
                   )}
                 </div>

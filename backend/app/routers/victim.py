@@ -12,6 +12,7 @@ _active_checkins: Set[str] = set()
 from app.database import db
 from app.services.voice_analytics import voice_engine
 from app.services.stt_bridge import stt_bridge
+from app.services.tts_bridge import tts_bridge
 from app.services.nlp_engine import nlp_engine
 from app.services.mood_estimator import mood_estimator
 from app.services.multimodal_fusion import multimodal_fusion_engine
@@ -431,4 +432,33 @@ async def transcribe_speech_sample(audio_file: UploadFile = File(...)):
         "transcript": result.get("transcript", ""),
         "confidence": result.get("confidence", "low")
     }
+
+@router.post("/tts")
+async def generate_text_to_speech(
+    text: str = Form(...),
+    language: str = Form("hi")
+):
+    """
+    Sarvam AI Bulbul v1 Text-to-Speech (TTS) endpoint.
+    Synthesizes AI companion text messages into natural Indic speech audio (base64 WAV).
+    """
+    if not text or not text.strip():
+        return {"status": "error", "message": "Text input is empty"}
+
+    result = tts_bridge.synthesize(text=text.strip(), language=language)
+
+    if result.get("success"):
+        return {
+            "status": "success",
+            "audio_base64": result.get("audio_base64"),
+            "provider": result.get("provider", "sarvam_bulbul_v1"),
+            "language_code": result.get("language_code")
+        }
+    else:
+        return {
+            "status": "fallback",
+            "provider": "browser_fallback",
+            "reason": result.get("reason", "Sarvam TTS service unavailable")
+        }
+
 
