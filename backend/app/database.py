@@ -340,24 +340,60 @@ class AtrocityMonitoringDatabase:
                     ]
                 })
 
+    def get_or_create_victim(self, victim_id: str) -> Dict[str, Any]:
+        if victim_id not in self.victims:
+            suffix = victim_id.replace("VIC-", "").upper()
+            clean_code = f"SURVIVOR-{suffix}"
+            self.victims[victim_id] = {
+                "victim_id": victim_id,
+                "victim_code": clean_code,
+                "code_name": f"{clean_code} (Live Session Case)",
+                "full_name_masked": f"{clean_code} (Live Intake)",
+                "age": 26,
+                "gender": "Self Intake",
+                "community": "SC/ST Atrocity Witness Intake",
+                "state": "Maharashtra",
+                "district": "Ahmednagar",
+                "police_station": "District Central PS",
+                "fir_number": f"FIR-2026-{suffix[-4:]}",
+                "fir_date": datetime.now().strftime("%Y-%m-%d"),
+                "sections_invoked": "SC/ST (PoA) Act Sec 15A Witness Protection System",
+                "legal_stage": "Live Survivor Intake Session",
+                "court_name": "Special Court (SC/ST PoA)",
+                "next_hearing_date": (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d"),
+                "accused_on_bail": True,
+                "compensation_status": "Interim Relief Under Process",
+                "compensation_delayed": False,
+                "needs_relocation": True,
+                "primary_language": "en",
+                "protection_assigned": "Sec 15A Sentinel Protection Protocol",
+                "emergency_contact": "Emergency Helplines 14566 / 112",
+                "current_risk_level": "AWAITING INTAKE",
+                "current_dds": 0.0,
+                "trend_status": "Active Survivor Session Intake",
+                "summary": "Live survivor check-in session initiated via SAMVEDNA web portal."
+            }
+        return self.victims[victim_id]
+
     def get_all_victims(self) -> List[Dict[str, Any]]:
         return list(self.victims.values())
 
     def get_victim_by_id(self, victim_id: str) -> Optional[Dict[str, Any]]:
-        return self.victims.get(victim_id)
+        return self.get_or_create_victim(victim_id)
 
     def get_victim_checkins(self, victim_id: str) -> List[Dict[str, Any]]:
         return self.checkins.get(victim_id, [])
 
     def add_checkin(self, victim_id: str, checkin_data: Dict[str, Any]):
+        self.get_or_create_victim(victim_id)
         if victim_id not in self.checkins:
             self.checkins[victim_id] = []
         self.checkins[victim_id].append(checkin_data)
         
-        if victim_id in self.victims:
-            self.victims[victim_id]["current_dds"] = checkin_data["composite_dds"]
-            self.victims[victim_id]["current_risk_level"] = checkin_data["risk_level"]
-            self.victims[victim_id]["trend_status"] = checkin_data.get("risk_trajectory_label", "Updated")
+        # Update current DDS score and risk level to match the LATEST / LAST check-in score
+        self.victims[victim_id]["current_dds"] = checkin_data["composite_dds"]
+        self.victims[victim_id]["current_risk_level"] = checkin_data["risk_level"]
+        self.victims[victim_id]["trend_status"] = checkin_data.get("risk_trajectory_label", "Updated via Live Intake")
 
     def add_counsellor_note(self, victim_id: str, note_data: Dict[str, Any]):
         if victim_id not in self.counsellor_notes:

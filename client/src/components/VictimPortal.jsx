@@ -286,21 +286,9 @@ export default function VictimPortal({
                 </p>
               </div>
               
-              <div className="flex items-center gap-2">
-                <label className="font-semibold text-slate-700 text-xs flex items-center gap-1">
-                  <User className="w-3.5 h-3.5 text-indigo-600" /> Case Code:
-                </label>
-                <select
-                  value={selectedVictim}
-                  onChange={(e) => setSelectedVictim(e.target.value)}
-                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 font-mono font-medium focus:outline-none focus:ring-1 focus:ring-indigo-600 max-w-[220px] truncate"
-                >
-                  {displayedVictims.map((v) => (
-                    <option key={v.victim_id} value={v.victim_id} className="text-slate-900 font-sans">
-                      {v.code_name || v.victim_code} — {v.district}, {v.state}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold">
+                <Lock className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
+                <span>Active Anonymous Intake Session</span>
               </div>
             </div>
 

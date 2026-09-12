@@ -22,9 +22,15 @@ export default function App() {
   const [selectedVictimId, setSelectedVictimId] = useState(() => {
     try {
       const saved = sessionStorage.getItem('samvedna_selected_victim');
-      return (saved && typeof saved === 'string' && saved.startsWith('VIC-')) ? saved : 'VIC-MH-2024-114';
+      if (saved && typeof saved === 'string' && saved.startsWith('VIC-')) {
+        return saved;
+      }
+      const sessionSuffix = Math.floor(1000 + Math.random() * 9000);
+      const newSessionId = `VIC-2026-${sessionSuffix}`;
+      sessionStorage.setItem('samvedna_selected_victim', newSessionId);
+      return newSessionId;
     } catch (e) {
-      return 'VIC-MH-2024-114';
+      return 'VIC-2026-1001';
     }
   });
   const [language, setLanguage] = useState(() => {
