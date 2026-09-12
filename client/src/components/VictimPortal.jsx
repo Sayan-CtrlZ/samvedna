@@ -405,7 +405,7 @@ export default function VictimPortal({
                 </span>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-2xl font-black text-slate-900">
-                    {lastResponse ? lastResponse.composite_dds : '74.2'}
+                    {lastResponse ? lastResponse.composite_dds : '--'}
                   </span>
                   <span className="text-xs text-slate-500 font-semibold">/ 100</span>
                 </div>
@@ -414,9 +414,13 @@ export default function VictimPortal({
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                   Risk Trajectory Status
                 </span>
-                <div className="text-xs font-bold text-rose-700 mt-1.5 flex items-center gap-1">
-                  <Activity className="w-3.5 h-3.5 text-rose-600" />
-                  <span>{lastResponse?.is_escalating_rapidly ? 'Rapid Escalation (+14 pts)' : 'Section 15A Protection Active'}</span>
+                <div className="text-xs font-bold text-slate-700 mt-1.5 flex items-center gap-1">
+                  <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>
+                    {lastResponse
+                      ? (lastResponse.is_escalating_rapidly ? 'Rapid Escalation (+14 pts)' : 'Section 15A Protection Active')
+                      : 'Awaiting Check-in Intake'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -430,47 +434,49 @@ export default function VictimPortal({
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Pitch Mean (F0)</span>
                   <span className="font-bold text-slate-800 text-xs">
-                    {lastResponse?.voice_metrics?.pitch_mean_hz ? `${Math.round(lastResponse.voice_metrics.pitch_mean_hz)} Hz` : (lastResponse?.feature_summary?.f0 ? `${Math.round(lastResponse.feature_summary.f0)} Hz` : '198.4 Hz')}
+                    {lastResponse?.voice_metrics?.pitch_mean_hz ? `${Math.round(lastResponse.voice_metrics.pitch_mean_hz)} Hz` : (lastResponse?.feature_summary?.f0 ? `${Math.round(lastResponse.feature_summary.f0)} Hz` : '--')}
                   </span>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Jitter (Micro-tremor)</span>
                   <span className="font-bold text-amber-700 text-xs">
-                    {lastResponse?.voice_metrics?.jitter_pct ? `${lastResponse.voice_metrics.jitter_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.jitter ? `${lastResponse.feature_summary.jitter.toFixed(1)}%` : '2.4%')}
+                    {lastResponse?.voice_metrics?.jitter_pct ? `${lastResponse.voice_metrics.jitter_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.jitter ? `${lastResponse.feature_summary.jitter.toFixed(1)}%` : '--')}
                   </span>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Shimmer (Volatility)</span>
                   <span className="font-bold text-purple-700 text-xs">
-                    {lastResponse?.voice_metrics?.shimmer_pct ? `${lastResponse.voice_metrics.shimmer_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.shimmer ? `${lastResponse.feature_summary.shimmer.toFixed(1)}%` : '4.8%')}
+                    {lastResponse?.voice_metrics?.shimmer_pct ? `${lastResponse.voice_metrics.shimmer_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.shimmer ? `${lastResponse.feature_summary.shimmer.toFixed(1)}%` : '--')}
                   </span>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Harmonic Noise (HNR)</span>
                   <span className="font-bold text-indigo-700 text-xs">
-                    {lastResponse?.voice_metrics?.hnr_db ? `${lastResponse.voice_metrics.hnr_db.toFixed(1)} dB` : (lastResponse?.feature_summary?.hnr ? `${lastResponse.feature_summary.hnr.toFixed(1)} dB` : '18.2 dB')}
+                    {lastResponse?.voice_metrics?.hnr_db ? `${lastResponse.voice_metrics.hnr_db.toFixed(1)} dB` : (lastResponse?.feature_summary?.hnr ? `${lastResponse.feature_summary.hnr.toFixed(1)} dB` : '--')}
                   </span>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Vocal Tremor Index</span>
                   <span className="font-bold text-rose-700 text-xs">
-                    {lastResponse?.voice_metrics?.tremor_intensity ? `${lastResponse.voice_metrics.tremor_intensity.toFixed(1)}%` : (lastResponse?.feature_summary?.tremor ? `${lastResponse.feature_summary.tremor.toFixed(1)}%` : '38.5%')}
+                    {lastResponse?.voice_metrics?.tremor_intensity ? `${lastResponse.voice_metrics.tremor_intensity.toFixed(1)}%` : (lastResponse?.feature_summary?.tremor ? `${lastResponse.feature_summary.tremor.toFixed(1)}%` : '--')}
                   </span>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-semibold block">Threat Cues Flag</span>
                   <span className="font-bold text-slate-800 text-[11px] truncate block">
-                    {lastResponse?.nlp_metrics?.witness_threat_detected ? '🚨 Threat Cues' : 'Unflagged'}
+                    {lastResponse ? (lastResponse?.nlp_metrics?.witness_threat_detected ? '🚨 Threat Cues' : 'Unflagged') : '--'}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Statutory Notification Footer */}
-            <div className="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-semibold flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-[11px] font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-indigo-600 flex-shrink-0" />
               <span>
-                Check-in saved to official case docket. Real-time synchronized across Police Triage & Clinical Workbench.
+                {lastResponse
+                  ? 'Check-in saved to official case docket. Real-time synchronized across Police Triage & Clinical Workbench.'
+                  : 'Ready for voice or text intake. Record audio or enter text to compute live distress biomarkers.'}
               </span>
             </div>
           </div>
