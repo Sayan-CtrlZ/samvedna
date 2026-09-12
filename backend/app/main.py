@@ -15,7 +15,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:8000', 'http://127.0.0.1:8000'],
+    allow_origin_regex=r'https?://.*',
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -33,7 +34,12 @@ if os.path.exists(client_assets_dir):
     app.mount("/assets", StaticFiles(directory=client_assets_dir), name="assets")
 
 @app.get("/")
-async def serve_ui():
+@app.get("/{full_path:path}")
+async def serve_ui(full_path: str = ""):
+    # If path starts with api/ or docs or openapi.json, return 404 if not matched by routers
+    if full_path.startswith("api/") or full_path in ["docs", "openapi.json", "redoc"]:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not Found")
     client_index = os.path.join(client_dist_dir, "index.html")
     if os.path.exists(client_index):
         return FileResponse(client_index)

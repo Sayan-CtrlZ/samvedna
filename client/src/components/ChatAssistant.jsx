@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2, RotateCcw, MessageSquare, ShieldCheck, User, ShieldAlert, Activity, AlertTriangle } from 'lucide-react';
+import { getApiUrl } from '../utils/api';
 
 export default function ChatAssistant({
   onCheckinComplete,
@@ -192,11 +193,11 @@ export default function ChatAssistant({
             try {
               const formData = new FormData();
               formData.append('audio_file', audioBlob, 'mic_input.wav');
-              const res = await fetch('/api/v1/victim/transcribe', {
+              const res = await fetch(getApiUrl('/api/v1/victim/transcribe'), {
                 method: 'POST',
                 body: formData,
               });
-              if (res.ok) {
+              if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
                 const data = await res.json();
                 if (data.transcript) {
                   setInputText((prev) => (prev ? `${prev} ${data.transcript}` : data.transcript));
@@ -281,12 +282,12 @@ export default function ChatAssistant({
       formData.append('text', text);
       formData.append('language', language);
 
-      const res = await fetch('/api/v1/victim/tts', {
+      const res = await fetch(getApiUrl('/api/v1/victim/tts'), {
         method: 'POST',
         body: formData,
       });
 
-      if (res.ok) {
+      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
         const data = await res.json();
         if (data.status === 'success' && data.audio_base64) {
           const audioUrl = `data:audio/wav;base64,${data.audio_base64}`;
@@ -339,12 +340,15 @@ export default function ChatAssistant({
       formData.append('text_content', text);
       formData.append('language', language);
 
-      const response = await fetch('/api/v1/victim/checkin', {
+      const response = await fetch(getApiUrl('/api/v1/victim/checkin'), {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('Backend API URL not configured or returned non-JSON response');
+      }
       const data = await response.json();
       const checkinId = data.checkin_id || `chat-${Date.now()}`;
       lastProcessedCheckinIdRef.current = checkinId;
@@ -393,7 +397,7 @@ export default function ChatAssistant({
     try {
       const formData = new FormData();
       formData.append('victim_id', selectedVictimId || 'VIC-MP-881');
-      await fetch('/api/v1/victim/reset', { method: 'POST', body: formData });
+      await fetch(getApiUrl('/api/v1/victim/reset'), { method: 'POST', body: formData });
     } catch (e) {
       console.warn('Reset error:', e);
     }

@@ -7,6 +7,7 @@ import AnalyticsView from './components/AnalyticsView';
 import VictimPortal from './components/VictimPortal';
 import AlertsDrawer from './components/AlertsDrawer';
 import EmergencySosModal from './components/EmergencySosModal';
+import { getApiUrl, DEFAULT_CASES } from './utils/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -45,7 +46,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(true);
   const [alerts, setAlerts] = useState([]);
   const [metrics, setMetrics] = useState(null);
-  const [cases, setCases] = useState([]);
+  const [cases, setCases] = useState(DEFAULT_CASES);
 
   const [userLocation, setUserLocation] = useState(() => {
     try {
@@ -73,7 +74,7 @@ export default function App() {
       if (selectedVictimId) {
         const data = new FormData();
         data.append('victim_id', selectedVictimId);
-        navigator.sendBeacon('/api/v1/victim/reset', data);
+        navigator.sendBeacon(getApiUrl('/api/v1/victim/reset'), data);
       }
     };
     window.addEventListener('beforeunload', handleUnload);
@@ -111,7 +112,7 @@ export default function App() {
             const formData = new FormData();
             formData.append('victim_id', selectedVictimId);
             formData.append('location', locString);
-            fetch('/api/v1/victim/location', { method: 'POST', body: formData });
+            fetch(getApiUrl('/api/v1/victim/location'), { method: 'POST', body: formData });
           } catch (e) {}
         },
         (err) => {
@@ -127,23 +128,23 @@ export default function App() {
     }
   }, [selectedVictimId]);
 
-  // Fetch metrics, cases, and alerts
+  // Fetch metrics, cases, and alerts safely
   const loadDashboardData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
-        fetch('/api/v1/dashboard/metrics'),
-        fetch('/api/v1/dashboard/cases'),
-        fetch('/api/v1/alerts/feed')
+        fetch(getApiUrl('/api/v1/dashboard/metrics')),
+        fetch(getApiUrl('/api/v1/dashboard/cases')),
+        fetch(getApiUrl('/api/v1/alerts/feed'))
       ]);
 
-      if (resMetrics.ok) {
+      if (resMetrics.ok && resMetrics.headers.get('content-type')?.includes('application/json')) {
         setMetrics(await resMetrics.json());
       }
-      if (resCases.ok) {
+      if (resCases.ok && resCases.headers.get('content-type')?.includes('application/json')) {
         const data = await resCases.json();
-        setCases(data.cases || []);
+        setCases((data.cases && data.cases.length > 0) ? data.cases : DEFAULT_CASES);
       }
-      if (resAlerts.ok) {
+      if (resAlerts.ok && resAlerts.headers.get('content-type')?.includes('application/json')) {
         const data = await resAlerts.json();
         setAlerts(data.alerts || []);
         setIsOnline(true);
@@ -168,7 +169,7 @@ export default function App() {
       formData.append('officer_name', 'Superintendent of Police / Special Duty Magistrate');
       formData.append('action_taken', 'Dispatched Armed Police Picket under Section 15A');
 
-      const res = await fetch('/api/v1/alerts/acknowledge', {
+      const res = await fetch(getApiUrl('/api/v1/alerts/acknowledge'), {
         method: 'POST',
         body: formData,
       });

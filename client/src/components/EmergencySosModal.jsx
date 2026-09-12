@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Phone, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
+import { getApiUrl } from '../utils/api';
 
 export default function EmergencySosModal({ isOpen, onClose, userLocation }) {
   const [isDispatched, setIsDispatched] = useState(false);
@@ -17,7 +18,7 @@ export default function EmergencySosModal({ isOpen, onClose, userLocation }) {
       formData.append('victim_id', activeVictimId);
       formData.append('location', activeLoc);
 
-      const res = await fetch('/api/v1/victim/sos', {
+      const res = await fetch(getApiUrl('/api/v1/victim/sos'), {
         method: 'POST',
         body: formData,
       });

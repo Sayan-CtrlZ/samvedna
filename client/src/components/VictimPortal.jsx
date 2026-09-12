@@ -17,6 +17,7 @@ import {
   Globe
 } from 'lucide-react';
 import ChatAssistant from './ChatAssistant';
+import { getApiUrl } from '../utils/api';
 
 export default function VictimPortal({
   cases = [],
@@ -232,13 +233,17 @@ export default function VictimPortal({
         formData.append('audio_file', audioBlob, 'recording.wav');
       }
 
-      const res = await fetch('/api/v1/victim/checkin', {
+      const res = await fetch(getApiUrl('/api/v1/victim/checkin'), {
         method: 'POST',
         body: formData
       });
 
       if (!res.ok) {
         throw new Error(`Server returned status: ${res.status}`);
+      }
+
+      if (!res.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('Backend API URL not configured or returned non-JSON response');
       }
 
       const data = await res.json();

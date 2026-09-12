@@ -27,11 +27,20 @@ import {
   BadgeAlert,
   FileSpreadsheet
 } from 'lucide-react';
+import { getApiUrl, DEFAULT_CASES } from '../utils/api';
 
 export default function OfficialDashboard({ selectedVictimId, onSelectVictim, userLocation }) {
   const [metrics, setMetrics] = useState(null);
-  const [cases, setCases] = useState([]);
-  const [activeCase, setActiveCase] = useState(null);
+  const [cases, setCases] = useState(DEFAULT_CASES);
+  const [activeCase, setActiveCase] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('samvedna_active_official_case');
+      const match = DEFAULT_CASES.find(c => c.victim_id === saved);
+      return match || DEFAULT_CASES[0];
+    } catch (e) {
+      return DEFAULT_CASES[0];
+    }
+  });
   const [caseFile, setCaseFile] = useState(null);
   const [alertsFeed, setAlertsFeed] = useState([]);
   const [filterRisk, setFilterRisk] = useState('ALL');
@@ -40,7 +49,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [officerNote, setOfficerNote] = useState('');
   const [noteSuccess, setNoteSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Helper: Format Date & Time cleanly
   const formatDateTime = (isoString) => {
@@ -71,34 +80,43 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
     return code;
   };
 
+  // Save activeCase to sessionStorage whenever it changes
+  useEffect(() => {
+    if (activeCase?.victim_id) {
+      try {
+        sessionStorage.setItem('samvedna_active_official_case', activeCase.victim_id);
+      } catch (e) {}
+    }
+  }, [activeCase?.victim_id]);
+
   // Load summary metrics, cases, and live police alerts feed
   const loadData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
-        fetch('/api/v1/dashboard/metrics'),
-        fetch('/api/v1/dashboard/cases'),
-        fetch('/api/v1/alerts/feed')
+        fetch(getApiUrl('/api/v1/dashboard/metrics')),
+        fetch(getApiUrl('/api/v1/dashboard/cases')),
+        fetch(getApiUrl('/api/v1/alerts/feed'))
       ]);
 
-      if (resMetrics.ok) {
+      if (resMetrics.ok && resMetrics.headers.get('content-type')?.includes('application/json')) {
         setMetrics(await resMetrics.json());
       }
 
-      if (resCases.ok) {
+      if (resCases.ok && resCases.headers.get('content-type')?.includes('application/json')) {
         const dataCases = await resCases.json();
-        const loadedCases = dataCases.cases || [];
+        const loadedCases = (dataCases.cases && dataCases.cases.length > 0) ? dataCases.cases : DEFAULT_CASES;
         setCases(loadedCases);
 
-        const currentTargetId = selectedVictimId || (activeCase ? activeCase.victim_id : null);
-        const match = loadedCases.find(c => c.victim_id === currentTargetId);
-        if (match) {
-          setActiveCase(match);
-        } else if (loadedCases.length > 0) {
-          setActiveCase(loadedCases[0]);
+        // Update activeCase only if explicitly matching selectedVictimId or activeCase not set
+        if (selectedVictimId) {
+          const match = loadedCases.find(c => c.victim_id === selectedVictimId);
+          if (match) {
+            setActiveCase(match);
+          }
         }
       }
 
-      if (resAlerts.ok) {
+      if (resAlerts.ok && resAlerts.headers.get('content-type')?.includes('application/json')) {
         const dataAlerts = await resAlerts.json();
         setAlertsFeed(dataAlerts.alerts || []);
       }
@@ -120,8 +138,8 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
     if (!activeCase?.victim_id) return;
     async function loadCaseFile() {
       try {
-        const res = await fetch(`/api/v1/counsellor/case-file/${activeCase.victim_id}`);
-        if (res.ok) {
+        const res = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${activeCase.victim_id}`));
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
           setCaseFile(await res.json());
         }
       } catch (e) {
@@ -146,7 +164,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       formData.append('officer_name', 'District SP / Special Protection Cell');
       formData.append('action_taken', 'Dispatched Armed Police Protection & Patrol Unit');
 
-      const res = await fetch('/api/v1/alerts/acknowledge', {
+      const res = await fetch(getApiUrl('/api/v1/alerts/acknowledge'), {
         method: 'POST',
         body: formData
       });
@@ -171,15 +189,15 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       formData.append('intervention_type', actionType);
       formData.append('notes', `Statutory Directive (${actionType}) issued by District Protection Nodal Authority.`);
 
-      const res = await fetch('/api/v1/counsellor/intervene', {
+      const res = await fetch(getApiUrl('/api/v1/counsellor/intervene'), {
         method: 'POST',
         body: formData
       });
 
       if (res.ok) {
         setActionSuccess(`Order Issued: [${title}] dispatched to Superintendent of Police & Special Cell.`);
-        const fileRes = await fetch(`/api/v1/counsellor/case-file/${activeCase.victim_id}`);
-        if (fileRes.ok) {
+        const fileRes = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${activeCase.victim_id}`));
+        if (fileRes.ok && fileRes.headers.get('content-type')?.includes('application/json')) {
           setCaseFile(await fileRes.json());
         }
         setTimeout(() => setActionSuccess(null), 6000);
@@ -203,7 +221,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       formData.append('interventions_authorized', 'Witness Protection Review, Residence Watch');
       formData.append('next_follow_up_days', '2');
 
-      const res = await fetch('/api/v1/counsellor/note', {
+      const res = await fetch(getApiUrl('/api/v1/counsellor/note'), {
         method: 'POST',
         body: formData
       });
@@ -211,8 +229,8 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       if (res.ok) {
         setOfficerNote('');
         setNoteSuccess(true);
-        const fileRes = await fetch(`/api/v1/counsellor/case-file/${activeCase.victim_id}`);
-        if (fileRes.ok) {
+        const fileRes = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${activeCase.victim_id}`));
+        if (fileRes.ok && fileRes.headers.get('content-type')?.includes('application/json')) {
           setCaseFile(await fileRes.json());
         }
         setTimeout(() => setNoteSuccess(false), 4000);
@@ -231,7 +249,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       formData.append('officer_name', 'District SP / Special Protection Cell');
       formData.append('resolution_notes', 'Statutory witness protection enforced & threat resolved.');
 
-      const res = await fetch('/api/v1/dashboard/case/resolve', {
+      const res = await fetch(getApiUrl('/api/v1/dashboard/case/resolve'), {
         method: 'POST',
         body: formData
       });

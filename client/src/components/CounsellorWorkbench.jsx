@@ -17,6 +17,7 @@ import {
   HeartPulse,
   MessageSquare
 } from 'lucide-react';
+import { getApiUrl, DEFAULT_CASES } from '../utils/api';
 
 export default function CounsellorWorkbench({
   cases = [],
@@ -24,7 +25,17 @@ export default function CounsellorWorkbench({
   onSelectVictim,
   userLocation
 }) {
-  const [activeVictimId, setActiveVictimId] = useState(selectedVictimId || (cases[0]?.victim_id ?? 'VIC-MH-114'));
+  const activeCases = cases.length > 0 ? cases : DEFAULT_CASES;
+  const [activeVictimId, setActiveVictimId] = useState(() => {
+    if (selectedVictimId && activeCases.some(c => c.victim_id === selectedVictimId)) {
+      return selectedVictimId;
+    }
+    try {
+      const saved = sessionStorage.getItem('samvedna_active_official_case');
+      if (saved && activeCases.some(c => c.victim_id === saved)) return saved;
+    } catch (e) {}
+    return activeCases[0]?.victim_id ?? 'VIC-MP-881';
+  });
   const [caseFile, setCaseFile] = useState(null);
   const [officerNote, setOfficerNote] = useState('');
   const [noteSuccess, setNoteSuccess] = useState(false);
@@ -70,8 +81,8 @@ export default function CounsellorWorkbench({
 
   const loadCaseFile = async (vId) => {
     try {
-      const res = await fetch(`/api/v1/counsellor/case-file/${vId}`);
-      if (res.ok) {
+      const res = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${vId}`));
+      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
         setCaseFile(await res.json());
       }
     } catch (e) {
@@ -253,7 +264,7 @@ export default function CounsellorWorkbench({
       formData.append('interventions_authorized', 'Tele-MANAS Trauma Sessions, Witness Protection Requisition');
       formData.append('next_follow_up_days', '3');
 
-      const res = await fetch('/api/v1/counsellor/note', {
+      const res = await fetch(getApiUrl('/api/v1/counsellor/note'), {
         method: 'POST',
         body: formData
       });
@@ -294,7 +305,7 @@ export default function CounsellorWorkbench({
               }}
               className="bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-purple-600"
             >
-              {cases.map((c) => {
+              {activeCases.map((c) => {
                 const cleanCode = getCleanCodeName(c);
                 return (
                   <option key={c.victim_id} value={c.victim_id}>
