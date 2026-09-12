@@ -49,6 +49,14 @@ venv.bak/
 .env
 .env.*
 !.env.example
+client/.env
+client/.env.*
+!client/.env.example
+*.local
+
+# Vercel & Cloud Deployment Artifacts
+.vercel/
+.turbo/
 
 # Runtime Data, Logs, and Traces
 *.log
