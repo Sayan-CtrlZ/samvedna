@@ -6,14 +6,14 @@ backend_dir = os.path.join(os.path.dirname(__file__), "backend")
 sys.path.insert(0, backend_dir)
 
 import httpx
-from app.main import app
+from app.main import app as target_fastapi_app
 
 async def run_api_tests():
     print("=" * 65)
     print(" SAMVEDNA AI - REST API Endpoint Verification")
     print("=" * 65)
     
-    transport = httpx.ASGITransport(app=app)
+    transport = httpx.ASGITransport(app=target_fastapi_app)
     async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         # 1. Health check
         res = await client.get("/health")
