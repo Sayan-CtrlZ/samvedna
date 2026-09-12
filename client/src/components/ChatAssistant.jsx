@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, Volume2, RotateCcw, MessageSquare, ShieldCheck, User } from 'lucide-react';
+import { Send, Mic, MicOff, Volume2, RotateCcw, MessageSquare, ShieldCheck, User, ShieldAlert, Activity, AlertTriangle } from 'lucide-react';
 
 export default function ChatAssistant({
   onCheckinComplete,
+  onTriggerSos,
   isProcessing: externalIsProcessing,
   setIsProcessing: externalSetIsProcessing,
   latestVoiceResult,
@@ -311,15 +312,18 @@ export default function ChatAssistant({
       const data = await response.json();
 
       const assistantMessageId = `assistant-${Date.now()}`;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: assistantMessageId,
-          sender: 'assistant',
-          text: data.ai_response || 'Thank you for sharing. We are here with you.',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
+      const assistantMessage = {
+        id: assistantMessageId,
+        sender: 'assistant',
+        text: data.ai_response || 'Thank you for sharing. We are here with you.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        composite_dds: data.composite_dds,
+        risk_level: data.risk_level,
+        threat_detected: data.nlp_metrics?.witness_threat_detected || false,
+        is_sos_active: data.is_sos_active || false,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
 
       if (onCheckinComplete) {
         onCheckinComplete(data);
@@ -447,6 +451,56 @@ export default function ChatAssistant({
                   </div>
                 )}
                 <p className="whitespace-pre-wrap">{msg.text}</p>
+
+                {/* Pipeline Distress Evaluation Badge & Emergency Workflow (SAMVEDNA AI Pipeline Spec) */}
+                {!isUser && msg.composite_dds !== undefined && (
+                  <div className="mt-2.5 pt-2 border-t border-slate-200/80 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+                      <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">
+                        Distress Evaluation:
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] flex items-center gap-1 ${
+                          msg.composite_dds >= 75 || msg.risk_level === 'CRITICAL' || msg.threat_detected
+                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                            : msg.composite_dds >= 60 || msg.risk_level === 'HIGH'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        }`}
+                      >
+                        <span>
+                          {msg.composite_dds >= 75 || msg.threat_detected ? '🚨' : msg.composite_dds >= 60 ? '⚠️' : '💚'}
+                        </span>
+                        <span>DDS: {msg.composite_dds} / 100</span>
+                        <span>•</span>
+                        <span>{msg.risk_level || 'EVALUATED'}</span>
+                      </span>
+                    </div>
+
+                    {/* Emergency Workflow Card (DDS >= 75 / Critical Distress / Threat Cues) */}
+                    {(msg.composite_dds >= 75 || msg.risk_level === 'CRITICAL' || msg.threat_detected) && (
+                      <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2 mt-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800">
+                          <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 animate-pulse" />
+                          <span>Emergency Workflow Activated (DDS ≥ 75)</span>
+                        </div>
+                        <p className="text-[11px] text-rose-700 leading-snug">
+                          Critical distress or threat cues detected in text input. Priority audit log created & magistrate protection flagged under Section 15A.
+                        </p>
+                        {onTriggerSos && (
+                          <button
+                            type="button"
+                            onClick={onTriggerSos}
+                            className="w-full py-1.5 px-3 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                          >
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span>Instant Dispatch Emergency SOS</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div
                   className={`mt-2 flex items-center justify-between gap-2 text-[10px] ${
                     isUser ? 'text-indigo-200' : 'text-slate-400'

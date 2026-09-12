@@ -259,6 +259,15 @@ export default function VictimPortal({
     }
   };
 
+  const handleCheckinResult = (payload) => {
+    if (payload) {
+      setLastResponse(payload);
+    }
+    if (onCheckinSubmitted) {
+      onCheckinSubmitted(payload);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Check-in Workspace */}
@@ -488,7 +497,8 @@ export default function VictimPortal({
             latestVoiceResult={lastResponse}
             selectedVictimId={selectedVictim}
             language={language}
-            onCheckinComplete={onCheckinSubmitted}
+            onCheckinComplete={handleCheckinResult}
+            onTriggerSos={onTriggerSos}
           />
         </div>
       </div>
