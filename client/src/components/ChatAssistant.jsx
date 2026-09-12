@@ -119,7 +119,7 @@ export default function ChatAssistant({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isProcessing]);
 
   // Speech-to-Text Initialization
   useEffect(() => {
@@ -499,53 +499,28 @@ export default function ChatAssistant({
                 )}
                 <p className="whitespace-pre-wrap">{msg.text}</p>
 
-                {/* Pipeline Distress Evaluation Badge & Emergency Workflow (SAMVEDNA AI Pipeline Spec) */}
-                {!isUser && msg.composite_dds !== undefined && (
-                  <div className="mt-2.5 pt-2 border-t border-slate-200/80 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
-                      <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">
-                        Distress Evaluation:
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] flex items-center gap-1 ${
-                          msg.composite_dds >= 75 || msg.risk_level === 'CRITICAL' || msg.threat_detected
-                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : msg.composite_dds >= 60 || msg.risk_level === 'HIGH'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                        }`}
-                      >
-                        <span>
-                          {msg.composite_dds >= 75 || msg.threat_detected ? '🚨' : msg.composite_dds >= 60 ? '⚠️' : '💚'}
-                        </span>
-                        <span>DDS: {msg.composite_dds} / 100</span>
-                        <span>•</span>
-                        <span>{msg.risk_level || 'EVALUATED'}</span>
-                      </span>
-                    </div>
-
-                    {/* Emergency Workflow Card (DDS >= 75 / Critical Distress / Threat Cues) */}
-                    {(msg.composite_dds >= 75 || msg.risk_level === 'CRITICAL' || msg.threat_detected) && (
-                      <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2 mt-1.5">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800">
-                          <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 animate-pulse" />
-                          <span>Emergency Workflow Activated (DDS ≥ 75)</span>
-                        </div>
-                        <p className="text-[11px] text-rose-700 leading-snug">
-                          Critical distress or threat cues detected in text input. Priority audit log created & magistrate protection flagged under Section 15A.
-                        </p>
-                        {onTriggerSos && (
-                          <button
-                            type="button"
-                            onClick={onTriggerSos}
-                            className="w-full py-1.5 px-3 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
-                          >
-                            <ShieldAlert className="w-3.5 h-3.5" />
-                            <span>Instant Dispatch Emergency SOS</span>
-                          </button>
-                        )}
+                {/* Emergency Workflow Card (DDS >= 75 / Critical Distress / Threat Cues) */}
+                {!isUser && (msg.composite_dds >= 75 || msg.risk_level === 'CRITICAL' || msg.threat_detected) && (
+                  <div className="mt-2.5 pt-2 border-t border-slate-200/80">
+                    <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800">
+                        <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 animate-pulse" />
+                        <span>Emergency Workflow Activated</span>
                       </div>
-                    )}
+                      <p className="text-[11px] text-rose-700 leading-snug">
+                        Critical distress or threat cues detected. Priority alert created & magistrate protection flagged under Section 15A.
+                      </p>
+                      {onTriggerSos && (
+                        <button
+                          type="button"
+                          onClick={onTriggerSos}
+                          className="w-full py-1.5 px-3 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                        >
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          <span>Instant Dispatch Emergency SOS</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
                 <div
@@ -585,6 +560,24 @@ export default function ChatAssistant({
             </div>
           );
         })}
+
+        {/* Thinking Dot Animation Indicator */}
+        {isProcessing && (
+          <div className="flex items-start gap-2.5 flex-row animate-fade-in">
+            <div className="w-7 h-7 rounded-full bg-white text-indigo-600 border border-slate-200 shadow-sm flex items-center justify-center text-xs flex-shrink-0">
+              <ShieldCheck className="w-4 h-4 text-indigo-600 animate-pulse" />
+            </div>
+            <div className="bg-white border-2 border-indigo-100 px-4 py-3 rounded-2xl text-xs flex items-center gap-2.5 shadow-xs">
+              <span className="font-bold text-indigo-900 text-xs">SAMVEDNA AI is analyzing</span>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"></span>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 

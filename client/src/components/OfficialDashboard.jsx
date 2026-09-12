@@ -80,7 +80,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
     return code;
   };
 
-  // Save activeCase to sessionStorage whenever it changes
+  // Sync activeCase to sessionStorage
   useEffect(() => {
     if (activeCase?.victim_id) {
       try {
@@ -93,18 +93,17 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   const loadData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
-        fetch(getApiUrl('/api/v1/dashboard/metrics')),
-        fetch(getApiUrl('/api/v1/dashboard/cases')),
-        fetch(getApiUrl('/api/v1/alerts/feed'))
+        safeFetchJson('/api/v1/dashboard/metrics'),
+        safeFetchJson('/api/v1/dashboard/cases'),
+        safeFetchJson('/api/v1/alerts/feed')
       ]);
 
-      if (resMetrics.ok && resMetrics.headers.get('content-type')?.includes('application/json')) {
-        setMetrics(await resMetrics.json());
+      if (resMetrics.ok && resMetrics.data) {
+        setMetrics(resMetrics.data);
       }
 
-      if (resCases.ok && resCases.headers.get('content-type')?.includes('application/json')) {
-        const dataCases = await resCases.json();
-        const loadedCases = (dataCases.cases && dataCases.cases.length > 0) ? dataCases.cases : DEFAULT_CASES;
+      if (resCases.ok && resCases.data) {
+        const loadedCases = (resCases.data.cases && resCases.data.cases.length > 0) ? resCases.data.cases : DEFAULT_CASES;
         setCases(loadedCases);
 
         // Update activeCase only if explicitly matching selectedVictimId or activeCase not set
@@ -116,12 +115,11 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
         }
       }
 
-      if (resAlerts.ok && resAlerts.headers.get('content-type')?.includes('application/json')) {
-        const dataAlerts = await resAlerts.json();
-        setAlertsFeed(dataAlerts.alerts || []);
+      if (resAlerts.ok && resAlerts.data) {
+        setAlertsFeed(resAlerts.data.alerts || []);
       }
     } catch (err) {
-      console.warn('Dashboard sync warning:', err);
+      // Network errors handled gracefully by safeFetchJson
     } finally {
       setIsLoading(false);
     }
@@ -137,13 +135,9 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   useEffect(() => {
     if (!activeCase?.victim_id) return;
     async function loadCaseFile() {
-      try {
-        const res = await fetch(getApiUrl(`/api/v1/counsellor/case-file/${activeCase.victim_id}`));
-        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-          setCaseFile(await res.json());
-        }
-      } catch (e) {
-        console.warn('Failed loading case file:', e);
+      const res = await safeFetchJson(`/api/v1/counsellor/case-file/${activeCase.victim_id}`);
+      if (res.ok && res.data) {
+        setCaseFile(res.data);
       }
     }
     loadCaseFile();

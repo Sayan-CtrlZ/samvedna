@@ -132,25 +132,22 @@ export default function App() {
   const loadDashboardData = async () => {
     try {
       const [resMetrics, resCases, resAlerts] = await Promise.all([
-        fetch(getApiUrl('/api/v1/dashboard/metrics')),
-        fetch(getApiUrl('/api/v1/dashboard/cases')),
-        fetch(getApiUrl('/api/v1/alerts/feed'))
+        safeFetchJson('/api/v1/dashboard/metrics'),
+        safeFetchJson('/api/v1/dashboard/cases'),
+        safeFetchJson('/api/v1/alerts/feed')
       ]);
 
-      if (resMetrics.ok && resMetrics.headers.get('content-type')?.includes('application/json')) {
-        setMetrics(await resMetrics.json());
+      if (resMetrics.ok && resMetrics.data) {
+        setMetrics(resMetrics.data);
       }
-      if (resCases.ok && resCases.headers.get('content-type')?.includes('application/json')) {
-        const data = await resCases.json();
-        setCases((data.cases && data.cases.length > 0) ? data.cases : DEFAULT_CASES);
+      if (resCases.ok && resCases.data) {
+        setCases((resCases.data.cases && resCases.data.cases.length > 0) ? resCases.data.cases : DEFAULT_CASES);
       }
-      if (resAlerts.ok && resAlerts.headers.get('content-type')?.includes('application/json')) {
-        const data = await resAlerts.json();
-        setAlerts(data.alerts || []);
+      if (resAlerts.ok && resAlerts.data) {
+        setAlerts(resAlerts.data.alerts || []);
         setIsOnline(true);
       }
     } catch (e) {
-      console.warn('Network sync warning:', e);
       setIsOnline(false);
     }
   };
