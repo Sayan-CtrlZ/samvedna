@@ -8,7 +8,8 @@ import {
   Bell,
   Scale,
   Building2,
-  CheckCircle2
+  CheckCircle2,
+  Globe
 } from 'lucide-react';
 
 export default function Header({
@@ -17,7 +18,9 @@ export default function Header({
   onTriggerSos,
   isOnline = true,
   activeAlertsCount = 0,
-  onToggleAlertsDrawer
+  onToggleAlertsDrawer,
+  language = 'en',
+  setLanguage
 }) {
   const tabs = [
     { id: 'VICTIM', label: 'Survivor Intake & Check-in', icon: Mic },
@@ -27,7 +30,7 @@ export default function Header({
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0a1b3b] border-b border-[#1e3a8a]/50 text-white shadow-sm">
+    <header className="sticky top-0 z-50 bg-[#0a1b3b] border-b border-[#1e3a8a]/50 text-white shadow-md backdrop-blur-md">
       {/* Top Ministerial Bar */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-1 bg-[#061024] border-b border-white/10 flex items-center justify-between text-[11px] text-slate-300">
         <div className="flex items-center space-x-2">
@@ -98,6 +101,21 @@ export default function Header({
 
         {/* Right Side Action Controls */}
         <div className="flex items-center space-x-2 flex-shrink-0">
+          {/* Language Selector Dropdown */}
+          <div className="flex items-center gap-1 bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white">
+            <Globe className="w-3.5 h-3.5 text-indigo-300 flex-shrink-0" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage && setLanguage(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer"
+            >
+              <option value="en" className="bg-[#0a1b3b] text-white">English</option>
+              <option value="hi" className="bg-[#0a1b3b] text-white">हिन्दी (Hindi)</option>
+              <option value="mr" className="bg-[#0a1b3b] text-white">मराठी (Marathi)</option>
+              <option value="ta" className="bg-[#0a1b3b] text-white">தமிழ் (Tamil)</option>
+            </select>
+          </div>
+
           {/* Active Alerts Button (For Police & Magistrate / Clinical Officials) */}
           {activeTab !== 'VICTIM' && (
             <button

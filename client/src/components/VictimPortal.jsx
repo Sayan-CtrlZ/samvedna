@@ -261,91 +261,39 @@ export default function VictimPortal({
 
   return (
     <div className="space-y-4">
-      {/* Reassuring Hero Card */}
-      <div className="gov-card p-5 bg-gradient-to-r from-slate-900 via-[#0f2557] to-[#183b88] text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded">
-                Section 15A Legal Protection Active
-              </span>
-              <span className="text-xs text-indigo-200 flex items-center gap-1 font-medium">
-                <Lock className="w-3.5 h-3.5" /> Confidential & Encrypted
-              </span>
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-white">
-              You Are Protected • Survivor Well-being & Care Portal
-            </h2>
-            <p className="text-xs text-slate-200 max-w-2xl mt-1 leading-relaxed">
-              Your safety and dignity are protected by law under the SC/ST (Prevention of Atrocities) Act. Share regular updates so the District Protection Officer and Tele-MANAS counsellors can stand with you.
-            </p>
-          </div>
-
-          <div className="flex-shrink-0">
-            <button
-              onClick={onTriggerSos}
-              className="btn-danger text-xs font-bold pulse-emergency flex items-center gap-1.5"
-            >
-              <ShieldAlert className="w-4 h-4" />
-              <span>EMERGENCY POLICE SOS</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Top Bar Selectors: Case Profile & Language */}
-        <div className="mt-4 pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
-              <User className="w-3.5 h-3.5 text-indigo-300" /> Case Code:
-            </label>
-            <select
-              value={selectedVictim}
-              onChange={(e) => setSelectedVictim(e.target.value)}
-              className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md font-mono"
-            >
-              {displayedVictims.map((v) => (
-                <option key={v.victim_id} value={v.victim_id} className="bg-slate-900 text-white font-sans">
-                  {v.code_name || v.victim_code} — {v.district}, {v.state}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
-              <Globe className="w-3.5 h-3.5 text-indigo-300" /> Select Language:
-            </label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-medium"
-            >
-              <option value="en">English (Default)</option>
-              <option value="hi">हिन्दी (Hindi)</option>
-              <option value="mr">मराठी (Marathi)</option>
-              <option value="ta">தமிழ் (Tamil)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       {/* Main Check-in Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Column: Voice Recording & Statement Input (6 cols) */}
-        <div className="lg:col-span-6 gov-card p-5 space-y-4">
-          <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
-            <div>
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Periodic Voice Check-in
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Speak naturally or type. Voice stability and distress indicators will be assessed.
-              </p>
+        <div className="lg:col-span-6 space-y-4">
+          {/* Voice Recorder Card */}
+          <div className="gov-card p-5 space-y-4">
+            <div className="border-b border-slate-200 pb-2.5 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Periodic Voice Check-in
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Speak naturally or upload audio. Voice stability and distress indicators will be assessed.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <label className="font-semibold text-slate-700 text-xs flex items-center gap-1">
+                  <User className="w-3.5 h-3.5 text-indigo-600" /> Case Code:
+                </label>
+                <select
+                  value={selectedVictim}
+                  onChange={(e) => setSelectedVictim(e.target.value)}
+                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 font-mono font-medium focus:outline-none focus:ring-1 focus:ring-indigo-600 max-w-[220px] truncate"
+                >
+                  {displayedVictims.map((v) => (
+                    <option key={v.victim_id} value={v.victim_id} className="text-slate-900 font-sans">
+                      {v.code_name || v.victim_code} — {v.district}, {v.state}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-              NHAA 14566 Protocol
-            </span>
-          </div>
 
           {errorMsg && (
             <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
@@ -430,6 +378,7 @@ export default function VictimPortal({
               </div>
             )}
           </div>
+        </div>
 
           {/* Clinical Biomarker Assessment & Metrics Card (Left Column) */}
           <div className="gov-card p-5 space-y-4 border-l-4 border-l-indigo-600">
