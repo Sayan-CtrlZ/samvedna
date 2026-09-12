@@ -119,41 +119,49 @@ export default function App() {
         {activeTab === 'VICTIM' && <EmergencyHelplines />}
 
         {/* Tab 1: Survivor Voice Check-in Portal (Front / Default View) */}
-        <main className={activeTab === 'VICTIM' ? 'block' : 'hidden'}>
-          <VictimPortal
-            cases={cases}
-            activeVictimId={selectedVictimId}
-            onCheckinSubmitted={() => {
-              loadDashboardData();
-            }}
-            onTriggerSos={() => setIsSosOpen(true)}
-          />
-        </main>
+        {activeTab === 'VICTIM' && (
+          <main>
+            <VictimPortal
+              cases={cases}
+              activeVictimId={selectedVictimId}
+              onCheckinSubmitted={() => {
+                loadDashboardData();
+              }}
+              onTriggerSos={() => setIsSosOpen(true)}
+            />
+          </main>
+        )}
 
         {/* Tab 2: District Police & Magistrate Triage */}
-        <main className={activeTab === 'TRIAGE' ? 'block' : 'hidden'}>
-          <OfficialDashboard
-            selectedVictimId={selectedVictimId}
-            onSelectVictim={setSelectedVictimId}
-          />
-        </main>
+        {activeTab === 'TRIAGE' && (
+          <main>
+            <OfficialDashboard
+              selectedVictimId={selectedVictimId}
+              onSelectVictim={setSelectedVictimId}
+            />
+          </main>
+        )}
 
         {/* Tab 3: Counsellor Clinical Workbench & Longitudinal Tracking */}
-        <main className={activeTab === 'COUNSELLOR' ? 'block' : 'hidden'}>
-          <CounsellorWorkbench
-            cases={cases}
-            selectedVictimId={selectedVictimId}
-            onSelectVictim={setSelectedVictimId}
-          />
-        </main>
+        {activeTab === 'COUNSELLOR' && (
+          <main>
+            <CounsellorWorkbench
+              cases={cases}
+              selectedVictimId={selectedVictimId}
+              onSelectVictim={setSelectedVictimId}
+            />
+          </main>
+        )}
 
         {/* Tab 4: National Policy & Distress Analytics */}
-        <main className={activeTab === 'ANALYTICS' ? 'block' : 'hidden'}>
-          <AnalyticsView
-            metrics={metrics}
-            cases={cases}
-          />
-        </main>
+        {activeTab === 'ANALYTICS' && (
+          <main>
+            <AnalyticsView
+              metrics={metrics}
+              cases={cases}
+            />
+          </main>
+        )}
       </div>
 
       {/* Right Slide-over Alerts Drawer */}
