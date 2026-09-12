@@ -95,7 +95,28 @@ class VoiceStressAnalyticsEngine:
         except Exception:
             pass
 
-        # 3. Fallback: Raw 16-bit PCM
+        # 3. Try In-Memory FFmpeg Pipe Conversion (WebM, Ogg, MP3, AAC to 16kHz 16-bit Mono WAV)
+        try:
+            import subprocess
+            proc = subprocess.Popen(
+                ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "wav", "-ar", "16000", "-ac", "1", "pipe:1"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout_wav, _ = proc.communicate(input=audio_bytes, timeout=4)
+            if proc.returncode == 0 and len(stdout_wav) > 44:
+                rate, raw_audio = wavfile.read(io.BytesIO(stdout_wav))
+                if raw_audio.dtype == np.int16:
+                    audio = raw_audio.astype(np.float32) / 32768.0
+                else:
+                    audio = raw_audio.astype(np.float32)
+                if len(audio) > 100:
+                    return self._extract_acoustic_features_from_signal(audio, rate)
+        except Exception as e:
+            logger.debug(f"[VOICE] FFmpeg pipe fallback notice: {e}")
+
+        # 4. Fallback: Raw 16-bit PCM
         try:
             audio = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
             if len(audio) > 100:

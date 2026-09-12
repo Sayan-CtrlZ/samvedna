@@ -174,7 +174,7 @@ export default function WellbeingMetrics({ metrics }) {
             <div className="bg-white border-2 border-purple-100 rounded-xl p-3 shadow-xs">
               <span className="text-[11px] font-medium text-slate-500 block">Vocal Tremor</span>
               <span className="text-sm font-black text-purple-950">
-                {voiceMetrics.tremor_intensity != null ? `${(voiceMetrics.tremor_intensity * 100).toFixed(1)}%` : 'Low / Relaxed'}
+                {voiceMetrics.tremor_intensity != null ? `${(voiceMetrics.tremor_intensity > 1.0 ? voiceMetrics.tremor_intensity : voiceMetrics.tremor_intensity * 100).toFixed(1)}%` : 'Low / Relaxed'}
               </span>
             </div>
             <div className="bg-white border-2 border-purple-100 rounded-xl p-3 shadow-xs">
