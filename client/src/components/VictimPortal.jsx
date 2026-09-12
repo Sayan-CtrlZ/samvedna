@@ -212,7 +212,8 @@ export default function VictimPortal({
       }
     } catch (err) {
       console.error('Checkin submit error:', err);
-      setErrorMsg('Could not process check-in. Please try again or use Emergency SOS.');
+      const detail = err?.message ? ` [${err.message}]` : '';
+      setErrorMsg(`Could not process check-in${detail}. Please check backend connection & VITE_API_BASE_URL.`);
     } finally {
       setIsSubmitting(false);
     }
