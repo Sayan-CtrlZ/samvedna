@@ -201,7 +201,7 @@ export default function CounsellorWorkbench({
             >
               {cases.map((c) => (
                 <option key={c.victim_id} value={c.victim_id}>
-                  {c.victim_code} — {c.full_name_masked} ({c.district}, {c.state})
+                  {c.code_name || c.victim_code} ({c.district}, {c.state})
                 </option>
               ))}
             </select>

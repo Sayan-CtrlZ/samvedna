@@ -324,8 +324,8 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                             [{item.victim_id}]
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-600 font-medium line-clamp-1">
-                          {item.full_name_masked}
+                        <span className="text-[11px] text-slate-600 font-medium line-clamp-1 font-mono">
+                          {item.code_name || item.victim_code}
                         </span>
                       </div>
 
@@ -378,7 +378,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                     </span>
                   </div>
                   <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <span>{activeCase.full_name_masked}</span>
+                    <span className="font-mono">{activeCase.code_name || activeCase.victim_code}</span>
                     <span className={getRiskBadgeClass(activeCase.current_risk_level)}>
                       {activeCase.current_risk_level} PRIORITY
                     </span>

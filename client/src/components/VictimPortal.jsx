@@ -3,23 +3,21 @@ import {
   Mic,
   Square,
   Send,
-  Sparkles,
   HeartHandshake,
   ShieldAlert,
-  PhoneCall,
   CheckCircle2,
-  Volume2,
   AlertCircle,
-  Clock,
   Lock,
   User,
   Activity,
   FileAudio,
-  ShieldCheck,
-  Headphones
+  Upload,
+  Sparkles,
+  HeartPulse
 } from 'lucide-react';
 
 export default function VictimPortal({
+  cases = [],
   onCheckinSubmitted,
   activeVictimId = 'VIC-MH-2024-114',
   onTriggerSos
@@ -37,21 +35,51 @@ export default function VictimPortal({
 
   const mediaRecorderRef = useRef(null);
   const timerRef = useRef(null);
-  const audioChunksRef = useRef([]);
 
-  const sampleVictims = [
-    { id: 'VIC-MH-2024-114', code: 'V-114 (Ms. P*** G***)', desc: 'Eyewitness in Special Court Trial - Intimidation by Accused Associates' },
-    { id: 'VIC-MP-2024-881', code: 'V-881 (Ms. S*** B***)', desc: 'Survivor - Accused Granted Bail, Nocturnal Surveillance' },
-    { id: 'VIC-UP-2024-409', code: 'V-409 (Mr. R*** K***)', desc: 'Complainant Father - Accused High Court Bail Hearing Pending' },
-    { id: 'VIC-RJ-2024-215', code: 'V-215 (Mr. D*** R***)', desc: 'Arson Survivor - Social Boycott & 25% Compensation Delayed' },
-    { id: 'VIC-BR-2024-712', code: 'V-712 (Ms. K*** D***)', desc: 'Widow - 7 Months Pending Rehabilitation Pension' }
+  // Use dynamic cases from backend or default anonymous code names
+  const displayedVictims = cases.length > 0 ? cases : [
+    { victim_id: 'VIC-MH-2024-114', victim_code: 'SURVIVOR-MH-114', code_name: 'SURVIVOR-MH-114 (Primary Eyewitness)', district: 'Ahmednagar', state: 'Maharashtra', summary: 'Eyewitness in Special Court Trial' },
+    { victim_id: 'VIC-MP-2024-881', victim_code: 'SURVIVOR-MP-881', code_name: 'SURVIVOR-MP-881 (Key Complainant)', district: 'Morena', state: 'Madhya Pradesh', summary: 'Key Complainant - Bail threat' },
+    { victim_id: 'VIC-UP-2024-409', victim_code: 'COMPLAINANT-UP-409', code_name: 'COMPLAINANT-UP-409 (Next of Kin)', district: 'Hathras', state: 'Uttar Pradesh', summary: 'Next-of-Kin in Bail Hearing' },
+    { victim_id: 'VIC-RJ-2024-215', victim_code: 'SURVIVOR-RJ-215', code_name: 'SURVIVOR-RJ-215 (Agricultural Worker)', district: 'Udaipur', state: 'Rajasthan', summary: 'Social Boycott & Relief Pending' },
+    { victim_id: 'VIC-BR-2024-712', victim_code: 'SURVIVOR-BR-712', code_name: 'SURVIVOR-BR-712 (Surviving Spouse)', district: 'Gaya', state: 'Bihar', summary: 'Surviving Spouse - Pension Delayed' },
+    { victim_id: 'VIC-TN-2024-531', victim_code: 'SURVIVOR-TN-531', code_name: 'SURVIVOR-TN-531 (Youth Applicant)', district: 'Tirunelveli', state: 'Tamil Nadu', summary: 'Youth Applicant in Trial Phase' }
   ];
+
+  const handleAudioUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAudioBlob(file);
+      setAudioUrl(URL.createObjectURL(file));
+      setErrorMsg(null);
+    }
+  };
+
+  const applyScenarioPreset = (type) => {
+    if (type === 'threat') {
+      setTextContent("आरोपी के लोग कल रात हमारे घर के बाहर आकर धमकी दे रहे थे कि केस वापस ले लो वरना जान से मार देंगे। हमें बहुत डर लग रहा है।");
+      setLanguage('hi');
+    } else if (type === 'court') {
+      setTextContent("विशेष अदालत में गवाही की तारीख बहुत नजदीक आ गई है। हमें अदालत जाने में अपनी सुरक्षा को लेकर बहुत ज्यादा चिंता और घबराहट हो रही है।");
+      setLanguage('hi');
+    } else if (type === 'boycott') {
+      setTextContent("गांव में हमारा सामाजिक बहिष्कार कर दिया गया है। कुएं से पानी नहीं लेने दे रहे और मजदूरी भी बंद करवा दी है। घर में राशन खत्म हो गया है।");
+      setLanguage('hi');
+    } else if (type === 'stable') {
+      setTextContent("आज स्थिति सामान्य है। पुलिस गश्त आई थी और हमें थोड़ा सुरक्षित महसूस हो रहा है। हम नियमित रूप से दवाएं ले रहे हैं।");
+      setLanguage('hi');
+    }
+  };
 
   const startRecording = async () => {
     setErrorMsg(null);
     setAudioBlob(null);
     setAudioUrl(null);
-    audioChunksRef.current = [];
+
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      setErrorMsg('Direct microphone recording is not supported on this browser or requires HTTPS. You can upload an audio file or type your check-in below.');
+      return;
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -130,7 +158,7 @@ export default function VictimPortal({
       };
     } catch (err) {
       console.error('Audio record error:', err);
-      setErrorMsg('Microphone access unavailable or denied.');
+      setErrorMsg('Microphone access denied or unavailable. You can upload an audio file or type your message below.');
       setIsRecording(false);
     }
   };
@@ -143,7 +171,7 @@ export default function VictimPortal({
 
   const handleSubmitCheckin = async () => {
     if (!audioBlob && !textContent.trim()) {
-      setErrorMsg('Please record your voice or type a message to complete your check-in.');
+      setErrorMsg('Please record voice, upload audio, or enter text to complete your check-in.');
       return;
     }
 
@@ -226,16 +254,16 @@ export default function VictimPortal({
         {/* Case Profile Selector */}
         <div className="mt-4 pt-3 border-t border-white/15 flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
           <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
-            <User className="w-3.5 h-3.5 text-indigo-300" /> Case Reference:
+            <User className="w-3.5 h-3.5 text-indigo-300" /> Case Code:
           </label>
           <select
             value={selectedVictim}
             onChange={(e) => setSelectedVictim(e.target.value)}
-            className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md"
+            className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md font-mono"
           >
-            {sampleVictims.map((v) => (
-              <option key={v.id} value={v.id} className="bg-slate-900 text-white">
-                {v.code} — {v.desc}
+            {displayedVictims.map((v) => (
+              <option key={v.victim_id} value={v.victim_id} className="bg-slate-900 text-white font-sans">
+                {v.code_name || v.victim_code} — {v.district}, {v.state}
               </option>
             ))}
           </select>
@@ -252,7 +280,7 @@ export default function VictimPortal({
                 Periodic Voice Check-in
               </h3>
               <p className="text-[11px] text-slate-500">
-                Speak naturally in your preferred language. Voice stability and distress indicators will be assessed.
+                Speak naturally or type. Voice stability and distress indicators will be assessed.
               </p>
             </div>
             <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
@@ -293,7 +321,7 @@ export default function VictimPortal({
                 <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center mx-auto border border-indigo-200">
                   <FileAudio className="w-5 h-5" />
                 </div>
-                <div className="text-xs font-semibold text-slate-700">Audio Recorded (16kHz PCM WAV)</div>
+                <div className="text-xs font-semibold text-slate-700">Audio Ready for Analysis (16kHz PCM WAV)</div>
                 <audio src={audioUrl} controls className="mx-auto max-w-xs w-full" />
                 <div className="flex items-center justify-center gap-2">
                   <button
@@ -305,27 +333,74 @@ export default function VictimPortal({
                 </div>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                <button
-                  onClick={startRecording}
-                  className="w-14 h-14 rounded-xl bg-[#0f2557] hover:bg-[#183b88] text-white flex items-center justify-center mx-auto shadow transition-transform active:scale-95"
-                >
-                  <Mic className="w-7 h-7 text-indigo-200" />
-                </button>
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={startRecording}
+                    className="w-14 h-14 rounded-xl bg-[#0f2557] hover:bg-[#183b88] text-white flex items-center justify-center shadow transition-transform active:scale-95"
+                    title="Click to Record Voice Check-in"
+                  >
+                    <Mic className="w-7 h-7 text-indigo-200" />
+                  </button>
+
+                  <label className="p-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer shadow-sm flex items-center gap-1.5 transition-colors">
+                    <Upload className="w-4 h-4 text-indigo-600" />
+                    <span>Upload Audio</span>
+                    <input type="file" accept="audio/*" className="hidden" onChange={handleAudioUpload} />
+                  </label>
+                </div>
+
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Click to Record Voice Check-in</h4>
+                  <h4 className="text-xs font-bold text-slate-800">Click to Record Voice or Upload Audio</h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Microphone is analyzed for pitch tremor, vocal strain, and emotional stability.
+                    Analyzed for vocal tremor, pitch stability, and emotional strain.
                   </p>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Quick Situational Scenarios (1-Click Fill) */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>Quick Test Scenarios (1-Click Fill):</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => applyScenarioPreset('threat')}
+                className="p-2 text-left rounded-lg border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-900 font-semibold transition-colors truncate"
+              >
+                🚨 Threat by Accused Associates
+              </button>
+              <button
+                type="button"
+                onClick={() => applyScenarioPreset('court')}
+                className="p-2 text-left rounded-lg border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-900 font-semibold transition-colors truncate"
+              >
+                ⚠️ Special Court Summons Fear
+              </button>
+              <button
+                type="button"
+                onClick={() => applyScenarioPreset('boycott')}
+                className="p-2 text-left rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-900 font-semibold transition-colors truncate"
+              >
+                🌧️ Social Boycott & Ration Block
+              </button>
+              <button
+                type="button"
+                onClick={() => applyScenarioPreset('stable')}
+                className="p-2 text-left rounded-lg border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 font-semibold transition-colors truncate"
+              >
+                🌱 Stable / Routine Check-in
+              </button>
+            </div>
+          </div>
+
           {/* Written Statement (Optional) */}
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-700 block">
-              Additional Notes or Incident Description (Optional):
+              Additional Notes or Incident Description:
             </label>
             <textarea
               rows={3}
@@ -368,7 +443,7 @@ export default function VictimPortal({
           <div className="border-b border-slate-200 pb-2.5">
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
-              <span>Counsellor Assessment & Trauma Support</span>
+              <span>Counsellor Assessment & Trauma Guidance</span>
             </h3>
             <p className="text-[11px] text-slate-500">
               Trauma-informed guidance and grounding exercises grounded in Tele-MANAS care.
@@ -423,7 +498,7 @@ export default function VictimPortal({
               <div>
                 <h4 className="text-xs font-bold text-slate-900">Awaiting Your Check-in</h4>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto mt-0.5">
-                  Record a voice note or enter a message. Your assessment will appear here and sync directly with district protection authorities.
+                  Record voice, upload audio, or choose a scenario on the left. Your assessment will sync directly with district protection authorities.
                 </p>
               </div>
 
@@ -434,10 +509,10 @@ export default function VictimPortal({
                 </span>
                 <ul className="text-slate-600 space-y-1 text-[11px]">
                   <li>• <strong>5 things</strong> you can see around you right now</li>
-                  <li>• <strong>4 things</strong> you can physically touch (your clothing, desk)</li>
+                  <li>• <strong>4 things</strong> you can physically touch (clothing, phone)</li>
                   <li>• <strong>3 things</strong> you can hear</li>
                   <li>• <strong>2 things</strong> you can smell</li>
-                  <li>• <strong>1 deep, slow breath</strong> (inhale for 4s, exhale for 6s)</li>
+                  <li>• <strong>1 deep, slow breath</strong> (inhale 4s, exhale 6s)</li>
                 </ul>
               </div>
             </div>

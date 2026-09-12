@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export default function Header({
-  activeTab = 'TRIAGE',
+  activeTab = 'VICTIM',
   setActiveTab,
   onTriggerSos,
   isOnline = true,
@@ -20,10 +20,10 @@ export default function Header({
   onToggleAlertsDrawer
 }) {
   const tabs = [
+    { id: 'VICTIM', label: 'Survivor Intake & Check-in', icon: Mic },
     { id: 'TRIAGE', label: 'District Police Triage', icon: LayoutDashboard },
     { id: 'COUNSELLOR', label: 'Clinical Dossier', icon: Stethoscope },
     { id: 'ANALYTICS', label: 'Statutory Analytics', icon: BarChart3 },
-    { id: 'VICTIM', label: 'Survivor Intake', icon: Mic },
   ];
 
   return (

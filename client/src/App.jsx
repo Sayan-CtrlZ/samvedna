@@ -10,7 +10,7 @@ import AlertsDrawer from './components/AlertsDrawer';
 import EmergencySosModal from './components/EmergencySosModal';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('TRIAGE'); // 'TRIAGE' | 'COUNSELLOR' | 'ANALYTICS' | 'VICTIM'
+  const [activeTab, setActiveTab] = useState('VICTIM'); // 'VICTIM' | 'TRIAGE' | 'COUNSELLOR' | 'ANALYTICS'
   const [selectedVictimId, setSelectedVictimId] = useState('VIC-MH-2024-114');
   const [isSosOpen, setIsSosOpen] = useState(false);
   const [isAlertsDrawerOpen, setIsAlertsDrawerOpen] = useState(false);
@@ -135,10 +135,11 @@ export default function App() {
           </main>
         )}
 
-        {/* Tab 4: Survivor Voice Check-in Portal */}
+        {/* Tab 1: Survivor Voice Check-in Portal (Front / Default View) */}
         {activeTab === 'VICTIM' && (
           <main>
             <VictimPortal
+              cases={cases}
               activeVictimId={selectedVictimId}
               onCheckinSubmitted={() => {
                 loadDashboardData();
