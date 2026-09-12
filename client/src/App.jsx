@@ -25,9 +25,20 @@ export default function App() {
     checkHealth();
   }, []);
 
-  const handleCheckinComplete = (result) => {
+  const [latestVoiceResult, setLatestVoiceResult] = useState(null);
+
+  const handleCheckinComplete = (result, source = 'text') => {
     if (result) {
       setMetrics(result);
+      if (source === 'voice') {
+        setLatestVoiceResult({
+          id: Date.now(),
+          transcript: result.transcript || result.text_content,
+          ai_response: result.ai_response,
+          status: result.status,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        });
+      }
     }
   };
 
@@ -56,6 +67,7 @@ export default function App() {
               onCheckinComplete={handleCheckinComplete}
               isProcessing={isProcessing}
               setIsProcessing={setIsProcessing}
+              latestVoiceResult={latestVoiceResult}
             />
           </div>
 

@@ -290,7 +290,7 @@ export default function VoiceCheckin({ onCheckinComplete, isProcessing, setIsPro
       const result = await response.json();
       setStatusMessage('Voice assessment complete.');
       if (onCheckinComplete) {
-        onCheckinComplete(result);
+        onCheckinComplete(result, 'voice');
       }
     } catch (err) {
       console.error('Check-in error:', err);

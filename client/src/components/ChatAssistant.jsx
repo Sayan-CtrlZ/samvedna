@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2, RotateCcw, MessageSquare, ShieldCheck, User } from 'lucide-react';
 
-export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsProcessing }) {
+export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsProcessing, latestVoiceResult }) {
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
@@ -16,6 +16,39 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  // Sync Voice Check-in results directly into the chat conversation
+  useEffect(() => {
+    if (latestVoiceResult) {
+      const userText =
+        latestVoiceResult.transcript && latestVoiceResult.transcript.trim()
+          ? latestVoiceResult.transcript
+          : latestVoiceResult.status === 'silence_detected'
+          ? 'Voice check-in audio recorded (unclear audio)'
+          : 'Voice check-in audio recorded';
+
+      const assistantText =
+        latestVoiceResult.ai_response ||
+        'Thank you for sharing your voice check-in. Your emotional stability and distress indicators have been assessed.';
+
+      const userMessage = {
+        id: `voice-user-${latestVoiceResult.id}`,
+        sender: 'user',
+        isVoice: true,
+        text: userText,
+        time: latestVoiceResult.time,
+      };
+
+      const assistantMessage = {
+        id: `voice-assistant-${latestVoiceResult.id}`,
+        sender: 'assistant',
+        text: assistantText,
+        time: latestVoiceResult.time,
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    }
+  }, [latestVoiceResult]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -303,6 +336,12 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
                     : 'bg-white text-slate-900 border-2 border-slate-200/90 shadow-xs'
                 }`}
               >
+                {msg.isVoice && isUser && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-200 mb-1">
+                    <Volume2 className="w-3.5 h-3.5" />
+                    <span>Voice Check-in</span>
+                  </div>
+                )}
                 <p className="whitespace-pre-wrap">{msg.text}</p>
                 <div
                   className={`mt-2 flex items-center justify-between gap-2 text-[10px] ${
@@ -337,8 +376,9 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
           <button
             key={idx}
             type="button"
+            disabled={isProcessing}
             onClick={() => handleSelectPreset(preset.text)}
-            className={`btn-3d text-[11px] px-2.5 py-1 rounded-lg font-bold border border-b-[3px] transition-transform active:translate-y-0.5 ${preset.chipStyle}`}
+            className={`btn-3d text-[11px] px-2.5 py-1 rounded-lg font-bold border border-b-[3px] transition-transform active:translate-y-0.5 disabled:opacity-50 ${preset.chipStyle}`}
           >
             {preset.label}
           </button>
