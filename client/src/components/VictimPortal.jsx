@@ -323,8 +323,18 @@ export default function VictimPortal({
                 </div>
                 <div className="text-xs font-semibold text-slate-700">Audio Ready for Analysis (16kHz PCM WAV)</div>
                 <audio src={audioUrl} controls className="mx-auto max-w-xs w-full" />
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
+                  >
+                    <Sparkles className="w-4 h-4 text-indigo-200" />
+                    <span>{isSubmitting ? 'Analyzing & Submitting...' : 'Analyze Audio & Submit Check-in'}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={startRecording}
                     className="btn-subtle text-xs"
                   >
@@ -430,10 +440,10 @@ export default function VictimPortal({
             <button
               onClick={handleSubmitCheckin}
               disabled={isSubmitting || (!audioBlob && !textContent.trim())}
-              className="btn-navy text-xs disabled:opacity-50"
+              className="btn-navy text-xs disabled:opacity-50 font-bold"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? 'Analyzing Biomarkers...' : 'Submit Official Check-in'}</span>
+              <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+              <span>{isSubmitting ? 'Analyzing Biomarkers...' : 'Analyze & Submit Official Check-in'}</span>
             </button>
           </div>
         </div>
