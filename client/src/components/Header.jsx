@@ -7,7 +7,8 @@ import {
   Mic,
   Bell,
   Scale,
-  Sparkles
+  Building2,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function Header({
@@ -20,37 +21,61 @@ export default function Header({
 }) {
   const tabs = [
     { id: 'TRIAGE', label: 'District Police Triage', icon: LayoutDashboard },
-    { id: 'COUNSELLOR', label: 'Counsellor Workbench', icon: Stethoscope },
-    { id: 'ANALYTICS', label: 'Atrocity Analytics', icon: BarChart3 },
-    { id: 'VICTIM', label: 'Survivor Check-in', icon: Mic },
+    { id: 'COUNSELLOR', label: 'Clinical Dossier', icon: Stethoscope },
+    { id: 'ANALYTICS', label: 'Statutory Analytics', icon: BarChart3 },
+    { id: 'VICTIM', label: 'Survivor Intake', icon: Mic },
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0a1b3b]/95 backdrop-blur-md border-b border-[#1e3a8a]/40 text-white shadow-sm">
-      <div className="w-full px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        {/* Brand & Mission */}
-        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0 flex-shrink">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-200 shadow-inner flex-shrink-0">
-            <Scale className="w-5 h-5 text-indigo-300" />
+    <header className="sticky top-0 z-30 bg-[#0a1b3b] border-b border-[#1e3a8a]/50 text-white shadow-sm">
+      {/* Top Ministerial Bar */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-1 bg-[#061024] border-b border-white/10 flex items-center justify-between text-[11px] text-slate-300">
+        <div className="flex items-center space-x-2">
+          <span className="font-semibold text-slate-200">
+            Ministry of Social Justice and Empowerment • Government of India
+          </span>
+          <span className="hidden md:inline text-slate-500">|</span>
+          <span className="hidden md:inline text-indigo-300">
+            National Helpline Against Atrocities (NHAA 14566)
+          </span>
+        </div>
+        <div className="flex items-center space-x-3 text-[10px]">
+          <span className="flex items-center gap-1 text-emerald-400 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            CCTNS & ICJS Synchronized
+          </span>
+          <span className="hidden sm:inline text-slate-500">•</span>
+          <span className="hidden sm:inline text-slate-300">
+            Sec 15A Witness Protection System
+          </span>
+        </div>
+      </div>
+
+      {/* Main Navigation Header */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Brand & Portal Title */}
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300 flex-shrink-0 shadow-inner">
+            <Scale className="w-5 h-5 text-indigo-200" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center space-x-2">
-              <h1 className="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
-                <span>SAMVEDNA AI</span>
-                <span className="text-indigo-300 font-normal text-xs hidden sm:inline">| संवेदना AI</span>
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
+                <span>SAMVEDNA</span>
+                <span className="text-indigo-300 font-normal text-xs">संवेदना</span>
               </h1>
-              <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full bg-[#183b88] text-indigo-100 border border-[#2d55b0] text-[10px] font-semibold">
-                NHAA 14566 • Sec 15A
+              <span className="hidden xl:inline-flex px-2 py-0.5 rounded bg-indigo-900/60 border border-indigo-700/50 text-[10px] font-mono text-indigo-200 uppercase">
+                District Sentinel Console
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-300 hidden md:block font-medium truncate">
-              National Distress Monitoring & Witness Protection Sentinel Console
+            <p className="text-[11px] text-slate-300 hidden md:block font-normal truncate">
+              Dynamic Distress Monitoring & Statutory Protective Intervention Protocol
             </p>
           </div>
         </div>
 
-        {/* Navigation Tabs (Material Flat Pill Bar) */}
-        <div className="bg-[#061024] p-1 rounded-xl border border-[#1e3a8a]/60 flex items-center text-xs overflow-x-auto">
+        {/* Center Tabs Navigation */}
+        <nav className="flex items-center bg-[#061024] p-1 rounded-lg border border-[#1e3a8a]/70">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -58,43 +83,43 @@ export default function Header({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg font-semibold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-[#183b88] text-white shadow-sm border border-indigo-400/40'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                <span className="text-xs">{tab.label}</span>
+                <span>{tab.label}</span>
               </button>
             );
           })}
-        </div>
+        </nav>
 
-        {/* Actions: Live Alerts Drawer & Emergency SOS */}
+        {/* Right Side Action Controls */}
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {/* Live Alerts Drawer Toggle */}
+          {/* Active Alerts Button */}
           <button
             onClick={onToggleAlertsDrawer}
-            className="px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900/80 border border-red-500/50 text-red-200 text-xs font-bold flex items-center space-x-1.5 transition-colors"
-            title="Toggle Live Emergency Police Alerts"
+            className="px-3 py-1.5 rounded-lg bg-red-950/70 hover:bg-red-900/90 border border-red-500/40 text-red-100 text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            title="View Live Priority Police Alerts"
           >
             <Bell className="w-3.5 h-3.5 text-red-400" />
             <span className="hidden sm:inline">Alerts</span>
             {activeAlertsCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-extrabold animate-pulse">
+              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-bold">
                 {activeAlertsCount}
               </span>
             )}
           </button>
 
-          {/* Emergency SOS Button */}
+          {/* Emergency SOS Trigger */}
           <button
             onClick={onTriggerSos}
-            className="px-3 sm:px-4 py-1.5 bg-[#e03131] hover:bg-[#c92a2a] active:scale-95 text-white rounded-full text-xs font-bold shadow-md shadow-red-950/40 flex items-center space-x-1.5 transition-all pulse-emergency"
-            title="Instant Armed Police & Crisis Dispatch"
+            className="btn-danger text-xs font-bold pulse-emergency flex items-center space-x-1.5"
+            title="Instant Police & Crisis Dispatch"
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
+            <ShieldAlert className="w-4 h-4" />
             <span className="hidden sm:inline">EMERGENCY SOS</span>
             <span className="sm:hidden">SOS</span>
           </button>

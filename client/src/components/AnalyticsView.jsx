@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
-import { BarChart3, PieChart, TrendingDown, Scale, ShieldCheck, FileCheck2, MapPin } from 'lucide-react';
+import { BarChart3, PieChart, TrendingDown, Scale, ShieldCheck, FileCheck2, MapPin, Building2, CheckCircle2 } from 'lucide-react';
 
 export default function AnalyticsView({ metrics, cases = [] }) {
   const stageChartRef = useRef(null);
@@ -29,24 +29,17 @@ export default function AnalyticsView({ metrics, cases = [] }) {
           ],
           datasets: [
             {
-              label: 'Average Distress Score (DDS)',
+              label: 'Average Distress Index (DDS)',
               data: [84.0, 74.0, 76.5, 68.5, 54.0],
               backgroundColor: [
-                'rgba(225, 29, 72, 0.85)',   // Crimson Red
-                'rgba(245, 158, 11, 0.85)',  // Amber
-                'rgba(168, 85, 247, 0.85)',  // Purple
-                'rgba(249, 115, 22, 0.85)',  // Orange
-                'rgba(59, 130, 246, 0.85)'   // Blue
+                '#e03131', // Crimson
+                '#d97706', // Amber
+                '#7c6ee6', // Purple
+                '#ea580c', // Orange
+                '#2563eb'  // Blue
               ],
-              borderColor: [
-                '#be123c',
-                '#d97706',
-                '#9333ea',
-                '#c2410c',
-                '#2563eb'
-              ],
-              borderWidth: 1.5,
-              borderRadius: 8
+              borderRadius: 4,
+              borderWidth: 0
             }
           ]
         },
@@ -57,7 +50,7 @@ export default function AnalyticsView({ metrics, cases = [] }) {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (ctx) => ` Distress Index: ${ctx.parsed.y}/100`
+                label: (ctx) => ` Vulnerability Score: ${ctx.parsed.y} / 100`
               }
             }
           },
@@ -66,7 +59,7 @@ export default function AnalyticsView({ metrics, cases = [] }) {
               beginAtZero: true,
               max: 100,
               grid: { color: '#f1f5f9' },
-              ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
             },
             x: {
               grid: { display: false },
@@ -93,14 +86,14 @@ export default function AnalyticsView({ metrics, cases = [] }) {
           labels: ['Critical (DDS ≥ 80)', 'High Risk (DDS 65-79)', 'Moderate (DDS 45-64)', 'Stable (DDS < 45)'],
           datasets: [
             {
-              data: [crit, high, mod, low || 0.1],
+              data: [crit, high, mod, low || 0.05],
               backgroundColor: [
-                '#e11d48', // Red
-                '#f59e0b', // Amber
-                '#eab308', // Yellow
-                '#10b981'  // Emerald
+                '#e03131',
+                '#d97706',
+                '#eab308',
+                '#059669'
               ],
-              borderWidth: 2,
+              borderWidth: 1.5,
               borderColor: '#ffffff'
             }
           ]
@@ -112,13 +105,13 @@ export default function AnalyticsView({ metrics, cases = [] }) {
             legend: {
               position: 'bottom',
               labels: {
-                font: { family: 'Plus Jakarta Sans', size: 11 },
-                boxWidth: 12,
-                padding: 12
+                font: { family: 'Plus Jakarta Sans', size: 10 },
+                boxWidth: 10,
+                padding: 10
               }
             }
           },
-          cutout: '65%'
+          cutout: '70%'
         }
       });
     }
@@ -134,25 +127,21 @@ export default function AnalyticsView({ metrics, cases = [] }) {
           labels: [
             'Armed Police Picket',
             'Safe House Relocation',
-            'Tele-MANAS Care',
+            'Tele-MANAS Psychiatric Care',
             'Interim Relief DBT'
           ],
           datasets: [
             {
               label: 'Pre-Intervention Distress',
               data: [84.0, 78.0, 72.0, 69.0],
-              backgroundColor: 'rgba(239, 68, 68, 0.75)',
-              borderColor: '#dc2626',
-              borderWidth: 1,
-              borderRadius: 6
+              backgroundColor: '#e03131',
+              borderRadius: 4
             },
             {
-              label: 'Post-Intervention (30-Day Followup)',
+              label: 'Post-Intervention (30-Day Evaluation)',
               data: [38.0, 32.0, 41.0, 44.0],
-              backgroundColor: 'rgba(16, 185, 129, 0.75)',
-              borderColor: '#059669',
-              borderWidth: 1,
-              borderRadius: 6
+              backgroundColor: '#059669',
+              borderRadius: 4
             }
           ]
         },
@@ -170,11 +159,11 @@ export default function AnalyticsView({ metrics, cases = [] }) {
               beginAtZero: true,
               max: 100,
               grid: { color: '#f1f5f9' },
-              ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
             },
             x: {
               grid: { display: false },
-              ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
             }
           }
         }
@@ -188,114 +177,167 @@ export default function AnalyticsView({ metrics, cases = [] }) {
     };
   }, [metrics, cases]);
 
+  const districtData = [
+    { district: 'Ahmednagar', state: 'Maharashtra', court: 'Special Court, Rahata', monitored: 1, bailHazard: 0, pickets: 1, dds: 84.0, status: 'Active Picket' },
+    { district: 'Hathras', state: 'Uttar Pradesh', court: 'Special SC/ST Court', monitored: 1, bailHazard: 0, pickets: 1, dds: 74.0, status: 'HC Bail Hearing' },
+    { district: 'Gaya', state: 'Bihar', court: 'Special Court, Bodh Gaya', monitored: 1, bailHazard: 0, pickets: 0, dds: 76.5, status: 'Pension Delayed' },
+    { district: 'Udaipur', state: 'Rajasthan', court: 'Special Atrocity Court', monitored: 1, bailHazard: 1, pickets: 0, dds: 68.5, status: 'Accused on Bail' },
+    { district: 'Tirunelveli', state: 'Tamil Nadu', court: 'Exclusive PoA Court', monitored: 1, bailHazard: 1, pickets: 1, dds: 54.0, status: 'Chargesheet Filed' },
+    { district: 'Morena', state: 'Madhya Pradesh', court: 'Special SC/ST Court', monitored: 1, bailHazard: 1, pickets: 1, dds: 42.7, status: 'Witness Intimidation' }
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Overview Analytics Header Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="mat-card p-4 flex items-center justify-between border-l-4 border-l-indigo-600">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 block">Trial Hostility Avoided</span>
-            <span className="text-2xl font-black text-indigo-900">89.4%</span>
-            <span className="text-[11px] text-emerald-600 font-bold block mt-0.5">↑ +24% vs Historical Avg</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <Scale className="w-5 h-5" />
-          </div>
+    <div className="space-y-4">
+      {/* Compliance Overview Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="gov-card p-3.5 border-l-4 border-l-[#0f2557]">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Hostility Prevention Rate</span>
+          <span className="text-xl font-bold text-slate-900">89.4%</span>
+          <span className="text-[10px] text-emerald-700 font-semibold block mt-0.5">Section 15A Mandate Achieved</span>
         </div>
 
-        <div className="mat-card p-4 flex items-center justify-between border-l-4 border-l-rose-500">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 block">Acute Crisis Prevention</span>
-            <span className="text-2xl font-black text-rose-600">100%</span>
-            <span className="text-[11px] text-rose-600 font-bold block mt-0.5">0 Fatal Escalations</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
+        <div className="gov-card p-3.5 border-l-4 border-l-rose-600">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Critical Crisis Interception</span>
+          <span className="text-xl font-bold text-rose-700">100%</span>
+          <span className="text-[10px] text-rose-600 font-semibold block mt-0.5">Zero Fatal Retaliations</span>
         </div>
 
-        <div className="mat-card p-4 flex items-center justify-between border-l-4 border-l-emerald-500">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 block">Avg Distress Drop</span>
-            <span className="text-2xl font-black text-emerald-700">-38.2 pts</span>
-            <span className="text-[11px] text-emerald-600 font-bold block mt-0.5">Post Statutory Directives</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <TrendingDown className="w-5 h-5" />
-          </div>
+        <div className="gov-card p-3.5 border-l-4 border-l-emerald-600">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Post-Directive Distress Drop</span>
+          <span className="text-xl font-bold text-emerald-800">-38.2 pts</span>
+          <span className="text-[10px] text-emerald-700 font-semibold block mt-0.5">Average 52% Reduction</span>
         </div>
 
-        <div className="mat-card p-4 flex items-center justify-between border-l-4 border-l-amber-500">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 block">Annexure I DBT Speed</span>
-            <span className="text-2xl font-black text-amber-700">4.2 Days</span>
-            <span className="text-[11px] text-amber-600 font-bold block mt-0.5">Reduced from 60+ Days</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <FileCheck2 className="w-5 h-5" />
-          </div>
+        <div className="gov-card p-3.5 border-l-4 border-l-amber-600">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Annexure I DBT Turnaround</span>
+          <span className="text-xl font-bold text-amber-800">4.2 Days</span>
+          <span className="text-[10px] text-amber-700 font-semibold block mt-0.5">Down from 60+ Day Benchmark</span>
         </div>
       </div>
 
       {/* Main Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Chart 1: Distress Vulnerability by Legal Stage (7 cols) */}
-        <div className="lg:col-span-7 mat-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Chart 1: Distress Vulnerability by Criminal Trial Stage (7 cols) */}
+        <div className="lg:col-span-7 gov-card p-4 space-y-2.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-indigo-600" />
-                <span>Distress Vulnerability by Criminal Trial Stage</span>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <BarChart3 className="w-3.5 h-3.5 text-indigo-700" />
+                <span>Distress Vulnerability by Criminal Trial Phase</span>
               </h3>
-              <p className="text-xs text-slate-500">
-                Identifies critical procedural phases where witnesses face highest coercive pressure.
+              <p className="text-[11px] text-slate-500">
+                Identifies critical procedural phases where witnesses face highest intimidation pressure.
               </p>
             </div>
-            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-              SC/ST PoA Act
+            <span className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+              PoA 1989
             </span>
           </div>
-          <div className="h-72 relative">
+          <div className="h-64 relative">
             <canvas ref={stageChartRef}></canvas>
           </div>
         </div>
 
-        {/* Chart 2: Priority Risk Tier Distribution (5 cols) */}
-        <div className="lg:col-span-5 mat-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* Chart 2: Caseload Risk Tier Distribution (5 cols) */}
+        <div className="lg:col-span-5 gov-card p-4 space-y-2.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-purple-600" />
-                <span>Caseload Risk Tier Distribution</span>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <PieChart className="w-3.5 h-3.5 text-purple-700" />
+                <span>Caseload Severity Distribution</span>
               </h3>
-              <p className="text-xs text-slate-500">
-                Breakdown of all active monitored cases by severity threshold.
+              <p className="text-[11px] text-slate-500">
+                Active registry breakdown by clinical-legal severity tier.
               </p>
             </div>
           </div>
-          <div className="h-72 relative flex items-center justify-center">
+          <div className="h-64 relative flex items-center justify-center">
             <canvas ref={pieChartRef}></canvas>
           </div>
         </div>
 
-        {/* Chart 3: Statutory Intervention Efficacy (Full width / 12 cols) */}
-        <div className="lg:col-span-12 mat-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* Chart 3: Statutory Protective Interventions Efficacy (Full width / 12 cols) */}
+        <div className="lg:col-span-12 gov-card p-4 space-y-2.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <TrendingDown className="w-4 h-4 text-emerald-600" />
-                <span>Section 15A Protection Directives Efficacy (Pre vs Post 30-Day Distress)</span>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Section 15A Protective Directives Efficacy (Pre vs Post 30-Day Distress)</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] text-slate-500">
                 Empirical impact of statutory interventions on survivor psychological stability and trial confidence.
               </p>
             </div>
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-              Average 52% Distress Reduction
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+              Average 52% Distress Drop
             </span>
           </div>
-          <div className="h-72 relative">
+          <div className="h-64 relative">
             <canvas ref={impactChartRef}></canvas>
+          </div>
+        </div>
+
+        {/* District Compliance Table (Full width / 12 cols) */}
+        <div className="lg:col-span-12 gov-card p-4 space-y-3">
+          <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                District-Level Protection Compliance Ledger (Section 15A SC/ST PoA Act)
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Status across designated Special Courts and District Protection Cells.
+              </p>
+            </div>
+            <span className="text-[10px] text-slate-400">Official Roster</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="gov-table">
+              <thead>
+                <tr>
+                  <th>Jurisdiction</th>
+                  <th>Designated Special Court</th>
+                  <th>Monitored Cases</th>
+                  <th>Bail Proximity Hazard</th>
+                  <th>Armed Pickets Active</th>
+                  <th>Vulnerability Index</th>
+                  <th>Current Protection Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {districtData.map((d, i) => (
+                  <tr key={i}>
+                    <td className="font-semibold text-slate-900">
+                      {d.district}, {d.state}
+                    </td>
+                    <td className="text-slate-600">{d.court}</td>
+                    <td>{d.monitored}</td>
+                    <td>
+                      {d.bailHazard > 0 ? (
+                        <span className="text-rose-700 font-bold">1 Active</span>
+                      ) : (
+                        <span className="text-slate-400">None</span>
+                      )}
+                    </td>
+                    <td>
+                      {d.pickets > 0 ? (
+                        <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Dispatched
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Pending Request</span>
+                      )}
+                    </td>
+                    <td className="font-bold text-slate-800 font-mono">{d.dds} / 100</td>
+                    <td>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">
+                        {d.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

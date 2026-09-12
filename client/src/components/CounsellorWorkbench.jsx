@@ -12,7 +12,9 @@ import {
   Brain,
   Headphones,
   Stethoscope,
-  UserCheck
+  UserCheck,
+  ClipboardList,
+  HeartPulse
 } from 'lucide-react';
 
 export default function CounsellorWorkbench({
@@ -35,13 +37,11 @@ export default function CounsellorWorkbench({
     }
   }, [selectedVictimId]);
 
-  // Fetch full case-file
   const loadCaseFile = async (vId) => {
     try {
       const res = await fetch(`/api/v1/counsellor/case-file/${vId}`);
       if (res.ok) {
-        const data = await res.json();
-        setCaseFile(data);
+        setCaseFile(await res.json());
       }
     } catch (e) {
       console.warn('Failed loading counsellor case-file:', e);
@@ -54,7 +54,7 @@ export default function CounsellorWorkbench({
     }
   }, [activeVictimId]);
 
-  // Render Longitudinal Line Chart
+  // Longitudinal Distress Line Chart
   useEffect(() => {
     if (!lineChartRef.current) return;
     if (lineChartInstance.current) lineChartInstance.current.destroy();
@@ -65,8 +65,7 @@ export default function CounsellorWorkbench({
     const voiceData = trajectory.map((t) => t.voice_stress);
     const nlpData = trajectory.map((t) => t.nlp_distress);
 
-    // Fallback sample trajectory if history is short
-    const finalLabels = labels.length > 0 ? labels : ['Intake Baseline', 'Week 2 Followup', 'Pre-Trial Notice', 'Current Triage'];
+    const finalLabels = labels.length > 0 ? labels : ['Intake Baseline', 'Week 2 Review', 'Pre-Trial Notice', 'Current Assessment'];
     const finalDds = ddsData.length > 0 ? ddsData : [42, 58, 74, 84];
     const finalVoice = voiceData.length > 0 ? voiceData : [38, 52, 68, 75];
     const finalNlp = nlpData.length > 0 ? nlpData : [34, 49, 71, 78];
@@ -80,36 +79,35 @@ export default function CounsellorWorkbench({
           {
             label: 'Composite Distress Score (DDS)',
             data: finalDds,
-            borderColor: '#e11d48', // Crimson Red
-            backgroundColor: 'rgba(225, 29, 72, 0.1)',
+            borderColor: '#e11d48',
+            backgroundColor: 'rgba(225, 29, 72, 0.08)',
             fill: true,
-            tension: 0.35,
-            borderWidth: 2.5,
-            pointBackgroundColor: '#be123c',
-            pointRadius: 5,
-            pointHoverRadius: 7
-          },
-          {
-            label: 'Voice Tremor Stress',
-            data: finalVoice,
-            borderColor: '#6366f1', // Indigo
-            backgroundColor: 'transparent',
-            borderDash: [5, 5],
-            tension: 0.35,
+            tension: 0.25,
             borderWidth: 2,
-            pointBackgroundColor: '#4f46e5',
+            pointBackgroundColor: '#be123c',
             pointRadius: 4
           },
           {
-            label: 'NLP Threat Sentiment',
+            label: 'Vocal Tremor Stress',
+            data: finalVoice,
+            borderColor: '#0f2557',
+            backgroundColor: 'transparent',
+            borderDash: [4, 4],
+            tension: 0.25,
+            borderWidth: 1.5,
+            pointBackgroundColor: '#0f2557',
+            pointRadius: 3
+          },
+          {
+            label: 'NLP Threat Index',
             data: finalNlp,
-            borderColor: '#a855f7', // Purple
+            borderColor: '#7c6ee6',
             backgroundColor: 'transparent',
             borderDash: [2, 2],
-            tension: 0.35,
-            borderWidth: 2,
-            pointBackgroundColor: '#9333ea',
-            pointRadius: 4
+            tension: 0.25,
+            borderWidth: 1.5,
+            pointBackgroundColor: '#7c6ee6',
+            pointRadius: 3
           }
         ]
       },
@@ -123,7 +121,7 @@ export default function CounsellorWorkbench({
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}/100`
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} / 100`
             }
           }
         },
@@ -135,7 +133,7 @@ export default function CounsellorWorkbench({
             ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }
           },
           x: {
-            grid: { color: '#f8fafc' },
+            grid: { display: false },
             ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
           }
         }
@@ -147,7 +145,6 @@ export default function CounsellorWorkbench({
     };
   }, [caseFile]);
 
-  // Handle Note Save
   const handleSaveNote = async (e) => {
     e.preventDefault();
     if (!officerNote.trim() || !activeVictimId) return;
@@ -183,16 +180,16 @@ export default function CounsellorWorkbench({
   const acoustic = caseFile?.latest_voice_spectrogram_biomarkers || {};
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Case Selector Strip */}
-      <div className="mat-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="gov-card p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
-            <Stethoscope className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-900 flex items-center justify-center font-bold">
+            <Stethoscope className="w-5 h-5 text-purple-800" />
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-              Active Case File
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Active Psychiatric Case Docket
             </span>
             <select
               value={activeVictimId}
@@ -200,7 +197,7 @@ export default function CounsellorWorkbench({
                 setActiveVictimId(e.target.value);
                 if (onSelectVictim) onSelectVictim(e.target.value);
               }}
-              className="bg-slate-50 border border-slate-200 text-slate-900 text-xs sm:text-sm font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500 font-sans"
+              className="bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-purple-600"
             >
               {cases.map((c) => (
                 <option key={c.victim_id} value={c.victim_id}>
@@ -212,178 +209,177 @@ export default function CounsellorWorkbench({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200 font-semibold flex items-center gap-1.5">
-            <Headphones className="w-3.5 h-3.5" /> Tele-MANAS Tier-2 Protocol Active
+          <span className="text-xs text-purple-900 bg-purple-50 px-3 py-1 rounded-full border border-purple-200 font-medium flex items-center gap-1.5">
+            <Headphones className="w-3.5 h-3.5 text-purple-700" /> Tele-MANAS Tier-2 Protocol Active
           </span>
         </div>
       </div>
 
-      {/* Main Grid: Longitudinal Graph & Acoustic Biomarkers */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Main Grid: Longitudinal Graph & Acoustic Diagnostics */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Longitudinal Trajectory Graph (7 cols) */}
-        <div className="lg:col-span-7 mat-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="lg:col-span-7 gov-card p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-indigo-600" />
-                <span>Longitudinal Distress Trajectory (DDS Time-Series)</span>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-indigo-700" />
+                <span>Longitudinal Distress Trajectory (Time-Series)</span>
               </h3>
-              <p className="text-xs text-slate-500">
-                Continuous monitoring of psychological distress progression through investigation and trial.
+              <p className="text-[11px] text-slate-500">
+                Tracking clinical and acoustic distress indicators across investigation & court proceedings.
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+            <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
               Current: {currentVictim?.current_dds ?? 84.0} DDS
             </span>
           </div>
 
-          <div className="h-72 relative">
+          <div className="h-68 relative">
             <canvas ref={lineChartRef}></canvas>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-            <span>• Red Line: Composite DDS Index</span>
-            <span>• Indigo Dashed: Vocal Tremor Stress</span>
-            <span>• Purple Dotted: NLP Threat Sentiment</span>
+          <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-100">
+            <span>• Red Solid Line: Composite Distress Index (DDS)</span>
+            <span>• Navy Dashed: Vocal Tremor Stress</span>
+            <span>• Purple Dotted: Linguistic Threat Sentiment</span>
           </div>
         </div>
 
-        {/* Acoustic Diagnostics & Voice Biomarkers (5 cols) */}
-        <div className="lg:col-span-5 mat-card p-5 space-y-4">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Volume2 className="w-4 h-4 text-sky-600" />
-              <span>Acoustic Prosody Diagnostics (Forensic AI)</span>
+        {/* Forensic Acoustic Diagnostics Grid (5 cols) */}
+        <div className="lg:col-span-5 gov-card p-4 space-y-3">
+          <div className="border-b border-slate-200 pb-2.5">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Volume2 className="w-3.5 h-3.5 text-sky-700" />
+              <span>Forensic Acoustic Prosody Diagnostics</span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Biomarkers extracted via 16kHz speech analysis from victim check-ins.
+            <p className="text-[11px] text-slate-500">
+              Biomarkers derived from 16kHz speech analysis during survivor check-ins.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
               <span className="text-[10px] text-slate-500 font-semibold block">Vocal Jitter %</span>
-              <span className="font-black text-sky-600 text-sm">
+              <span className="font-bold text-sky-700 text-sm">
                 {acoustic.jitter_pct ? `${acoustic.jitter_pct}%` : '3.8%'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Norm: &lt;1.0%</span>
+              <span className="text-[9px] text-slate-400 block mt-0.5">Clinical Norm: &lt;1.0%</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
               <span className="text-[10px] text-slate-500 font-semibold block">Vocal Shimmer %</span>
-              <span className="font-black text-amber-600 text-sm">
+              <span className="font-bold text-amber-700 text-sm">
                 {acoustic.shimmer_pct ? `${acoustic.shimmer_pct}%` : '11.2%'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Norm: &lt;3.5%</span>
+              <span className="text-[9px] text-slate-400 block mt-0.5">Clinical Norm: &lt;3.5%</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
               <span className="text-[10px] text-slate-500 font-semibold block">Micro-Tremor (4-10Hz)</span>
-              <span className="font-black text-rose-600 text-sm">
+              <span className="font-bold text-rose-700 text-sm">
                 {acoustic.tremor_intensity ? `${acoustic.tremor_intensity} / 100` : '74.0 / 100'}
               </span>
-              <span className="text-[9px] text-rose-500 font-semibold block mt-0.5">High Tension Alert</span>
+              <span className="text-[9px] text-rose-600 block mt-0.5 font-medium">Sympathetic Constriction</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
               <span className="text-[10px] text-slate-500 font-semibold block">Pitch (F0 Mean Hz)</span>
-              <span className="font-black text-teal-600 text-sm">
+              <span className="font-bold text-teal-700 text-sm">
                 {acoustic.pitch_mean_hz ? `${acoustic.pitch_mean_hz} Hz` : '248.0 Hz'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Pitch Volatility: High</span>
+              <span className="text-[9px] text-slate-400 block mt-0.5">Elevated Vocal Strain</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
               <span className="text-[10px] text-slate-500 font-semibold block">Harmonics / Noise (HNR)</span>
-              <span className="font-black text-emerald-600 text-sm">
+              <span className="font-bold text-emerald-700 text-sm">
                 {acoustic.hnr_db ? `${acoustic.hnr_db} dB` : '10.4 dB'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Glottal Constriction</span>
+              <span className="text-[9px] text-slate-400 block mt-0.5">Dysphonic Perturbation</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Pause / Silence Ratio</span>
-              <span className="font-black text-indigo-600 text-sm">
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
+              <span className="text-[10px] text-slate-500 font-semibold block">Pause / Hesitation Ratio</span>
+              <span className="font-bold text-indigo-700 text-sm">
                 {acoustic.pause_ratio ? `${acoustic.pause_ratio * 100}%` : '40.0%'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Speech Hesitation</span>
+              <span className="text-[9px] text-slate-400 block mt-0.5">Affective Blocking</span>
             </div>
           </div>
 
-          {/* Deep Audio Perception Classification */}
-          <div className="p-3.5 bg-purple-50/60 rounded-xl border border-purple-200 space-y-1 text-xs">
+          {/* Diagnostic Assessment Card */}
+          <div className="p-3 bg-purple-50/70 rounded border border-purple-200 space-y-1 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Brain className="w-3.5 h-3.5 text-purple-700" />
-                <span>Multimodal Perception Verdict</span>
+              <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider">
+                Forensic Psychiatric Summary
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+              <span className="badge-critical">
                 {acoustic.acoustic_classification || 'High Vocal Tremor & Threat Constriction'}
               </span>
             </div>
-            <p className="text-[11px] text-purple-950 font-medium leading-relaxed">
-              Elevated acoustic perturbation and micro-tremors indicate severe sympathetic nervous system arousal consistent with acute pre-deposition intimidation.
+            <p className="text-[11px] text-slate-800 leading-relaxed">
+              Vocal tremor and elevated fundamental frequency perturbation indicate severe neuroendocrine arousal consistent with active witness coercion and impending trial apprehension.
             </p>
           </div>
         </div>
 
-        {/* Clinical Case Notes Form & Previous Consultations (Full Width / 12 cols) */}
-        <div className="lg:col-span-12 mat-card p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* Clinical Care Notes Form (Full Width / 12 cols) */}
+        <div className="lg:col-span-12 gov-card p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-600" />
-                <span>Tele-MANAS Psychological Consultation Log & Care Notes</span>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <ClipboardList className="w-3.5 h-3.5 text-slate-600" />
+                <span>Tele-MANAS Psychiatric Consultation Record & Treatment Plan</span>
               </h3>
-              <p className="text-xs text-slate-500">
-                Confidential psychiatric evaluations appended to the official Section 15A protection case file.
+              <p className="text-[11px] text-slate-500">
+                Official clinical observations appended to the Section 15A Special Court file.
               </p>
             </div>
             {noteSuccess && (
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                <CheckCircle2 className="w-4 h-4" /> Consultation note saved successfully.
+              <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Clinical note recorded successfully.
               </span>
             )}
           </div>
 
-          <form onSubmit={handleSaveNote} className="space-y-3">
+          <form onSubmit={handleSaveNote} className="space-y-2.5">
             <textarea
-              rows={3}
+              rows={2}
               value={officerNote}
               onChange={(e) => setOfficerNote(e.target.value)}
-              placeholder="Record clinical trauma evaluation, witness coping observations, or recommended therapeutic interventions..."
-              className="w-full p-3 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
+              placeholder="Record clinical trauma observations, witness coping capacity, recommended pharmacological or psychotherapeutic care..."
+              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-purple-600 text-slate-800 placeholder-slate-400 font-normal"
             />
 
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-medium">
-                Authorized via National Mental Health Tele-Helpline (14416) Protocol
+              <span className="text-[10px] text-slate-400">
+                Conducted under Rule 5(1)(e) PoA Rules & Tele-MANAS Protocol (14416)
               </span>
 
               <button
                 type="submit"
                 disabled={isSubmitting || !officerNote.trim()}
-                className="mat-btn-indigo text-xs"
+                className="btn-navy text-xs disabled:opacity-50"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>{isSubmitting ? 'Saving Note...' : 'Append Clinical Consultation Note'}</span>
+                <Send className="w-3 h-3" />
+                <span>{isSubmitting ? 'Recording Note...' : 'Record Consultation Note'}</span>
               </button>
             </div>
           </form>
 
           {/* Past Notes History */}
           {caseFile?.clinical_notes_history && caseFile.clinical_notes_history.length > 0 && (
-            <div className="pt-3 border-t border-slate-100 space-y-2.5">
-              <span className="text-xs font-bold text-slate-600 block">
-                Historical Psychological Consultation Records:
+            <div className="pt-2 border-t border-slate-100 space-y-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Historical Consultation Records:
               </span>
               {caseFile.clinical_notes_history.map((n, i) => (
-                <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-bold">
+                <div key={i} className="bg-slate-50 border border-slate-200 rounded p-2 text-xs space-y-0.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
                     <span>{n.counsellor_name}</span>
                     <span>{n.timestamp ? n.timestamp.slice(0, 16).replace('T', ' ') : ''}</span>
                   </div>
-                  <p className="text-slate-800 font-medium">{n.clinical_observations}</p>
+                  <p className="text-slate-700">{n.clinical_observations}</p>
                 </div>
               ))}
             </div>

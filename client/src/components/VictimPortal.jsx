@@ -14,7 +14,9 @@ import {
   Lock,
   User,
   Activity,
-  FileAudio
+  FileAudio,
+  ShieldCheck,
+  Headphones
 } from 'lucide-react';
 
 export default function VictimPortal({
@@ -37,16 +39,14 @@ export default function VictimPortal({
   const timerRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // Available sample victims for demonstration
   const sampleVictims = [
-    { id: 'VIC-MH-2024-114', code: 'V-114 (Ms. P*** G***)', desc: 'Eyewitness in Special Court Trial - Threat from Accused Associates' },
-    { id: 'VIC-MP-2024-881', code: 'V-881 (Ms. S*** B***)', desc: 'Survivor - Accused Granted Bail, Nocturnal Intimidation' },
-    { id: 'VIC-UP-2024-409', code: 'V-409 (Mr. R*** K***)', desc: 'Complainant Father - Accused High Court Bail Hearing Impending' },
-    { id: 'VIC-RJ-2024-215', code: 'V-215 (Mr. D*** R***)', desc: 'Arson Survivor - Social Boycott & Compensation Delayed' },
+    { id: 'VIC-MH-2024-114', code: 'V-114 (Ms. P*** G***)', desc: 'Eyewitness in Special Court Trial - Intimidation by Accused Associates' },
+    { id: 'VIC-MP-2024-881', code: 'V-881 (Ms. S*** B***)', desc: 'Survivor - Accused Granted Bail, Nocturnal Surveillance' },
+    { id: 'VIC-UP-2024-409', code: 'V-409 (Mr. R*** K***)', desc: 'Complainant Father - Accused High Court Bail Hearing Pending' },
+    { id: 'VIC-RJ-2024-215', code: 'V-215 (Mr. D*** R***)', desc: 'Arson Survivor - Social Boycott & 25% Compensation Delayed' },
     { id: 'VIC-BR-2024-712', code: 'V-712 (Ms. K*** D***)', desc: 'Widow - 7 Months Pending Rehabilitation Pension' }
   ];
 
-  // Start Voice Recording with Web Audio API (16kHz PCM WAV)
   const startRecording = async () => {
     setErrorMsg(null);
     setAudioBlob(null);
@@ -85,7 +85,6 @@ export default function VictimPortal({
           clearInterval(timerRef.current);
           setIsRecording(false);
 
-          // Flatten and convert Float32Array to 16-bit PCM WAV
           const totalLength = pcmData.reduce((acc, curr) => acc + curr.length, 0);
           const result = new Float32Array(totalLength);
           let offset = 0;
@@ -94,7 +93,6 @@ export default function VictimPortal({
             offset += chunk.length;
           }
 
-          // Build WAV header
           const wavBuffer = new ArrayBuffer(44 + result.length * 2);
           const view = new DataView(wavBuffer);
 
@@ -109,16 +107,15 @@ export default function VictimPortal({
           writeString(view, 8, 'WAVE');
           writeString(view, 12, 'fmt ');
           view.setUint32(16, 16, true);
-          view.setUint16(20, 1, true); // PCM
-          view.setUint16(22, 1, true); // 1 channel
-          view.setUint32(24, 16000, true); // Sample rate 16000
-          view.setUint32(28, 32000, true); // Byte rate (16000 * 1 * 2)
-          view.setUint16(32, 2, true); // Block align
-          view.setUint16(34, 16, true); // 16-bit
+          view.setUint16(20, 1, true);
+          view.setUint16(22, 1, true);
+          view.setUint32(24, 16000, true);
+          view.setUint32(28, 32000, true);
+          view.setUint16(32, 2, true);
+          view.setUint16(34, 16, true);
           writeString(view, 36, 'data');
           view.setUint32(40, result.length * 2, true);
 
-          // Write PCM samples
           let index = 44;
           for (let i = 0; i < result.length; i++) {
             const s = Math.max(-1, Math.min(1, result[i]));
@@ -133,7 +130,7 @@ export default function VictimPortal({
       };
     } catch (err) {
       console.error('Audio record error:', err);
-      setErrorMsg('Microphone access denied or not available.');
+      setErrorMsg('Microphone access unavailable or denied.');
       setIsRecording(false);
     }
   };
@@ -144,10 +141,9 @@ export default function VictimPortal({
     }
   };
 
-  // Submit Check-in to Backend (/api/v1/victim/checkin)
   const handleSubmitCheckin = async () => {
     if (!audioBlob && !textContent.trim()) {
-      setErrorMsg('Please record your voice or enter a message to check in.');
+      setErrorMsg('Please record your voice or type a message to complete your check-in.');
       return;
     }
 
@@ -195,47 +191,47 @@ export default function VictimPortal({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Survivor Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-2xl p-6 shadow-md border-2 border-indigo-700">
+    <div className="space-y-4">
+      {/* Reassuring Hero Card */}
+      <div className="gov-card p-5 bg-gradient-to-r from-slate-900 via-[#0f2557] to-[#183b88] text-white">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full">
-                Section 15A Protection Scheme
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded">
+                Section 15A Legal Protection Active
               </span>
-              <span className="text-xs text-indigo-200 font-semibold flex items-center gap-1">
+              <span className="text-xs text-indigo-200 flex items-center gap-1 font-medium">
                 <Lock className="w-3.5 h-3.5" /> Confidential & Encrypted
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white">
-              SAMVEDNA Survivor Well-being Portal
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              आप सुरक्षित हैं • Survivor Well-being & Care Portal
             </h2>
-            <p className="text-xs text-indigo-100 max-w-xl mt-1 leading-relaxed">
-              Your voice and safety are legally protected under the Scheduled Castes and Scheduled Tribes (Prevention of Atrocities) Act, 1989. Record regular check-ins to monitor well-being, access trauma support, and request police protection.
+            <p className="text-xs text-slate-200 max-w-2xl mt-1 leading-relaxed">
+              Your safety and dignity are protected by law under the SC/ST (Prevention of Atrocities) Act. Share regular updates so the District Protection Officer and Tele-MANAS counsellors can stand with you.
             </p>
           </div>
 
           <div className="flex-shrink-0">
             <button
               onClick={onTriggerSos}
-              className="mat-btn-danger px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+              className="btn-danger text-xs font-bold pulse-emergency flex items-center gap-1.5"
             >
               <ShieldAlert className="w-4 h-4" />
-              <span>Trigger Emergency SOS</span>
+              <span>EMERGENCY POLICE SOS</span>
             </button>
           </div>
         </div>
 
         {/* Case Profile Selector */}
-        <div className="mt-5 pt-4 border-t border-white/20 flex flex-col sm:flex-row sm:items-center gap-3">
-          <label className="text-xs font-bold text-indigo-200 flex items-center gap-1.5 flex-shrink-0">
-            <User className="w-4 h-4" /> Checking in as Case:
+        <div className="mt-4 pt-3 border-t border-white/15 flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+          <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
+            <User className="w-3.5 h-3.5 text-indigo-300" /> Case Reference:
           </label>
           <select
             value={selectedVictim}
             onChange={(e) => setSelectedVictim(e.target.value)}
-            className="bg-indigo-950/80 border border-indigo-500/60 rounded-xl px-3 py-1.5 text-xs text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 max-w-md"
+            className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md"
           >
             {sampleVictims.map((v) => (
               <option key={v.id} value={v.id} className="bg-slate-900 text-white">
@@ -246,203 +242,202 @@ export default function VictimPortal({
         </div>
       </div>
 
-      {/* Main Interaction Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Voice & Check-in Input */}
-        <div className="lg:col-span-7 bg-white border-2 border-slate-200/90 rounded-2xl shadow-sm p-6 space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-black text-slate-900">Periodic Voice Check-in</h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Speak freely in your preferred language. Emotion AI and voice stress biomarkers will assess your well-being.
-            </p>
+      {/* Main Check-in Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left Column: Voice Recording & Statement Input (7 cols) */}
+        <div className="lg:col-span-7 gov-card p-5 space-y-4">
+          <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Periodic Voice Check-in
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Speak naturally in your preferred language. Voice stability and distress indicators will be assessed.
+              </p>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+              NHAA 14566 Protocol
+            </span>
           </div>
 
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Voice Recorder Block */}
-          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
+          {/* Voice Recorder Area */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
             {isRecording ? (
-              <div className="space-y-4">
-                <div className="w-16 h-16 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto animate-pulse shadow-lg shadow-rose-200">
-                  <Mic className="w-8 h-8" />
+              <div className="space-y-3">
+                <div className="w-14 h-14 rounded-full bg-rose-600 text-white flex items-center justify-center mx-auto animate-pulse shadow-md shadow-rose-200">
+                  <Mic className="w-7 h-7" />
                 </div>
                 <div>
-                  <div className="text-sm font-black text-rose-600">Recording Voice Check-in...</div>
-                  <div className="text-xs font-mono font-bold text-slate-500 mt-1">
+                  <div className="text-xs font-bold text-rose-700">Recording Voice Check-in...</div>
+                  <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">
                     {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
                   </div>
                 </div>
                 <button
                   onClick={stopRecording}
-                  className="mat-btn-danger px-5 py-2 text-xs font-bold flex items-center gap-2 mx-auto"
+                  className="btn-danger text-xs mx-auto"
                 >
-                  <Square className="w-4 h-4" />
-                  <span>Stop & Review Recording</span>
+                  <Square className="w-3.5 h-3.5" />
+                  <span>Stop & Review Audio</span>
                 </button>
               </div>
             ) : audioUrl ? (
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto border border-indigo-200">
-                  <FileAudio className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center mx-auto border border-indigo-200">
+                  <FileAudio className="w-5 h-5" />
                 </div>
-                <div className="text-xs font-bold text-slate-700">Audio Captured (16kHz PCM WAV)</div>
+                <div className="text-xs font-semibold text-slate-700">Audio Recorded (16kHz PCM WAV)</div>
                 <audio src={audioUrl} controls className="mx-auto max-w-xs w-full" />
                 <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={startRecording}
-                    className="mat-btn-outline text-xs"
+                    className="btn-subtle text-xs"
                   >
-                    Re-record
+                    Record Again
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <button
                   onClick={startRecording}
-                  className="w-16 h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center mx-auto shadow-md shadow-indigo-200 transition-transform active:scale-95"
+                  className="w-14 h-14 rounded-xl bg-[#0f2557] hover:bg-[#183b88] text-white flex items-center justify-center mx-auto shadow transition-transform active:scale-95"
                 >
-                  <Mic className="w-8 h-8" />
+                  <Mic className="w-7 h-7 text-indigo-200" />
                 </button>
                 <div>
-                  <h4 className="text-xs font-black text-slate-800">Click to Record Voice Note</h4>
-                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                    Microphone is analyzed for pitch stability, tremor, and emotional tone.
+                  <h4 className="text-xs font-bold text-slate-800">Click to Record Voice Check-in</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Microphone is analyzed for pitch tremor, vocal strain, and emotional stability.
                   </p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Text Statement (Optional / Alternative) */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 block">
-              Additional Notes or Written Statement (Optional):
+          {/* Written Statement (Optional) */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-700 block">
+              Additional Notes or Incident Description (Optional):
             </label>
             <textarea
               rows={3}
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
-              placeholder="E.g., Yesterday two associates of the accused came to our neighborhood and warned my family not to testify..."
-              className="w-full p-3 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+              placeholder="Share any recent incidents, threats, court apprehensions, or how you are coping..."
+              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 text-slate-800 placeholder-slate-400 font-normal"
             />
           </div>
 
           {/* Language Selector & Submit Button */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500">Language:</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500 font-medium">Language:</span>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="text-xs border border-slate-300 rounded-lg px-2.5 py-1 bg-white font-medium focus:outline-none"
+                className="text-xs border border-slate-300 rounded px-2 py-1 bg-white font-medium focus:outline-none"
               >
-                <option value="hi">Hindi (हिंदी)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
                 <option value="en">English</option>
-                <option value="mr">Marathi (मराठी)</option>
-                <option value="ta">Tamil (தமிழ்)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
               </select>
             </div>
 
             <button
               onClick={handleSubmitCheckin}
               disabled={isSubmitting || (!audioBlob && !textContent.trim())}
-              className="mat-btn-indigo px-6 py-2.5 text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              className="btn-navy text-xs disabled:opacity-50"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? 'Analyzing Biomarkers & Scoring...' : 'Submit Check-in'}</span>
+              <span>{isSubmitting ? 'Analyzing Biomarkers...' : 'Submit Official Check-in'}</span>
             </button>
           </div>
         </div>
 
-        {/* Right: Real-time Analysis Feedback & Trauma Support */}
-        <div className="lg:col-span-5 bg-white border-2 border-slate-200/90 rounded-2xl shadow-sm p-6 space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-purple-600" />
-              <span>Well-being & Trauma Guidance</span>
+        {/* Right Column: Trauma Guidance & Response (5 cols) */}
+        <div className="lg:col-span-5 gov-card p-5 space-y-4">
+          <div className="border-b border-slate-200 pb-2.5">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
+              <span>Counsellor Assessment & Trauma Support</span>
             </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Empathetic AI support grounded in clinical 5-4-3-2-1 sensory grounding.
+            <p className="text-[11px] text-slate-500">
+              Trauma-informed guidance and grounding exercises grounded in Tele-MANAS care.
             </p>
           </div>
 
           {lastResponse ? (
-            <div className="space-y-4 animate-fadeIn">
-              {/* Score Card */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+            <div className="space-y-3">
+              {/* Score Assessment Card */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Assessed Distress Score
+                    Distress Determination Score
                   </span>
                   <div className="flex items-baseline gap-1 mt-0.5">
-                    <span className="text-2xl font-black text-slate-900">
+                    <span className="text-xl font-bold text-slate-900">
                       {lastResponse.composite_dds}
                     </span>
-                    <span className="text-xs text-slate-400 font-bold">/100</span>
+                    <span className="text-xs text-slate-400">/ 100</span>
                   </div>
                 </div>
 
-                <span
-                  className={`text-xs font-black px-3 py-1 rounded-full border ${
-                    lastResponse.risk_level === 'CRITICAL'
-                      ? 'bg-rose-100 text-rose-800 border-rose-300'
-                      : lastResponse.risk_level === 'HIGH'
-                      ? 'bg-amber-100 text-amber-800 border-amber-300'
-                      : 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                  }`}
-                >
+                <span className={lastResponse.risk_level === 'CRITICAL' ? 'badge-critical' : lastResponse.risk_level === 'HIGH' ? 'badge-high' : 'badge-low'}>
                   {lastResponse.risk_level}
                 </span>
               </div>
 
               {/* Empathetic AI Response */}
-              <div className="bg-indigo-50/70 border-2 border-indigo-200 rounded-xl p-4 space-y-2">
-                <div className="text-xs font-black text-indigo-900 flex items-center gap-1.5">
-                  <HeartHandshake className="w-4 h-4 text-indigo-600" />
-                  <span>Supportive Counsellor Message:</span>
-                </div>
-                <p className="text-xs text-indigo-950 font-medium leading-relaxed whitespace-pre-line">
+              <div className="bg-purple-50/70 border border-purple-200 rounded-lg p-3.5 space-y-1.5">
+                <span className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+                  <HeartHandshake className="w-3.5 h-3.5 text-purple-700" />
+                  <span>Counsellor Supportive Guidance:</span>
+                </span>
+                <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-line">
                   {lastResponse.ai_response}
                 </p>
               </div>
 
-              {/* Notice to survivor */}
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold flex items-center gap-2">
+              {/* Official notification */}
+              <div className="p-2.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-medium flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                 <span>
-                  Check-in recorded in official dossier. District Protection Officer notified.
+                  Check-in saved to official case docket. District Nodal Officer notified.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="space-y-4 text-center py-8">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 border-2 border-indigo-200 text-indigo-600 flex items-center justify-center mx-auto">
-                <Activity className="w-7 h-7 animate-pulse" />
+            <div className="space-y-3 py-4 text-center">
+              <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center mx-auto">
+                <Activity className="w-6 h-6 text-indigo-700" />
               </div>
               <div>
-                <h4 className="text-xs font-black text-slate-800">Awaiting Your Check-in</h4>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1 font-medium">
-                  Submit a voice or written note on the left. Your assessment will appear here and sync directly with district protection authorities.
+                <h4 className="text-xs font-bold text-slate-900">Awaiting Your Check-in</h4>
+                <p className="text-xs text-slate-500 max-w-xs mx-auto mt-0.5">
+                  Record a voice note or enter a message. Your assessment will appear here and sync directly with district protection authorities.
                 </p>
               </div>
 
-              {/* Standard 5-4-3-2-1 Sensory Grounding Help */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left space-y-2">
-                <span className="text-[11px] font-bold text-slate-800 block">
-                  Grounding Exercise (If Feeling Stressed):
+              {/* 5-4-3-2-1 Sensory Grounding Support */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-left space-y-1.5 text-xs">
+                <span className="font-bold text-slate-800 block">
+                  Grounding Technique (If You Feel Stressed or Anxious):
                 </span>
-                <ul className="text-[11px] text-slate-600 space-y-1 font-medium">
-                  <li>• <strong>5 things</strong> you can see around you</li>
-                  <li>• <strong>4 things</strong> you can physically feel or touch</li>
-                  <li>• <strong>3 things</strong> you can hear right now</li>
+                <ul className="text-slate-600 space-y-1 text-[11px]">
+                  <li>• <strong>5 things</strong> you can see around you right now</li>
+                  <li>• <strong>4 things</strong> you can physically touch (your clothing, desk)</li>
+                  <li>• <strong>3 things</strong> you can hear</li>
                   <li>• <strong>2 things</strong> you can smell</li>
-                  <li>• <strong>1 deep breath</strong> in for 4 seconds, out for 6</li>
+                  <li>• <strong>1 deep, slow breath</strong> (inhale for 4s, exhale for 6s)</li>
                 </ul>
               </div>
             </div>
