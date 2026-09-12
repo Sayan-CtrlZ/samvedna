@@ -1,0 +1,23 @@
+# Vercel Ignore File - Optimize Serverless Function Bundle Size
+client/node_modules/
+client/src/
+client/public/
+client/.env*
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdf
+*.txt
+*.md
+*.jsonl
+*.log
+*.sqlite3
+*.db
+static/
+.git/
+.github/
+.vscode/
+.idea/

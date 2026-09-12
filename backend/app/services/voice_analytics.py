@@ -12,13 +12,6 @@ try:
 except ImportError:
     NOISEREDUCE_AVAILABLE = False
 
-try:
-    from scipy.io import wavfile
-    import scipy.signal as signal
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-
 
 class VoiceStressAnalyticsEngine:
     """
@@ -40,38 +33,8 @@ class VoiceStressAnalyticsEngine:
     def __init__(self):
         self.sample_rate_default = 16000
 
-    def analyze_audio_bytes(self, audio_bytes: bytes, filename: str = "") -> Dict[str, Any]:
-        """
-        Parses in-memory audio bytes and extracts genuine acoustic biomarkers.
-        Returns calculated features and extracted indicators.
-        """
-        if not audio_bytes or len(audio_bytes) < 44:
-            return self._empty_or_fallback_result("Audio buffer too short or empty")
-
-        # 1. Try SciPy WAV reader
-        if SCIPY_AVAILABLE:
-            try:
-                rate, raw_audio = wavfile.read(io.BytesIO(audio_bytes))
-                if raw_audio.ndim > 1:
-                    raw_audio = raw_audio.mean(axis=1)
-
-                if raw_audio.dtype == np.int16:
-                    audio = raw_audio.astype(np.float32) / 32768.0
-                elif raw_audio.dtype == np.uint8:
-                    audio = (raw_audio.astype(np.float32) - 128.0) / 128.0
-                elif raw_audio.dtype == np.int32:
-                    audio = raw_audio.astype(np.float32) / 2147483648.0
-                elif np.issubdtype(raw_audio.dtype, np.floating):
-                    audio = raw_audio.astype(np.float32)
-                else:
-                    audio = raw_audio.astype(np.float32)
-
-                if len(audio) > 100:
-                    return self._extract_acoustic_features_from_signal(audio, rate)
-            except Exception:
-                pass
-
-        # 2. Try Standard Python wave module
+    def _parse_wav_bytes(self, audio_bytes: bytes) -> Optional[tuple]:
+        """Reads WAV audio using Python's standard library wave module + numpy."""
         try:
             with wave.open(io.BytesIO(audio_bytes), "rb") as wf:
                 n_channels = wf.getnchannels()
@@ -90,12 +53,26 @@ class VoiceStressAnalyticsEngine:
                 if n_channels > 1:
                     audio = audio.reshape(-1, n_channels).mean(axis=1)
 
-                if len(audio) > 100:
-                    return self._extract_acoustic_features_from_signal(audio, framerate)
+                return framerate, audio
         except Exception:
-            pass
+            return None
 
-        # 3. Try In-Memory FFmpeg Pipe Conversion (WebM, Ogg, MP3, AAC to 16kHz 16-bit Mono WAV)
+    def analyze_audio_bytes(self, audio_bytes: bytes, filename: str = "") -> Dict[str, Any]:
+        """
+        Parses in-memory audio bytes and extracts genuine acoustic biomarkers.
+        Returns calculated features and extracted indicators.
+        """
+        if not audio_bytes or len(audio_bytes) < 44:
+            return self._empty_or_fallback_result("Audio buffer too short or empty")
+
+        # 1. Standard Python wave parser (WAV format)
+        wav_res = self._parse_wav_bytes(audio_bytes)
+        if wav_res:
+            framerate, audio = wav_res
+            if len(audio) > 100:
+                return self._extract_acoustic_features_from_signal(audio, framerate)
+
+        # 2. Try In-Memory FFmpeg Pipe Conversion (WebM, Ogg, MP3, AAC to 16kHz 16-bit Mono WAV)
         try:
             import subprocess
             proc = subprocess.Popen(
@@ -106,15 +83,13 @@ class VoiceStressAnalyticsEngine:
             )
             stdout_wav, _ = proc.communicate(input=audio_bytes, timeout=4)
             if proc.returncode == 0 and len(stdout_wav) > 44:
-                rate, raw_audio = wavfile.read(io.BytesIO(stdout_wav))
-                if raw_audio.dtype == np.int16:
-                    audio = raw_audio.astype(np.float32) / 32768.0
-                else:
-                    audio = raw_audio.astype(np.float32)
-                if len(audio) > 100:
-                    return self._extract_acoustic_features_from_signal(audio, rate)
+                ffmpeg_res = self._parse_wav_bytes(stdout_wav)
+                if ffmpeg_res:
+                    rate, audio = ffmpeg_res
+                    if len(audio) > 100:
+                        return self._extract_acoustic_features_from_signal(audio, rate)
         except Exception as e:
-            logger.debug(f"[VOICE] FFmpeg pipe fallback notice: {e}")
+            pass
 
         # 4. Fallback: Raw 16-bit PCM
         try:
@@ -375,12 +350,6 @@ class VoiceStressAnalyticsEngine:
         """
         clean = np.nan_to_num(audio.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
         clean = clean - float(np.mean(clean))
-        if SCIPY_AVAILABLE and len(clean) > max(32, sample_rate // 10):
-            nyquist = sample_rate / 2.0
-            low, high = 80.0 / nyquist, min(0.95, 3400.0 / nyquist)
-            if 0 < low < high < 1:
-                b, a = signal.butter(2, [low, high], btype="band")
-                clean = signal.lfilter(b, a, clean).astype(np.float32)
         
         # Apply Noisereduce Noise Gate
         if settings.ENABLE_NOISE_GATE and NOISEREDUCE_AVAILABLE:

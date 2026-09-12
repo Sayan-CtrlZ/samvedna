@@ -5,7 +5,5 @@ numpy>=1.26.0
 python-multipart>=0.0.9
 requests>=2.32.0
 python-dotenv>=1.0.0
-scipy>=1.11.0
-noisereduce>=3.0.0
 groq>=0.18.0
 sarvamai>=0.1.33
