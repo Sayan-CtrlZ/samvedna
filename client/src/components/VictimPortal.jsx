@@ -309,6 +309,7 @@ export default function VictimPortal({
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={stopRecording}
                   className="btn-danger text-xs mx-auto"
                 >
@@ -326,7 +327,7 @@ export default function VictimPortal({
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   <button
                     type="button"
-                    onClick={handleSubmit}
+                    onClick={handleSubmitCheckin}
                     disabled={isSubmitting}
                     className="px-4 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
                   >
@@ -346,6 +347,7 @@ export default function VictimPortal({
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-3">
                   <button
+                    type="button"
                     onClick={startRecording}
                     className="w-14 h-14 rounded-xl bg-[#0f2557] hover:bg-[#183b88] text-white flex items-center justify-center shadow transition-transform active:scale-95"
                     title="Click to Record Voice Check-in"
