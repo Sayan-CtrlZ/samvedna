@@ -5,6 +5,13 @@ from app.database import db
 
 router = APIRouter(prefix="/counsellor", tags=["Psychological Counsellor Workbench"])
 
+@router.get("/cases")
+async def get_counsellor_cases():
+    cases = db.get_all_victims()
+    priority_order = {"CRITICAL": 0, "HIGH": 1, "MODERATE": 2, "LOW": 3}
+    cases.sort(key=lambda x: (priority_order.get(x["current_risk_level"], 4), -x["current_dds"]))
+    return {"count": len(cases), "cases": cases}
+
 @router.get("/case-file/{victim_id}")
 async def get_counsellor_case_file(victim_id: str):
     victim = db.get_victim_by_id(victim_id)

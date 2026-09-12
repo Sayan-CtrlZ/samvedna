@@ -5,6 +5,7 @@ from app.database import db
 router = APIRouter(prefix="/dashboard", tags=["Government & District Triage Dashboard"])
 
 @router.get("/metrics")
+@router.get("/overview")
 async def get_summary_metrics(
     state: Optional[str] = None,
     district: Optional[str] = None

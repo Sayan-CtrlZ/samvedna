@@ -81,6 +81,10 @@ coverage.xml
 .pytest_cache/
 htmlcov/
 
+# Local extracts and static legacy
+SAMVEDNA_PRD_v2.1.txt
+static/
+
 # Editor and IDE configurations
 .vscode/
 !.vscode/settings.json
