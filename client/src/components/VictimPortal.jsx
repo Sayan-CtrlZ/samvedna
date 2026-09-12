@@ -25,7 +25,12 @@ export default function VictimPortal({
   onTriggerSos
 }) {
   const [selectedVictim, setSelectedVictim] = useState(() => {
-    return sessionStorage.getItem('samvedna_selected_victim') || activeVictimId;
+    try {
+      const saved = sessionStorage.getItem('samvedna_selected_victim');
+      return (saved && typeof saved === 'string' && saved.startsWith('VIC-')) ? saved : activeVictimId;
+    } catch (e) {
+      return activeVictimId;
+    }
   });
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -33,13 +38,20 @@ export default function VictimPortal({
   const [audioUrl, setAudioUrl] = useState(null);
   const [textContent, setTextContent] = useState('');
   const [language, setLanguage] = useState(() => {
-    return sessionStorage.getItem('samvedna_language') || 'en';
+    try {
+      const saved = sessionStorage.getItem('samvedna_language');
+      return (saved && ['en', 'hi', 'mr', 'ta'].includes(saved)) ? saved : 'en';
+    } catch (e) {
+      return 'en';
+    }
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastResponse, setLastResponse] = useState(() => {
     try {
       const saved = sessionStorage.getItem('samvedna_last_response');
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      return (parsed && typeof parsed === 'object' && parsed.composite_dds !== undefined) ? parsed : null;
     } catch (e) {
       return null;
     }

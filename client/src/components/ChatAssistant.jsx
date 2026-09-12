@@ -23,7 +23,9 @@ export default function ChatAssistant({
   const [messages, setMessages] = useState(() => {
     try {
       const saved = sessionStorage.getItem(`samvedna_chat_${selectedVictimId}`);
-      return saved ? JSON.parse(saved) : [defaultWelcomeMessage];
+      if (!saved) return [defaultWelcomeMessage];
+      const parsed = JSON.parse(saved);
+      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : [defaultWelcomeMessage];
     } catch (e) {
       return [defaultWelcomeMessage];
     }

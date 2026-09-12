@@ -11,10 +11,21 @@ import EmergencySosModal from './components/EmergencySosModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
-    return sessionStorage.getItem('samvedna_active_tab') || 'VICTIM';
+    try {
+      const saved = sessionStorage.getItem('samvedna_active_tab');
+      const validTabs = ['VICTIM', 'TRIAGE', 'COUNSELLOR', 'ANALYTICS'];
+      return (saved && validTabs.includes(saved)) ? saved : 'VICTIM';
+    } catch (e) {
+      return 'VICTIM';
+    }
   });
   const [selectedVictimId, setSelectedVictimId] = useState(() => {
-    return sessionStorage.getItem('samvedna_selected_victim') || 'VIC-MH-2024-114';
+    try {
+      const saved = sessionStorage.getItem('samvedna_selected_victim');
+      return (saved && typeof saved === 'string' && saved.startsWith('VIC-')) ? saved : 'VIC-MH-2024-114';
+    } catch (e) {
+      return 'VIC-MH-2024-114';
+    }
   });
   const [isSosOpen, setIsSosOpen] = useState(false);
   const [isAlertsDrawerOpen, setIsAlertsDrawerOpen] = useState(false);
