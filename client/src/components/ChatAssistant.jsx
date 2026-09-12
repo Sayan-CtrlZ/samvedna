@@ -399,22 +399,6 @@ export default function ChatAssistant({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 3D Quick Presets Pills */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-0.5">Quick Prompts:</span>
-        {presetPrompts.map((preset, idx) => (
-          <button
-            key={idx}
-            type="button"
-            disabled={isProcessing}
-            onClick={() => handleSelectPreset(preset.text)}
-            className={`btn-3d text-[11px] px-2.5 py-1 rounded-lg font-bold border border-b-[3px] transition-transform active:translate-y-0.5 disabled:opacity-50 ${preset.chipStyle}`}
-          >
-            {preset.label}
-          </button>
-        ))}
-      </div>
-
       {/* Input Bar */}
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <button

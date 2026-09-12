@@ -430,10 +430,8 @@ export default function VictimPortal({
               </div>
             )}
           </div>
-        </div>
 
-        {/* Clinical Biomarker Assessment & Metrics Card (Left Column continuation) */}
-        <div className="lg:col-span-6 space-y-4">
+          {/* Clinical Biomarker Assessment & Metrics Card (Left Column) */}
           <div className="gov-card p-5 space-y-4 border-l-4 border-l-indigo-600">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <div>
