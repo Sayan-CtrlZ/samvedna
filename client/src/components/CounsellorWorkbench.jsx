@@ -81,10 +81,10 @@ export default function CounsellorWorkbench({
     const hasTrajectory = trajectory.length > 0;
     const finalLabels = hasTrajectory
       ? rawLabels.map((l, i) => formatTimestamp(l, i, rawLabels.length))
-      : ['Intake Baseline', 'Week 2 Review', 'Pre-Trial Notice', 'Current Assessment'];
-    const finalDds = hasTrajectory ? ddsData : [42, 58, 74, 84];
-    const finalVoice = hasTrajectory ? voiceData : [38, 52, 68, 75];
-    const finalNlp = hasTrajectory ? nlpData : [34, 49, 71, 78];
+      : ['Live Intake Assessment'];
+    const finalDds = hasTrajectory ? ddsData : [caseFile?.victim_profile?.current_dds || 0];
+    const finalVoice = hasTrajectory ? voiceData : [caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score || 0];
+    const finalNlp = hasTrajectory ? nlpData : [caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score || 0];
 
     const ctx = lineChartRef.current.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 280);

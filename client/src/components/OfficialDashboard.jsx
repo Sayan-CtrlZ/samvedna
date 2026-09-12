@@ -75,6 +75,8 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 3000);
+    return () => clearInterval(interval);
   }, [selectedVictimId]);
 
   // When activeCase changes, load full case-file
@@ -91,6 +93,8 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
       }
     }
     loadCaseFile();
+    const interval = setInterval(loadCaseFile, 3000);
+    return () => clearInterval(interval);
   }, [activeCase?.victim_id]);
 
   const handleSelect = (c) => {
@@ -451,16 +455,20 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                   <span className="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">
                     FIR & Police Station
                   </span>
-                  <span className="font-bold text-slate-900 block">{activeCase.fir_number}</span>
-                  <span className="text-[11px] text-slate-500">{activeCase.police_station}</span>
+                  <span className="font-bold text-slate-900 block">
+                    {activeCase.fir_number && activeCase.fir_number !== '--' ? activeCase.fir_number : 'Live Survivor Session'}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {activeCase.police_station && activeCase.police_station !== '--' ? activeCase.police_station : 'Web Portal Channel'}
+                  </span>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
                   <span className="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">
                     Impugned Sections
                   </span>
-                  <span className="font-semibold text-slate-800 text-[11px] line-clamp-2" title={activeCase.sections_invoked}>
-                    {activeCase.sections_invoked}
+                  <span className="font-semibold text-slate-800 text-[11px] line-clamp-2" title={activeCase.sections_invoked || 'Sec 15A Protection'}>
+                    {activeCase.sections_invoked && activeCase.sections_invoked !== '--' ? activeCase.sections_invoked : 'Sec 15A Witness Protection System'}
                   </span>
                 </div>
 
@@ -468,10 +476,12 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                   <span className="text-[10px] text-slate-500 font-bold uppercase block mb-0.5">
                     Trial Phase & Court
                   </span>
-                  <span className="font-bold text-slate-900 block line-clamp-1">{activeCase.legal_stage}</span>
+                  <span className="font-bold text-slate-900 block line-clamp-1">
+                    {activeCase.legal_stage && activeCase.legal_stage !== '--' ? activeCase.legal_stage : 'Survivor Intake & Triage'}
+                  </span>
                   <span className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    Next: {activeCase.next_hearing_date}
+                    Next: {activeCase.next_hearing_date && activeCase.next_hearing_date !== '--' ? activeCase.next_hearing_date : 'N/A (Live Session)'}
                   </span>
                 </div>
 
@@ -484,7 +494,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                       activeCase.compensation_delayed ? 'text-rose-700' : 'text-emerald-700'
                     }`}
                   >
-                    {activeCase.compensation_status}
+                    {activeCase.compensation_status && activeCase.compensation_status !== '--' ? activeCase.compensation_status : 'Interim Relief Intake Active'}
                   </span>
                 </div>
               </div>
@@ -509,17 +519,28 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                         Vocal Prosody & Micro-Tremor (28% Weight)
                       </span>
                       <span className="font-bold">
-                        {caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score ?? 75} / 100
+                        {caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== undefined && caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== null
+                          ? `${caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score} / 100`
+                          : 'N/A (Awaiting Audio Intake)'}
                       </span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="bg-indigo-600 h-1.5 rounded-full"
-                        style={{ width: `${caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score ?? 75}%` }}
+                        style={{
+                          width: `${
+                            caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== undefined && caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== null
+                              ? caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score
+                              : 0
+                          }%`
+                        }}
                       ></div>
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      Classification: {caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_classification || 'Acoustic Tension & Tremor Detected'}
+                      Classification: {
+                        caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_classification ||
+                        (caseFile?.latest_voice_spectrogram_biomarkers ? 'Acoustic Signal Analyzed' : 'No voice sample recorded yet for this session')
+                      }
                     </span>
                   </div>
 
@@ -531,36 +552,66 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                         Linguistic Threat & Emotion Indicators (28% Weight)
                       </span>
                       <span className="font-bold">
-                        {caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score ?? 78} / 100
+                        {caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
+                          ? `${caseFile.latest_nlp_emotion_matrix.nlp_distress_score} / 100`
+                          : 'N/A (Awaiting Text Intake)'}
                       </span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="bg-purple-600 h-1.5 rounded-full"
-                        style={{ width: `${caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score ?? 78}%` }}
+                        style={{
+                          width: `${
+                            caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
+                              ? caseFile.latest_nlp_emotion_matrix.nlp_distress_score
+                              : 0
+                          }%`
+                        }}
                       ></div>
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      Fear: {caseFile?.latest_nlp_emotion_matrix?.fear_score ?? 85}% • Hopelessness: {caseFile?.latest_nlp_emotion_matrix?.hopelessness_score ?? 70}%
+                      {caseFile?.latest_nlp_emotion_matrix ? (
+                        `Fear: ${caseFile.latest_nlp_emotion_matrix.fear_score ?? 0}% • Hopelessness: ${caseFile.latest_nlp_emotion_matrix.hopelessness_score ?? 0}%`
+                      ) : (
+                        'No chat or text transcripts analyzed yet for this session'
+                      )}
                     </span>
                   </div>
 
                   {/* Clinical Baseline */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-slate-700">
-                      <span className="font-semibold flex items-center gap-1">
-                        <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
-                        Psychotrauma Baseline (20% Weight)
+                  {activeCase?.clinical_phq_score ? (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-slate-700">
+                        <span className="font-semibold flex items-center gap-1">
+                          <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
+                          Psychotrauma Baseline (20% Weight)
+                        </span>
+                        <span className="font-bold">{activeCase.clinical_phq_score} / 100</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-rose-600 h-1.5 rounded-full" style={{ width: `${activeCase.clinical_phq_score}%` }}></div>
+                      </div>
+                      <span className="text-[10px] text-slate-500">
+                        {activeCase.clinical_phq_description || 'PHQ-9 Clinical Baseline Assessment'}
                       </span>
-                      <span className="font-bold">68 / 100</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-rose-600 h-1.5 rounded-full" style={{ width: '68%' }}></div>
+                  ) : (
+                    <div className="space-y-1 opacity-75">
+                      <div className="flex justify-between text-slate-700">
+                        <span className="font-semibold flex items-center gap-1">
+                          <HeartPulse className="w-3.5 h-3.5 text-slate-400" />
+                          Psychotrauma Baseline (20% Weight)
+                        </span>
+                        <span className="font-bold text-slate-400">N/A (Clinical Assessment Pending)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-slate-300 h-1.5 rounded-full" style={{ width: '0%' }}></div>
+                      </div>
+                      <span className="text-[10px] text-slate-400">
+                        Psychological evaluation pending initial counsellor session
+                      </span>
                     </div>
-                    <span className="text-[10px] text-slate-500">
-                      PHQ-9 Baseline: Moderate-Severe Trauma Index
-                    </span>
-                  </div>
+                  )}
 
                   {/* Legal Vulnerability */}
                   <div className="space-y-1">
@@ -569,16 +620,38 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                         <Scale className="w-3.5 h-3.5 text-amber-600" />
                         Legal Vulnerability & Deposition Proximity (16% Weight)
                       </span>
-                      <span className="font-bold">{activeCase.accused_on_bail ? '85' : '45'} / 100</span>
+                      <span className="font-bold">
+                        {activeCase?.legal_vulnerability_score !== undefined
+                          ? `${activeCase.legal_vulnerability_score} / 100`
+                          : activeCase?.accused_on_bail
+                          ? '85 / 100'
+                          : activeCase?.legal_stage && activeCase.legal_stage !== '--'
+                          ? '45 / 100'
+                          : '15 / 100'}
+                      </span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="bg-amber-600 h-1.5 rounded-full"
-                        style={{ width: activeCase.accused_on_bail ? '85%' : '45%' }}
+                        style={{
+                          width: `${
+                            activeCase?.legal_vulnerability_score !== undefined
+                              ? activeCase.legal_vulnerability_score
+                              : activeCase?.accused_on_bail
+                              ? 85
+                              : activeCase?.legal_stage && activeCase.legal_stage !== '--'
+                              ? 45
+                              : 15
+                          }%`
+                        }}
                       ></div>
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      {activeCase.accused_on_bail ? 'Accused on Bail + Impending Special Court Witness Examination' : 'Regular Procedural Phase'}
+                      {activeCase?.accused_on_bail
+                        ? 'Accused on Bail + Impending Special Court Witness Examination'
+                        : activeCase?.legal_stage && activeCase.legal_stage !== '--'
+                        ? `Active Phase: ${activeCase.legal_stage}`
+                        : 'Pre-Trial / Live Survivor Intake — Statutory Witness Protection Coverage Active'}
                     </span>
                   </div>
                 </div>
