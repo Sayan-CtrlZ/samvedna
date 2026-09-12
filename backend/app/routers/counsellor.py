@@ -53,3 +53,34 @@ async def add_clinical_counselling_note(
     }
     db.add_counsellor_note(victim_id, note)
     return {"status": "success", "note": note}
+
+@router.post("/intervene")
+async def issue_statutory_intervention(
+    victim_id: str = Form(...),
+    intervention_type: str = Form(...),
+    notes: Optional[str] = Form("Statutory intervention requisition dispatched.")
+):
+    victim = db.get_victim_by_id(victim_id)
+    if not victim:
+        raise HTTPException(status_code=404, detail="Victim not found")
+        
+    action_record = {
+        "action_id": f"ACT-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        "victim_id": victim_id,
+        "intervention_type": intervention_type,
+        "timestamp": datetime.now().isoformat(),
+        "notes": notes,
+        "status": "DISPATCHED_TO_DISTRICT_POLICE"
+    }
+    note = {
+        "note_id": f"NOTE-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        "victim_id": victim_id,
+        "counsellor_name": "Duty Protection Officer / Nodal Authority",
+        "timestamp": datetime.now().isoformat(),
+        "clinical_observations": f"Statutory intervention requested: {intervention_type}. {notes}",
+        "interventions_authorized": [intervention_type],
+        "next_follow_up_days": 1
+    }
+    db.add_counsellor_note(victim_id, note)
+    return {"status": "success", "action": action_record}
+

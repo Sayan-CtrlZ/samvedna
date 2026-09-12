@@ -128,6 +128,20 @@ SAMVEDNA AI continuously monitors victim well-being through voluntary omnichanne
 
 ```
 samvedna/
+├── client/                     # Modern Neumorphic React + Tailwind + Lucide frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Header.jsx              # Navigation and tactile SOS trigger
+│   │   │   ├── VoiceCheckin.jsx        # Waveform recorder and voice assessment
+│   │   │   ├── ChatAssistant.jsx       # Conversational support with TTS and STT
+│   │   │   ├── WellbeingMetrics.jsx    # Well-being score and vocal characteristics
+│   │   │   ├── OfficialDashboard.jsx   # Priority triage and protection orders
+│   │   │   ├── EmergencyHelplines.jsx  # 24/7 statutory helpline quick links
+│   │   │   └── EmergencySosModal.jsx   # One-click emergency dispatch modal
+│   │   ├── App.jsx                     # Root application layout
+│   │   └── index.css                   # Neumorphic soft-shadow utility tokens
+│   ├── package.json
+│   └── vite.config.js
 ├── backend/
 │   ├── app/
 │   │   ├── models/             # Pydantic schemas and domain models
@@ -139,22 +153,17 @@ samvedna/
 │   │   │   ├── alert_service.py       # Multi-agency alert dispatch hub
 │   │   │   ├── distress_scoring.py    # Restored 5-component DDS engine
 │   │   │   ├── intervention.py        # Section 15A statutory protocol matcher
-│   │   │   ├── llm_service.py         # Groq LPU conversational empathy engine
+│   │   │   ├── llm_service.py         # Conversational empathy service
 │   │   │   ├── mood_estimator.py      # Discrete mood and affect classification
 │   │   │   ├── multimodal_fusion.py   # Audio-text valence and arousal fusion
 │   │   │   ├── nlp_engine.py          # Multilingual threat & boycott NLP
-│   │   │   ├── stt_bridge.py          # Sarvam Saaras v3 verbatim STT bridge
+│   │   │   ├── stt_bridge.py          # Speech-to-text verbatim memory bridge
 │   │   │   ├── voice_analytics.py     # Wiener-Khinchin FFT acoustic engine
 │   │   │   └── xai_explainer.py       # Causal factor attribution engine
 │   │   ├── config.py           # Centralized environment settings
 │   │   ├── database.py         # Mock in-memory database & longitudinal records
 │   │   └── main.py             # FastAPI application entry point
-│   ├── static/
-│   │   ├── css/                # Application stylesheet and typography
-│   │   ├── js/
-│   │   │   ├── app.js          # Client-side audio recorder, Web Speech API, UI
-│   │   │   └── translations.js # 5-language localization dictionaries
-│   │   └── index.html          # Interactive dual-portal web interface
+│   ├── static/                 # Fallback static assets
 │   └── requirements.txt        # Backend dependency specification
 ├── .env.example                # Environment configuration template
 ├── .gitignore                  # Production Git ignore rules
@@ -253,7 +262,22 @@ Or run directly via Uvicorn with reload support:
 uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 6.2. Service Access Points
+### 6.2. Frontend Development (Optional Live Hot-Reload)
+To run the React Neumorphic client with live Vite hot-reloading:
+```bash
+cd client
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser. All API calls automatically proxy to the FastAPI backend at port 8000.
+
+To build the client for production serving via FastAPI:
+```bash
+cd client
+npm run build
+```
+
+### 6.3. Service Access Points
 Once started, navigate to:
 - **Web Application Portal**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - **Interactive OpenAPI / Swagger Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)

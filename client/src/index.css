@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* ==========================================================================
+     Neumorphic (Soft UI) Surfaces & Shadows
+     Base canvas color: #e9eef5
+     Dark ambient shadow: #c5d0e0
+     Light highlight: #ffffff
+     ========================================================================== */
+
+  .neu-flat {
+    background: #e9eef5;
+    box-shadow: 8px 8px 18px #c5d0e0, -8px -8px 18px #ffffff;
+    border-radius: 1.25rem;
+  }
+
+  .neu-card {
+    background: #e9eef5;
+    box-shadow: 7px 7px 16px #c7d2e3, -7px -7px 16px #ffffff;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .neu-card-sm {
+    background: #e9eef5;
+    box-shadow: 4px 4px 10px #c9d4e4, -4px -4px 10px #ffffff;
+    border-radius: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .neu-btn {
+    background: #e9eef5;
+    box-shadow: 5px 5px 12px #c5d0e0, -5px -5px 12px #ffffff;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neu-btn:hover {
+    box-shadow: 6px 6px 14px #bfcbdd, -6px -6px 14px #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .neu-btn:active {
+    box-shadow: inset 3px 3px 6px #c5d0e0, inset -3px -3px 6px #ffffff;
+    transform: translateY(0);
+  }
+
+  .neu-btn-circle {
+    background: #e9eef5;
+    box-shadow: 6px 6px 14px #c5d0e0, -6px -6px 14px #ffffff;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neu-btn-circle:hover {
+    box-shadow: 8px 8px 16px #bfcbdd, -8px -8px 16px #ffffff;
+  }
+
+  .neu-btn-circle:active {
+    box-shadow: inset 4px 4px 8px #c5d0e0, inset -4px -4px 8px #ffffff;
+  }
+
+  /* Inset / Pressed / Recessed */
+  .neu-inset {
+    background: #e4ebf3;
+    box-shadow: inset 4px 4px 8px #c7d2e3, inset -4px -4px 8px #ffffff;
+    border-radius: 0.875rem;
+  }
+
+  .neu-inset-deep {
+    background: #e2e8f1;
+    box-shadow: inset 6px 6px 14px #c2cde0, inset -6px -6px 14px #ffffff;
+    border-radius: 1.25rem;
+  }
+
+  /* Active Pill / Tab */
+  .neu-pill-active {
+    background: #e9eef5;
+    box-shadow: inset 3px 3px 6px #c7d2e3, inset -3px -3px 6px #ffffff;
+    color: #4f46e5;
+  }
+
+  .neu-pill-inactive {
+    background: transparent;
+    color: #64748b;
+  }
+  .neu-pill-inactive:hover {
+    color: #1e293b;
+  }
+
+  /* Emergency SOS Neumorphic styling */
+  .neu-sos {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 6px 6px 14px rgba(220, 38, 38, 0.35), -5px -5px 12px #ffffff;
+    border: 1px solid rgba(254, 202, 202, 0.4);
+    color: #ffffff;
+    transition: all 0.2s ease;
+  }
+
+  .neu-sos:hover {
+    box-shadow: 8px 8px 18px rgba(220, 38, 38, 0.45), -6px -6px 14px #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .neu-sos:active {
+    box-shadow: inset 3px 3px 6px #991b1b, inset -2px -2px 5px rgba(255, 255, 255, 0.2);
+    transform: translateY(0);
+  }
+}
+
+/* Custom soft scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #e4ebf3;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5d0e0;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aab8ce;
+}

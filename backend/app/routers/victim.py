@@ -418,3 +418,17 @@ async def trigger_emergency_sos(
         "interventions": interventions,
         "guidance": "Police protection unit dispatched under Section 15A. Keep phone active and remain in a locked, secure room."
     }
+
+@router.post("/transcribe")
+async def transcribe_speech_sample(audio_file: UploadFile = File(...)):
+    """Lightweight speech-to-text endpoint for chat speech-to-text input across all browsers."""
+    audio_bytes = await audio_file.read()
+    if not audio_bytes or len(audio_bytes) < 100:
+        return {"status": "error", "transcript": ""}
+    result = stt_bridge.transcribe(audio_bytes, filename=audio_file.filename or "speech.wav")
+    return {
+        "status": "success" if result.get("success") else "fallback",
+        "transcript": result.get("transcript", ""),
+        "confidence": result.get("confidence", "low")
+    }
+

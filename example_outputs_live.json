@@ -21,7 +21,7 @@
     "response_mode": "positive",
     "confidence": 0.63,
     "reason": "Text establishes primary semantic intent as 'casual_conversation'. Positive user expression confirmed.",
-    "response": "That’s fantastic to hear! I hope the rest of your day stays just as bright."
+    "response": "That’s wonderful to hear! May your day stay bright and joyful."
   },
   "I'm really excited!": {
     "text": "I'm really excited!",
@@ -33,7 +33,7 @@
     "response_mode": "positive",
     "confidence": 0.63,
     "reason": "Text establishes primary semantic intent as 'casual_conversation'. Positive user expression confirmed.",
-    "response": "That’s wonderful—so glad you’re feeling excited! Enjoy every moment of it."
+    "response": "Your excitement is contagious—hope the energy carries you through an amazing day!"
   },
   "Tell me what FastAPI is.": {
     "text": "Tell me what FastAPI is.",
@@ -45,7 +45,7 @@
     "response_mode": "neutral",
     "confidence": 0.9,
     "reason": "Text establishes primary semantic intent as 'information_seeking'. Informational request classified as neutral informative response mode.",
-    "response": "FastAPI is a modern, high‑performance Python web framework for building APIs that uses standard type hints to provide automatic validation, serialization, and interactive documentation. It’s built on Starlette and Pydantic, making it fast, developer‑friendly, and suitable for everything from small services to large applications."
+    "response": "FastAPI is a modern, high‑performance Python web framework for building APIs, using type hints to automatically generate validation and interactive documentation. It’s praised for its speed, simplicity, and developer‑friendly features."
   },
   "I'm worried about my exam.": {
     "text": "I'm worried about my exam.",
@@ -57,7 +57,7 @@
     "response_mode": "supportive",
     "confidence": 0.71,
     "reason": "Text establishes primary semantic intent as 'emotional_sharing'. Negative valence triggers compassionate supportive response.",
-    "response": "I hear how stressful the exam feels right now, and that’s completely understandable. Try breaking your study time into short, focused blocks with brief breaks—this can help calm the anxiety and boost your confidence. Remember, you’ve prepared for this, and taking one step at a time will get you through."
+    "response": "I hear how stressful the exam feels right now, and it’s completely natural to feel anxious. Try taking a few deep breaths and breaking your study into small, manageable chunks—you’ll find it easier to stay focused. Remember you’ve put in effort, and you’re not alone in facing this challenge."
   },
   "I feel overwhelmed and don't know what to do.": {
     "text": "I feel overwhelmed and don't know what to do.",
@@ -69,6 +69,6 @@
     "response_mode": "distress_support",
     "confidence": 0.79,
     "reason": "Text establishes primary semantic intent as 'distress_support_seeking'. Support-seeking intent triggers empathetic supportive guidance.",
-    "response": "I’m really sorry you’re feeling this way—you’re not alone in this. Try a quick grounding exercise: notice five things you can see, four you can touch, three you can hear, two you can smell, and one you can taste, then take a slow, deep breath. If the overwhelm becomes too intense, please consider calling the National Helpline at 14566 or, if you feel unsafe, dial 112 for immediate help."
+    "response": "I hear how overwhelming things feel right now, and it’s okay to pause and take a breath—try the 5‑4‑3‑2‑1 grounding: notice five things you see, four you can touch, three you hear, two you smell, and one you taste. Remember you’re not alone; you can call the National Helpline at 14566 or, if you ever feel unsafe, dial 112 for immediate help. Take one small step at a time, and be gentle with yourself."
   }
 }
