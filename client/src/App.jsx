@@ -94,15 +94,17 @@ export default function App() {
 
       {/* Main Full-Width Application Body */}
       <div className="w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-5 flex-1 space-y-4">
-        {/* Live Police Priority Alerts Banner (If Active) */}
-        <LiveAlertsBanner
-          alerts={alerts}
-          onAcknowledge={handleAcknowledgeAlert}
-          onSelectVictim={handleSelectVictim}
-        />
+        {/* Live Police Priority Alerts Banner (For Official & Clinical Tabs) */}
+        {(activeTab === 'TRIAGE' || activeTab === 'COUNSELLOR') && (
+          <LiveAlertsBanner
+            alerts={alerts}
+            onAcknowledge={handleAcknowledgeAlert}
+            onSelectVictim={handleSelectVictim}
+          />
+        )}
 
-        {/* Emergency Hotlines Strip (14566, 112, 14416, 15100) */}
-        <EmergencyHelplines />
+        {/* Emergency Hotlines Strip (Only on Normal User / Survivor Intake Tab) */}
+        {activeTab === 'VICTIM' && <EmergencyHelplines />}
 
         {/* Tab 1: District Police & Magistrate Triage */}
         {activeTab === 'TRIAGE' && (

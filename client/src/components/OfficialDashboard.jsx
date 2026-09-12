@@ -316,16 +316,16 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center space-x-2">
                           <span className="font-bold text-xs text-slate-900">
-                            {item.victim_code}
+                            {item.code_name || (item.victim_code ? item.victim_code.replace(' (Anonymized)', '') : 'Case')}
                           </span>
                           <span className="text-[10px] text-slate-500 font-mono font-medium">
                             [{item.victim_id}]
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-600 font-medium line-clamp-1 font-mono">
-                          {item.code_name || item.victim_code}
+                        <span className="text-[11px] text-slate-600 font-medium line-clamp-1">
+                          {item.sections_invoked || item.summary}
                         </span>
                       </div>
 
@@ -378,7 +378,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                     </span>
                   </div>
                   <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <span className="font-mono">{activeCase.code_name || activeCase.victim_code}</span>
+                    <span className="font-mono">{activeCase.code_name || (activeCase.victim_code ? activeCase.victim_code.replace(' (Anonymized)', '') : 'Case')}</span>
                     <span className={getRiskBadgeClass(activeCase.current_risk_level)}>
                       {activeCase.current_risk_level} PRIORITY
                     </span>

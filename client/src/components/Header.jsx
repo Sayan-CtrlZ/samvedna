@@ -98,31 +98,35 @@ export default function Header({
 
         {/* Right Side Action Controls */}
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {/* Active Alerts Button */}
-          <button
-            onClick={onToggleAlertsDrawer}
-            className="px-3 py-1.5 rounded-lg bg-red-950/70 hover:bg-red-900/90 border border-red-500/40 text-red-100 text-xs font-semibold flex items-center space-x-1.5 transition-colors"
-            title="View Live Priority Police Alerts"
-          >
-            <Bell className="w-3.5 h-3.5 text-red-400" />
-            <span className="hidden sm:inline">Alerts</span>
-            {activeAlertsCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-bold">
-                {activeAlertsCount}
-              </span>
-            )}
-          </button>
+          {/* Active Alerts Button (For Police & Magistrate / Clinical Officials) */}
+          {activeTab !== 'VICTIM' && (
+            <button
+              onClick={onToggleAlertsDrawer}
+              className="px-3 py-1.5 rounded-lg bg-red-950/70 hover:bg-red-900/90 border border-red-500/40 text-red-100 text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+              title="View Live Priority Police Alerts"
+            >
+              <Bell className="w-3.5 h-3.5 text-red-400" />
+              <span className="hidden sm:inline">Alerts</span>
+              {activeAlertsCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                  {activeAlertsCount}
+                </span>
+              )}
+            </button>
+          )}
 
-          {/* Emergency SOS Trigger */}
-          <button
-            onClick={onTriggerSos}
-            className="btn-danger text-xs font-bold pulse-emergency flex items-center space-x-1.5"
-            title="Instant Police & Crisis Dispatch"
-          >
-            <ShieldAlert className="w-4 h-4" />
-            <span className="hidden sm:inline">EMERGENCY SOS</span>
-            <span className="sm:hidden">SOS</span>
-          </button>
+          {/* Emergency SOS Trigger (Only on Survivor Intake / Normal User tab) */}
+          {activeTab === 'VICTIM' && (
+            <button
+              onClick={onTriggerSos}
+              className="btn-danger text-xs font-bold pulse-emergency flex items-center space-x-1.5"
+              title="Instant Police & Crisis Dispatch"
+            >
+              <ShieldAlert className="w-4 h-4" />
+              <span className="hidden sm:inline">EMERGENCY SOS</span>
+              <span className="sm:hidden">SOS</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
