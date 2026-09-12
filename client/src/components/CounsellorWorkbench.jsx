@@ -342,81 +342,100 @@ export default function CounsellorWorkbench({
           </div>
         </div>
 
-        {/* Forensic Acoustic Diagnostics Grid (5 cols) */}
-        <div className="lg:col-span-5 gov-card p-4 space-y-3">
-          <div className="border-b border-slate-200 pb-2.5">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Volume2 className="w-3.5 h-3.5 text-sky-700" />
-              <span>Forensic Acoustic Prosody Diagnostics</span>
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              Biomarkers derived from 16kHz speech analysis during survivor check-ins.
+        {/* Separate Voice & Chat Metrics Column (5 cols) */}
+        <div className="lg:col-span-5 space-y-3">
+          {/* Survivor Reported Issue Brief */}
+          <div className="gov-card p-3.5 space-y-1">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+              Survivor Reported Issue
+            </span>
+            <p className="text-xs text-slate-800 leading-relaxed font-medium">
+              {currentVictim?.summary || 'Awaiting initial survivor intake description...'}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Vocal Jitter %</span>
-              <span className="font-bold text-sky-700 text-sm">
-                {acoustic.jitter_pct ? `${acoustic.jitter_pct}%` : '3.8%'}
+          {/* Voice Biomarker Metrics Card */}
+          <div className="gov-card p-4 space-y-2.5">
+            <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Voice Biomarker Metrics (Audio)</span>
+              </h3>
+              <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                {acoustic.acoustic_stress_score !== undefined ? `${acoustic.acoustic_stress_score} / 100` : 'N/A'}
               </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Clinical Norm: &lt;1.0%</span>
             </div>
 
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Vocal Shimmer %</span>
-              <span className="font-bold text-amber-700 text-sm">
-                {acoustic.shimmer_pct ? `${acoustic.shimmer_pct}%` : '11.2%'}
-              </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Clinical Norm: &lt;3.5%</span>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-slate-500 font-semibold block">Tremor Intensity</span>
+                <span className="font-bold text-rose-700 text-sm">
+                  {acoustic.tremor_intensity !== undefined ? `${acoustic.tremor_intensity} / 100` : 'N/A'}
+                </span>
+              </div>
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-slate-500 font-semibold block">Vocal Jitter</span>
+                <span className="font-bold text-indigo-700 text-sm">
+                  {acoustic.jitter_pct !== undefined ? `${acoustic.jitter_pct}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-slate-500 font-semibold block">Vocal Shimmer</span>
+                <span className="font-bold text-amber-700 text-sm">
+                  {acoustic.shimmer_pct !== undefined ? `${acoustic.shimmer_pct}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-slate-500 font-semibold block">Mean Pitch (F0)</span>
+                <span className="font-bold text-teal-700 text-sm">
+                  {acoustic.pitch_mean_hz !== undefined ? `${acoustic.pitch_mean_hz} Hz` : 'N/A'}
+                </span>
+              </div>
             </div>
 
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Micro-Tremor (4-10Hz)</span>
-              <span className="font-bold text-rose-700 text-sm">
-                {acoustic.tremor_intensity ? `${acoustic.tremor_intensity} / 100` : '74.0 / 100'}
-              </span>
-              <span className="text-[9px] text-rose-600 block mt-0.5 font-medium">Sympathetic Constriction</span>
-            </div>
-
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Pitch (F0 Mean Hz)</span>
-              <span className="font-bold text-teal-700 text-sm">
-                {acoustic.pitch_mean_hz ? `${acoustic.pitch_mean_hz} Hz` : '248.0 Hz'}
-              </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Elevated Vocal Strain</span>
-            </div>
-
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Harmonics / Noise (HNR)</span>
-              <span className="font-bold text-emerald-700 text-sm">
-                {acoustic.hnr_db ? `${acoustic.hnr_db} dB` : '10.4 dB'}
-              </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Dysphonic Perturbation</span>
-            </div>
-
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold block">Pause / Hesitation Ratio</span>
-              <span className="font-bold text-indigo-700 text-sm">
-                {acoustic.pause_ratio ? `${acoustic.pause_ratio * 100}%` : '40.0%'}
-              </span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Affective Blocking</span>
+            <div className="p-2.5 bg-indigo-50/60 rounded border border-indigo-200 text-xs">
+              <span className="text-[10px] text-indigo-900 font-bold block mb-0.5">Classification</span>
+              <p className="text-[11px] text-indigo-950 font-medium">
+                {acoustic.acoustic_classification || 'No audio sample recorded yet for this session'}
+              </p>
             </div>
           </div>
 
-          {/* Diagnostic Assessment Card */}
-          <div className="p-3 bg-purple-50/70 rounded border border-purple-200 space-y-1 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider">
-                Forensic Psychiatric Summary
-              </span>
-              <span className="badge-critical">
-                {acoustic.acoustic_classification || 'High Vocal Tremor & Threat Constriction'}
+          {/* Chat & Text Metrics Card */}
+          <div className="gov-card p-4 space-y-2.5">
+            <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
+                <span>Chat & Text Metrics (NLP)</span>
+              </h3>
+              <span className="font-mono font-bold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                {caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined
+                  ? `${caseFile.latest_nlp_emotion_matrix.nlp_distress_score} / 100`
+                  : 'N/A'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-800 leading-relaxed">
-              Vocal tremor and elevated fundamental frequency perturbation indicate severe neuroendocrine arousal consistent with active witness coercion and impending trial apprehension.
-            </p>
+
+            {caseFile?.latest_nlp_emotion_matrix ? (
+              <div className="space-y-2 text-xs">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                    <span className="text-[10px] text-slate-500 font-semibold block">Fear Score</span>
+                    <span className="font-bold text-purple-700 text-sm">{caseFile.latest_nlp_emotion_matrix.fear_score ?? 0}%</span>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                    <span className="text-[10px] text-slate-500 font-semibold block">Hopelessness</span>
+                    <span className="font-bold text-purple-700 text-sm">{caseFile.latest_nlp_emotion_matrix.hopelessness_score ?? 0}%</span>
+                  </div>
+                </div>
+                {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords?.length > 0 && (
+                  <div className="p-2 bg-purple-50 rounded border border-purple-200 text-[11px] text-purple-900">
+                    <strong>Detected Threat Cues:</strong> {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords.join(', ')}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 font-normal">No text or chat messages analyzed yet for this session</p>
+            )}
           </div>
         </div>
 

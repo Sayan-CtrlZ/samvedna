@@ -61,7 +61,7 @@ async def get_triage_case_queue(
         
     if search:
         s = search.lower()
-        cases = [c for c in cases if s in c["victim_id"].lower() or s in c["district"].lower() or s in c["state"].lower() or s in c["sections_invoked"].lower()]
+        cases = [c for c in cases if s in c["victim_id"].lower() or s in c["district"].lower() or s in c["state"].lower() or s in c.get("summary", "").lower()]
         
     priority_order = {"CRITICAL": 0, "HIGH": 1, "MODERATE": 2, "LOW": 3}
     cases.sort(key=lambda x: (priority_order.get(x["current_risk_level"], 4), -x["current_dds"]))
