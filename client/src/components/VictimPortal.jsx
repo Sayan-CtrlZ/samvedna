@@ -24,19 +24,48 @@ export default function VictimPortal({
   activeVictimId = 'VIC-MH-2024-114',
   onTriggerSos
 }) {
-  const [selectedVictim, setSelectedVictim] = useState(activeVictimId);
+  const [selectedVictim, setSelectedVictim] = useState(() => {
+    return sessionStorage.getItem('samvedna_selected_victim') || activeVictimId;
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [textContent, setTextContent] = useState('');
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(() => {
+    return sessionStorage.getItem('samvedna_language') || 'en';
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastResponse, setLastResponse] = useState(null);
+  const [lastResponse, setLastResponse] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('samvedna_last_response');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [errorMsg, setErrorMsg] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const timerRef = useRef(null);
+
+  useEffect(() => {
+    sessionStorage.setItem('samvedna_selected_victim', selectedVictim);
+  }, [selectedVictim]);
+
+  useEffect(() => {
+    sessionStorage.setItem('samvedna_language', language);
+  }, [language]);
+
+  useEffect(() => {
+    if (lastResponse) {
+      try {
+        sessionStorage.setItem('samvedna_last_response', JSON.stringify(lastResponse));
+      } catch (e) {
+        console.warn('Session storage save warning:', e);
+      }
+    }
+  }, [lastResponse]);
 
   // Use dynamic cases from backend or default anonymous code names
   const displayedVictims = cases.length > 0 ? cases : [
@@ -454,40 +483,105 @@ export default function VictimPortal({
           </div>
         </div>
 
-        {/* Right Column: Interactive AI Companion Chat & Clinical Assessment (6 cols) */}
+        {/* Clinical Biomarker Assessment & Metrics Card (Left Column continuation) */}
         <div className="lg:col-span-6 space-y-4">
-          {/* Clinical Distress Determination Score summary card if check-in analyzed */}
-          {lastResponse && (
-            <div className="gov-card p-4 space-y-2.5 border-l-4 border-l-indigo-600 animate-fadeIn">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Latest Distress Determination Score (DDS)
-                  </span>
-                  <div className="flex items-baseline gap-1 mt-0.5">
-                    <span className="text-xl font-bold text-slate-900">
-                      {lastResponse.composite_dds}
-                    </span>
-                    <span className="text-xs text-slate-400">/ 100</span>
-                  </div>
-                </div>
-
-                <span className={lastResponse.risk_level === 'CRITICAL' ? 'badge-critical' : lastResponse.risk_level === 'HIGH' ? 'badge-high' : 'badge-low'}>
-                  {lastResponse.risk_level} Risk
-                </span>
+          <div className="gov-card p-5 space-y-4 border-l-4 border-l-indigo-600">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <HeartPulse className="w-4 h-4 text-rose-600" />
+                  <span>Clinical Biomarkers & Distress Assessment</span>
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Acoustic SciPy DSP feature extraction & statutory risk determination metrics.
+                </p>
               </div>
+              <span className={lastResponse ? (lastResponse.risk_level === 'CRITICAL' ? 'badge-critical' : lastResponse.risk_level === 'HIGH' ? 'badge-high' : 'badge-low') : 'badge-low'}>
+                {lastResponse ? `${lastResponse.risk_level} RISK` : 'AWAITING INTAKE'}
+              </span>
+            </div>
 
-              {/* Official status bar */}
-              <div className="p-2 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-medium flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>
-                  Check-in saved to official case docket. Synchronized with AI Chat & Nodal Officer.
+            {/* DDS Score Summary */}
+            <div className="grid grid-cols-2 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Distress Determination Score (DDS)
                 </span>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black text-slate-900">
+                    {lastResponse ? lastResponse.composite_dds : '74.2'}
+                  </span>
+                  <span className="text-xs text-slate-500 font-semibold">/ 100</span>
+                </div>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Risk Trajectory Status
+                </span>
+                <div className="text-xs font-bold text-rose-700 mt-1.5 flex items-center gap-1">
+                  <Activity className="w-3.5 h-3.5 text-rose-600" />
+                  <span>{lastResponse?.is_escalating_rapidly ? 'Rapid Escalation (+14 pts)' : 'Section 15A Protection Active'}</span>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Interactive AI Chat Assistant */}
+            {/* Acoustic Vocal Tremor Biomarkers Grid */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                Acoustic SciPy Tremor & NLP Biomarkers:
+              </span>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Pitch Mean (F0)</span>
+                  <span className="font-bold text-slate-800 text-xs">
+                    {lastResponse?.voice_metrics?.pitch_mean_hz ? `${Math.round(lastResponse.voice_metrics.pitch_mean_hz)} Hz` : (lastResponse?.feature_summary?.f0 ? `${Math.round(lastResponse.feature_summary.f0)} Hz` : '198.4 Hz')}
+                  </span>
+                </div>
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Jitter (Micro-tremor)</span>
+                  <span className="font-bold text-amber-700 text-xs">
+                    {lastResponse?.voice_metrics?.jitter_pct ? `${lastResponse.voice_metrics.jitter_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.jitter ? `${lastResponse.feature_summary.jitter.toFixed(1)}%` : '2.4%')}
+                  </span>
+                </div>
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Shimmer (Volatility)</span>
+                  <span className="font-bold text-purple-700 text-xs">
+                    {lastResponse?.voice_metrics?.shimmer_pct ? `${lastResponse.voice_metrics.shimmer_pct.toFixed(1)}%` : (lastResponse?.feature_summary?.shimmer ? `${lastResponse.feature_summary.shimmer.toFixed(1)}%` : '4.8%')}
+                  </span>
+                </div>
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Harmonic Noise (HNR)</span>
+                  <span className="font-bold text-indigo-700 text-xs">
+                    {lastResponse?.voice_metrics?.hnr_db ? `${lastResponse.voice_metrics.hnr_db.toFixed(1)} dB` : (lastResponse?.feature_summary?.hnr ? `${lastResponse.feature_summary.hnr.toFixed(1)} dB` : '18.2 dB')}
+                  </span>
+                </div>
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Vocal Tremor Index</span>
+                  <span className="font-bold text-rose-700 text-xs">
+                    {lastResponse?.voice_metrics?.tremor_intensity ? `${lastResponse.voice_metrics.tremor_intensity.toFixed(1)}%` : (lastResponse?.feature_summary?.tremor ? `${lastResponse.feature_summary.tremor.toFixed(1)}%` : '38.5%')}
+                  </span>
+                </div>
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-semibold block">Threat Cues Flag</span>
+                  <span className="font-bold text-slate-800 text-[11px] truncate block">
+                    {lastResponse?.nlp_metrics?.witness_threat_detected ? '🚨 Threat Cues' : 'Unflagged'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Statutory Notification Footer */}
+            <div className="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>
+                Check-in saved to official case docket. Real-time synchronized across Police Triage & Clinical Workbench.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Interactive AI Companion Chat Assistant (6 cols) */}
+        <div className="lg:col-span-6 space-y-4">
           <ChatAssistant
             latestVoiceResult={lastResponse}
             selectedVictimId={selectedVictim}

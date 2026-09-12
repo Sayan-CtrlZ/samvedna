@@ -13,20 +13,35 @@ export default function ChatAssistant({
   const isProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
   const setIsProcessing = externalSetIsProcessing || setInternalIsProcessing;
 
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      sender: 'assistant',
-      text: 'Hello. I am here to support you and listen to whatever is on your mind. You can share your thoughts or concerns safely. How are you feeling today?',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    },
-  ]);
+  const defaultWelcomeMessage = {
+    id: 'welcome',
+    sender: 'assistant',
+    text: 'Hello. I am here to support you and listen to whatever is on your mind. You can share your thoughts or concerns safely. How are you feeling today?',
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  };
+
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(`samvedna_chat_${selectedVictimId}`);
+      return saved ? JSON.parse(saved) : [defaultWelcomeMessage];
+    } catch (e) {
+      return [defaultWelcomeMessage];
+    }
+  });
   const [inputText, setInputText] = useState('');
   const [isListeningSpeech, setIsListeningSpeech] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(`samvedna_chat_${selectedVictimId}`, JSON.stringify(messages));
+    } catch (e) {
+      console.warn('Chat storage warning:', e);
+    }
+  }, [messages, selectedVictimId]);
 
   // Sync Voice Check-in results directly into the chat conversation
   useEffect(() => {
@@ -298,7 +313,7 @@ export default function ChatAssistant({
   };
 
   return (
-    <div className="bg-white border-2 border-sky-200/80 shadow-md shadow-sky-100/40 rounded-2xl p-6 sm:p-7 flex flex-col h-[560px]">
+    <div className="bg-white border-2 border-sky-200/80 shadow-md shadow-sky-100/40 rounded-2xl p-6 sm:p-7 flex flex-col h-[680px]">
       {/* Header */}
       <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 mb-4">
         <div className="flex items-center gap-3">
