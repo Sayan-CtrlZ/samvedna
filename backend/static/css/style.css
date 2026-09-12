@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   SAMVEDNA AI - Enterprise Visual Design System
+   National Helpline Against Atrocities (NHAA 14566)
+   - Primary: Deep Navy Blue (#0A1B3B / #0F2557 / #183B88)
+   - Secondary Accent: Soft Calming Lavender (#8B7FD6 / #7C6EE6 / #F0EEFC)
+   - Backgrounds: Very light clean tint (#F8FAFC / #FAF9FE)
+   - Status: High (#FFEAEA), Med (#FFF4E5), Low (#E6F9F4), Info (#F0EEFC)
+   - Cards: 18px radius, subtle border (#E2E8F0), soft ambient shadows
+   ========================================================================== */
+
+:root {
+  /* Brand Navy Palette */
+  --color-primary-navy: #0F2557;
+  --color-navy-dark: #0A1B3B;
+  --color-navy-medium: #152E68;
+  --color-navy-light: #183B88;
+  --color-navy-subtle: #234CA7;
+  
+  /* Lavender & Soft Purple Accent */
+  --color-accent-lavender: #8B7FD6;
+  --color-accent-purple: #7C6EE6;
+  --color-lavender-deep: #5C4EB7;
+  --color-lavender-subtle: #F0EEFC;
+  --color-lavender-surface: #FAF9FE;
+  --color-lavender-border: #E0DBFB;
+
+  /* Surfaces & Backgrounds */
+  --color-bg-main: #F8FAFC;
+  --color-bg-hero: linear-gradient(135deg, #FFFFFF 0%, #FAF9FE 50%, #F4F2FF 100%);
+  --color-card-bg: #FFFFFF;
+  --color-card-border: #E8ECF5;
+  --color-card-border-hover: #D5DEF0;
+  --color-card-shadow: 0 4px 20px -2px rgba(15, 37, 87, 0.05), 0 2px 6px -1px rgba(15, 37, 87, 0.03);
+  --color-card-shadow-hover: 0 10px 30px -4px rgba(15, 37, 87, 0.09), 0 4px 10px -2px rgba(15, 37, 87, 0.05);
+
+  /* Typography Colors */
+  --color-text-title: #0F2557;
+  --color-text-body: #334155;
+  --color-text-muted: #64748B;
+  --color-text-light: #94A3B8;
+
+  /* Semantic Status */
+  --status-high-bg: #FFF1F2;
+  --status-high-text: #E03131;
+  --status-high-border: #FECDD3;
+
+  --status-med-bg: #FFFBEB;
+  --status-med-text: #D97706;
+  --status-med-border: #FDE68A;
+
+  --status-low-bg: #ECFDF5;
+  --status-low-text: #059669;
+  --status-low-border: #A7F3D0;
+
+  --status-info-bg: #F0EEFC;
+  --status-info-text: #5C4EB7;
+  --status-info-border: #DDD6FE;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Tamil', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-body);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F4F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Card Design System */
+.samvedna-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 18px;
+  box-shadow: var(--color-card-shadow);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.samvedna-card:hover {
+  border-color: var(--color-card-border-hover);
+  box-shadow: var(--color-card-shadow-hover);
+}
+
+/* Status Badges - Strict Pill Shapes */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.status-pill-high {
+  background-color: var(--status-high-bg);
+  color: var(--status-high-text);
+  border: 1px solid var(--status-high-border);
+}
+
+.status-pill-medium {
+  background-color: var(--status-med-bg);
+  color: var(--status-med-text);
+  border: 1px solid var(--status-med-border);
+}
+
+.status-pill-low {
+  background-color: var(--status-low-bg);
+  color: var(--status-low-text);
+  border: 1px solid var(--status-low-border);
+}
+
+.status-pill-neutral {
+  background-color: var(--status-info-bg);
+  color: var(--status-info-text);
+  border: 1px solid var(--status-info-border);
+}
+
+/* Primary Buttons */
+.btn-navy {
+  background: linear-gradient(135deg, #0F2557 0%, #183B88 100%);
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(15, 37, 87, 0.15);
+}
+.btn-navy:hover {
+  background: linear-gradient(135deg, #183B88 0%, #234CA7 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 37, 87, 0.22);
+}
+.btn-navy:active {
+  transform: scale(0.99);
+}
+
+.btn-lavender {
+  background: linear-gradient(135deg, #7C6EE6 0%, #6A5AD8 100%);
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(124, 110, 230, 0.25);
+}
+.btn-lavender:hover {
+  background: linear-gradient(135deg, #6A5AD8 0%, #5C4EB7 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 110, 230, 0.35);
+}
+.btn-lavender:active {
+  transform: scale(0.99);
+}
+
+/* Ghost / Pill Buttons */
+.btn-pill-subtle {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: var(--color-text-title);
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-pill-subtle:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  transform: translateY(-1px);
+}
+
+/* Chat Message Bubbles */
+.chat-bubble-bot {
+  background-color: #F6F5FD;
+  border: 1px solid #EAE6FC;
+  color: #1E293B;
+  border-radius: 18px 18px 18px 4px;
+  padding: 14px 18px;
+  line-height: 1.6;
+  box-shadow: 0 2px 10px rgba(139, 127, 214, 0.06);
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, #0F2557 0%, #152E68 100%);
+  border: 1px solid #234CA7;
+  color: #FFFFFF;
+  border-radius: 18px 18px 4px 18px;
+  padding: 14px 18px;
+  line-height: 1.6;
+  box-shadow: 0 3px 12px rgba(15, 37, 87, 0.12);
+}
+
+/* Emergency & Recording Pulse Animations */
+@keyframes emergency-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(224, 49, 49, 0);
+  }
+}
+
+.pulse-emergency {
+  animation: emergency-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes recording-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.45);
+    background-color: #DC2626;
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(224, 49, 49, 0);
+    background-color: #B91C1C;
+  }
+}
+
+.recording-active {
+  animation: recording-glow 1.6s infinite !important;
+}
+
+/* Waveform Canvas Box */
+.waveform-box {
+  background: linear-gradient(180deg, #FAF9FE 0%, #F5F3FF 100%);
+  border: 1px solid #EAE6FC;
+  border-radius: 14px;
+  position: relative;
+}
+
+.waveform-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#8B7FD6 0.75px, transparent 0.75px);
+  background-size: 14px 14px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* Preset Scenario Cards */
+.preset-card-btn {
+  background-color: #FFFFFF;
+  border: 1px solid #E8ECF5;
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(15, 37, 87, 0.03);
+}
+
+.preset-card-btn:hover {
+  background-color: #FAF9FE;
+  border-color: #C4B5FD;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(124, 110, 230, 0.1);
+}
+
+.preset-card-btn:active {
+  transform: scale(0.99);
+}
+
+/* Hotline Cards */
+.hotline-card {
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.hotline-card:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(15, 37, 87, 0.08);
+}
+
+/* Dropdown Menu Animation */
+.dropdown-menu-enter {
+  opacity: 0;
+  transform: scale(0.96) translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dropdown-menu-enter-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Essential Display & Alignment Fallbacks */
+.hidden {
+  display: none !important;
+}
+
+.flex {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+button, a {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Smooth Focus Rings for Accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #8B7FD6;
+  outline-offset: 2px;
+}
