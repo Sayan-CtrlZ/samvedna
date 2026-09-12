@@ -658,69 +658,69 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                   <button
                     onClick={() => handleIssueProtection('ARMED_POLICE_PICKET', 'Armed Police Picket at Residence (Sec 15A(6)(b))')}
                     disabled={isActionLoading}
-                    className="btn-3d btn-3d-red p-3 text-left flex items-start justify-between gap-2"
+                    className="p-3.5 text-left rounded-xl border border-rose-300 bg-rose-50/80 hover:bg-rose-100/90 text-rose-950 transition-all flex items-start justify-between gap-2 shadow-sm"
                   >
                     <div>
-                      <div className="font-black text-xs text-rose-900 flex items-center gap-1">
-                        <ShieldAlert className="w-3.5 h-3.5 text-rose-700" />
+                      <div className="font-bold text-xs text-rose-900 flex items-center gap-1.5">
+                        <ShieldAlert className="w-4 h-4 text-rose-600" />
                         <span>Armed Police Picket</span>
                       </div>
-                      <p className="text-[10px] text-rose-800 font-semibold mt-0.5 leading-tight">
+                      <p className="text-[11px] text-rose-700 font-medium mt-0.5 leading-tight">
                         Sec 15A(6)(b) • 24/7 armed guard at residence (2h SLA)
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-rose-700 flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                   </button>
 
                   <button
                     onClick={() => handleIssueProtection('SAFE_HOUSE_RELOCATION', 'Safe House Transit & Relocation (Sec 15A(6)(c))')}
                     disabled={isActionLoading}
-                    className="btn-3d btn-3d-indigo p-3 text-left flex items-start justify-between gap-2"
+                    className="p-3.5 text-left rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100/90 text-indigo-950 transition-all flex items-start justify-between gap-2 shadow-sm"
                   >
                     <div>
-                      <div className="font-black text-xs text-indigo-900 flex items-center gap-1">
-                        <Building className="w-3.5 h-3.5 text-indigo-700" />
+                      <div className="font-bold text-xs text-indigo-900 flex items-center gap-1.5">
+                        <Building className="w-4 h-4 text-indigo-600" />
                         <span>Safe House Relocation</span>
                       </div>
-                      <p className="text-[10px] text-indigo-800 font-semibold mt-0.5 leading-tight">
+                      <p className="text-[11px] text-indigo-700 font-medium mt-0.5 leading-tight">
                         Sec 15A(6)(c) • Confidential government transit shelter (24h SLA)
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-indigo-700 flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
                   </button>
 
                   <button
                     onClick={() => handleIssueProtection('TELE_MANAS_EMERGENCY', 'Tele-MANAS Psychiatric Escalation (Rule 5(1)(e))')}
                     disabled={isActionLoading}
-                    className="btn-3d btn-3d-green p-3 text-left flex items-start justify-between gap-2"
+                    className="p-3.5 text-left rounded-xl border border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-950 transition-all flex items-start justify-between gap-2 shadow-sm"
                   >
                     <div>
-                      <div className="font-black text-xs text-emerald-900 flex items-center gap-1">
-                        <HeartPulse className="w-3.5 h-3.5 text-emerald-700" />
+                      <div className="font-bold text-xs text-emerald-900 flex items-center gap-1.5">
+                        <HeartPulse className="w-4 h-4 text-emerald-600" />
                         <span>Tele-MANAS Emergency Escalation</span>
                       </div>
-                      <p className="text-[10px] text-emerald-800 font-semibold mt-0.5 leading-tight">
+                      <p className="text-[11px] text-emerald-700 font-medium mt-0.5 leading-tight">
                         Rule 5(1)(e) • Urgent clinical psychiatric trauma session (4h SLA)
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-emerald-700 flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                   </button>
 
                   <button
                     onClick={() => handleIssueProtection('EXPEDITE_INTERIM_RELIEF', 'Fast-Track Interim Relief DBT Sanction (Annexure I)')}
                     disabled={isActionLoading}
-                    className="btn-3d p-3 text-left flex items-start justify-between gap-2 bg-blue-100 border-blue-400 text-blue-950"
+                    className="p-3.5 text-left rounded-xl border border-blue-300 bg-blue-50/80 hover:bg-blue-100/90 text-blue-950 transition-all flex items-start justify-between gap-2 shadow-sm"
                   >
                     <div>
-                      <div className="font-black text-xs text-blue-900 flex items-center gap-1">
-                        <FileCheck className="w-3.5 h-3.5 text-blue-700" />
+                      <div className="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                        <FileCheck className="w-4 h-4 text-blue-600" />
                         <span>Expedite Interim Relief DBT</span>
                       </div>
-                      <p className="text-[10px] text-blue-800 font-semibold mt-0.5 leading-tight">
+                      <p className="text-[11px] text-blue-700 font-medium mt-0.5 leading-tight">
                         Annexure I • Fast-track pending 50% compensation grant (3 days)
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   </button>
                 </div>
               </div>
@@ -755,7 +755,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim }) 
                     <button
                       type="submit"
                       disabled={!officerNote.trim()}
-                      className="btn-3d btn-3d-indigo px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+                      className="mat-btn-indigo px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
                     >
                       <Send className="w-3 h-3" />
                       <span>Log Observation</span>

@@ -2,45 +2,63 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import EmergencyHelplines from './components/EmergencyHelplines';
 import OfficialDashboard from './components/OfficialDashboard';
+import CounsellorWorkbench from './components/CounsellorWorkbench';
+import AnalyticsView from './components/AnalyticsView';
 import VictimPortal from './components/VictimPortal';
 import LiveAlertsBanner from './components/LiveAlertsBanner';
+import AlertsDrawer from './components/AlertsDrawer';
 import EmergencySosModal from './components/EmergencySosModal';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('AUTHORITY'); // 'AUTHORITY' | 'VICTIM'
+  const [activeTab, setActiveTab] = useState('TRIAGE'); // 'TRIAGE' | 'COUNSELLOR' | 'ANALYTICS' | 'VICTIM'
   const [selectedVictimId, setSelectedVictimId] = useState('VIC-MH-2024-114');
   const [isSosOpen, setIsSosOpen] = useState(false);
+  const [isAlertsDrawerOpen, setIsAlertsDrawerOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [alerts, setAlerts] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [cases, setCases] = useState([]);
 
-  // Check health and load live alerts
-  const loadAlerts = async () => {
+  // Fetch metrics, cases, and alerts
+  const loadDashboardData = async () => {
     try {
-      const res = await fetch('/api/v1/alerts/feed');
-      if (res.ok) {
-        const data = await res.json();
+      const [resMetrics, resCases, resAlerts] = await Promise.all([
+        fetch('/api/v1/dashboard/metrics'),
+        fetch('/api/v1/dashboard/cases'),
+        fetch('/api/v1/alerts/feed')
+      ]);
+
+      if (resMetrics.ok) {
+        setMetrics(await resMetrics.json());
+      }
+      if (resCases.ok) {
+        const data = await resCases.json();
+        setCases(data.cases || []);
+      }
+      if (resAlerts.ok) {
+        const data = await resAlerts.json();
         setAlerts(data.alerts || []);
         setIsOnline(true);
       }
     } catch (e) {
-      console.warn('Could not load alerts feed:', e);
+      console.warn('Network sync warning:', e);
       setIsOnline(false);
     }
   };
 
   useEffect(() => {
-    loadAlerts();
-    const interval = setInterval(loadAlerts, 12000);
+    loadDashboardData();
+    const interval = setInterval(loadDashboardData, 12000);
     return () => clearInterval(interval);
   }, []);
 
-  // Handle alert acknowledgement & police dispatch
+  // Handle alert dispatching
   const handleAcknowledgeAlert = async (alertId) => {
     try {
       const formData = new FormData();
       formData.append('alert_id', alertId);
       formData.append('officer_name', 'Superintendent of Police / Special Duty Magistrate');
-      formData.append('action_taken', 'Dispatched Armed Police Picket & Relocation Team');
+      formData.append('action_taken', 'Dispatched Armed Police Picket under Section 15A');
 
       const res = await fetch('/api/v1/alerts/acknowledge', {
         method: 'POST',
@@ -48,85 +66,118 @@ export default function App() {
       });
 
       if (res.ok) {
-        await loadAlerts();
+        await loadDashboardData();
       }
     } catch (e) {
       console.error('Failed to acknowledge alert:', e);
     }
   };
 
-  // When a victim check-in is submitted from the Victim Portal
-  const handleCheckinSubmitted = (result) => {
-    loadAlerts();
-    if (result?.victim_id) {
-      setSelectedVictimId(result.victim_id);
-    }
-  };
-
   const handleSelectVictim = (victimId) => {
     setSelectedVictimId(victimId);
-    setActiveView('AUTHORITY');
+    setActiveTab('TRIAGE');
   };
 
   const activeAlertsCount = alerts.filter((a) => a.status === 'ACTIVE').length;
 
   return (
-    <div className="min-h-screen bg-[#eef2f7] p-3 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Top Header with Portal Navigation */}
-        <Header
-          activeView={activeView}
-          setActiveView={setActiveView}
-          onTriggerSos={() => setIsSosOpen(true)}
-          isOnline={isOnline}
-          activeAlertsCount={activeAlertsCount}
-        />
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col selection:bg-indigo-500 selection:text-white">
+      {/* Top Material Header */}
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onTriggerSos={() => setIsSosOpen(true)}
+        isOnline={isOnline}
+        activeAlertsCount={activeAlertsCount}
+        onToggleAlertsDrawer={() => setIsAlertsDrawerOpen(true)}
+      />
 
-        {/* Live Police Priority Alerts Banner */}
+      {/* Main Full-Width Application Body */}
+      <div className="w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-5 flex-1 space-y-4">
+        {/* Live Police Priority Alerts Banner (If Active) */}
         <LiveAlertsBanner
           alerts={alerts}
           onAcknowledge={handleAcknowledgeAlert}
           onSelectVictim={handleSelectVictim}
         />
 
-        {/* Emergency Helplines Bar (NHAA 14566, 112, 14416, 15100) */}
+        {/* Emergency Hotlines Strip (14566, 112, 14416, 15100) */}
         <EmergencyHelplines />
 
-        {/* Dynamic Portal View */}
-        <main className="mt-6">
-          {activeView === 'AUTHORITY' ? (
+        {/* Tab 1: District Police & Magistrate Triage */}
+        {activeTab === 'TRIAGE' && (
+          <main>
             <OfficialDashboard
               selectedVictimId={selectedVictimId}
               onSelectVictim={setSelectedVictimId}
             />
-          ) : (
+          </main>
+        )}
+
+        {/* Tab 2: Counsellor Clinical Workbench & Longitudinal Tracking */}
+        {activeTab === 'COUNSELLOR' && (
+          <main>
+            <CounsellorWorkbench
+              cases={cases}
+              selectedVictimId={selectedVictimId}
+              onSelectVictim={setSelectedVictimId}
+            />
+          </main>
+        )}
+
+        {/* Tab 3: National Policy & Distress Analytics */}
+        {activeTab === 'ANALYTICS' && (
+          <main>
+            <AnalyticsView
+              metrics={metrics}
+              cases={cases}
+            />
+          </main>
+        )}
+
+        {/* Tab 4: Survivor Voice Check-in Portal */}
+        {activeTab === 'VICTIM' && (
+          <main>
             <VictimPortal
               activeVictimId={selectedVictimId}
-              onCheckinSubmitted={handleCheckinSubmitted}
+              onCheckinSubmitted={() => {
+                loadDashboardData();
+              }}
               onTriggerSos={() => setIsSosOpen(true)}
             />
-          )}
-        </main>
-
-        {/* Emergency SOS Modal */}
-        <EmergencySosModal
-          isOpen={isSosOpen}
-          onClose={() => {
-            setIsSosOpen(false);
-            loadAlerts();
-          }}
-        />
-
-        {/* Authority Standard Footer */}
-        <footer className="mt-12 text-center text-xs text-slate-500 py-4 border-t border-slate-200">
-          <p className="font-semibold text-slate-600">
-            SAMVEDNA AI • Dynamic Mental Health Monitoring and Distress Prediction System
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Scheduled Castes and Scheduled Tribes (Prevention of Atrocities) Act, 1989 (Section 15A Witness Protection) • National Helpline Against Atrocities (14566)
-          </p>
-        </footer>
+          </main>
+        )}
       </div>
+
+      {/* Right Slide-over Alerts Drawer */}
+      <AlertsDrawer
+        isOpen={isAlertsDrawerOpen}
+        onClose={() => setIsAlertsDrawerOpen(false)}
+        alerts={alerts}
+        onAcknowledge={handleAcknowledgeAlert}
+        onSelectVictim={handleSelectVictim}
+      />
+
+      {/* Emergency SOS Modal */}
+      <EmergencySosModal
+        isOpen={isSosOpen}
+        onClose={() => {
+          setIsSosOpen(false);
+          loadDashboardData();
+        }}
+      />
+
+      {/* Enterprise Government Footer */}
+      <footer className="mt-8 bg-white border-t border-slate-200 py-4 px-4 sm:px-8 text-center text-xs text-slate-500">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="font-semibold text-slate-700">
+            SAMVEDNA AI • National Helpline Against Atrocities (14566) • Section 15A Witness Protection System
+          </p>
+          <p className="text-[11px] text-slate-400">
+            Scheduled Castes & Scheduled Tribes (Prevention of Atrocities) Act, 1989 • Data Encrypted & Confidential
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

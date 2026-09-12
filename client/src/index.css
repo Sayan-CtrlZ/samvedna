@@ -1,161 +1,179 @@
 @import "tailwindcss";
 
-@layer utilities {
-  /* ==========================================================================
-     Tactile 3D Elevated Buttons
-     ========================================================================== */
-  .btn-3d {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.1s ease-in-out;
-    border-radius: 0.875rem;
-  }
+/* ==========================================================================
+   SAMVEDNA AI - Material Theme & Enterprise Government Dashboard System
+   National Helpline Against Atrocities (NHAA 14566) & SC/ST PoA Act Sec 15A
+   ========================================================================== */
 
-  /* Primary Indigo 3D */
-  .btn-3d-indigo {
-    background-color: #4f46e5;
-    color: #ffffff;
-    border: 1px solid #4338ca;
-    border-bottom: 4px solid #312e81;
-    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-  }
-  .btn-3d-indigo:hover:not(:disabled) {
-    background-color: #4338ca;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-indigo:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
-  }
-
-  /* Crimson / Red SOS 3D */
-  .btn-3d-red {
-    background-color: #e11d48;
-    color: #ffffff;
-    border: 1px solid #be123c;
-    border-bottom: 4px solid #881337;
-    box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.35);
-  }
-  .btn-3d-red:hover:not(:disabled) {
-    background-color: #be123c;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-red:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-    box-shadow: 0 1px 2px rgba(225, 29, 72, 0.2);
-  }
-
-  /* Emerald Success / Send 3D */
-  .btn-3d-emerald {
-    background-color: #059669;
-    color: #ffffff;
-    border: 1px solid #047857;
-    border-bottom: 4px solid #064e3b;
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
-  }
-  .btn-3d-emerald:hover:not(:disabled) {
-    background-color: #047857;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-emerald:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-    box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
-  }
-
-  /* Amber / Warning 3D */
-  .btn-3d-amber {
-    background-color: #d97706;
-    color: #ffffff;
-    border: 1px solid #b45309;
-    border-bottom: 4px solid #78350f;
-    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);
-  }
-  .btn-3d-amber:hover:not(:disabled) {
-    background-color: #b45309;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-amber:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-  }
-
-  /* Sky / Blue 3D */
-  .btn-3d-sky {
-    background-color: #0284c7;
-    color: #ffffff;
-    border: 1px solid #0369a1;
-    border-bottom: 4px solid #075985;
-    box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
-  }
-  .btn-3d-sky:hover:not(:disabled) {
-    background-color: #0369a1;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-sky:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-  }
-
-  /* Light / Neutral 3D */
-  .btn-3d-light {
-    background-color: #ffffff;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
-    border-bottom: 4px solid #94a3b8;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  }
-  .btn-3d-light:hover:not(:disabled) {
-    background-color: #f8fafc;
-    transform: translateY(-1px);
-    border-bottom-width: 5px;
-  }
-  .btn-3d-light:active:not(:disabled) {
-    transform: translateY(3px);
-    border-bottom-width: 1px;
-  }
-
-  /* Card and Recessed Insets */
-  .neu-card {
-    background: #ffffff;
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-  }
-
-  .neu-inset {
-    background: #f1f5f9;
-    border-radius: 0.875rem;
-    border: 1px solid #e2e8f0;
-  }
-
-  .neu-inset-deep {
-    background: #f8fafc;
-    border-radius: 1.125rem;
-    border: 1px solid #e2e8f0;
-  }
+:root {
+  --color-primary-navy: #0f2557;
+  --color-navy-dark: #0a1b3b;
+  --color-navy-medium: #152e68;
+  --color-navy-light: #183b88;
+  --color-accent-indigo: #6366f1;
+  --color-accent-lavender: #8b7fd6;
+  --color-bg-slate: #f8fafc;
+  --color-card-border: #e2e8f0;
 }
 
-/* Custom smooth scrollbar */
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Card Surface */
+.mat-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mat-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+}
+
+/* Material Interactive Buttons */
+.mat-btn-primary {
+  background-color: #0f2557;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease-in-out;
+}
+
+.mat-btn-primary:hover:not(:disabled) {
+  background-color: #183b88;
+  box-shadow: 0 4px 6px -1px rgba(15, 37, 87, 0.2);
+}
+
+.mat-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.mat-btn-indigo {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(79, 70, 229, 0.2);
+  transition: all 0.15s ease-in-out;
+}
+
+.mat-btn-indigo:hover:not(:disabled) {
+  background-color: #4338ca;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+}
+
+.mat-btn-danger {
+  background-color: #e11d48;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(225, 29, 72, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+
+.mat-btn-danger:hover:not(:disabled) {
+  background-color: #be123c;
+  box-shadow: 0 4px 8px rgba(225, 29, 72, 0.35);
+}
+
+.mat-btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.mat-btn-outline {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.mat-btn-outline:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Material Status Badges */
+.mat-badge-critical {
+  background-color: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-weight: 700;
+  font-size: 0.6875rem;
+}
+
+.mat-badge-high {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-weight: 700;
+  font-size: 0.6875rem;
+}
+
+.mat-badge-moderate {
+  background-color: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-weight: 700;
+  font-size: 0.6875rem;
+}
+
+.mat-badge-low {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-weight: 700;
+  font-size: 0.6875rem;
+}
+
+/* Smooth custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
-  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
@@ -163,4 +181,13 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.pulse-emergency {
+  animation: pulse-soft 2s infinite ease-in-out;
 }

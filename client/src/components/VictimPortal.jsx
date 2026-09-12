@@ -219,7 +219,7 @@ export default function VictimPortal({
           <div className="flex-shrink-0">
             <button
               onClick={onTriggerSos}
-              className="btn-3d btn-3d-red px-5 py-3 text-xs font-black uppercase tracking-wider flex items-center gap-2"
+              className="mat-btn-danger px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2"
             >
               <ShieldAlert className="w-4 h-4" />
               <span>Trigger Emergency SOS</span>
@@ -279,7 +279,7 @@ export default function VictimPortal({
                 </div>
                 <button
                   onClick={stopRecording}
-                  className="btn-3d btn-3d-red px-5 py-2 text-xs font-bold flex items-center gap-2 mx-auto"
+                  className="mat-btn-danger px-5 py-2 text-xs font-bold flex items-center gap-2 mx-auto"
                 >
                   <Square className="w-4 h-4" />
                   <span>Stop & Review Recording</span>
@@ -295,7 +295,7 @@ export default function VictimPortal({
                 <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={startRecording}
-                    className="btn-3d px-3 py-1.5 text-xs font-semibold text-slate-600"
+                    className="mat-btn-outline text-xs"
                   >
                     Re-record
                   </button>
@@ -352,7 +352,7 @@ export default function VictimPortal({
             <button
               onClick={handleSubmitCheckin}
               disabled={isSubmitting || (!audioBlob && !textContent.trim())}
-              className="btn-3d btn-3d-indigo px-6 py-2.5 text-xs font-black flex items-center justify-center gap-2 disabled:opacity-50"
+              className="mat-btn-indigo px-6 py-2.5 text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isSubmitting ? 'Analyzing Biomarkers & Scoring...' : 'Submit Check-in'}</span>

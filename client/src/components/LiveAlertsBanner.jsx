@@ -53,7 +53,7 @@ export default function LiveAlertsBanner({ alerts = [], onAcknowledge, onSelectV
           <button
             onClick={(e) => handleAcknowledgeClick(e, topAlert.alert_id)}
             disabled={acknowledgingId === topAlert.alert_id}
-            className="btn-3d bg-white text-rose-800 hover:bg-rose-50 px-3.5 py-1.5 text-xs font-black flex items-center gap-1.5 shadow-sm"
+            className="bg-white text-rose-800 hover:bg-rose-50 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
           >
             <UserCheck className="w-3.5 h-3.5 text-rose-700" />
             <span>{acknowledgingId === topAlert.alert_id ? 'Dispatching...' : 'Dispatch Protection'}</span>
