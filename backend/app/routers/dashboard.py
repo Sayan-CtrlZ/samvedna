@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Form
 from typing import Optional, List, Dict, Any
 from app.database import db
 
@@ -91,17 +91,37 @@ async def resolve_case(
         victim["trend_status"] = "Protection Enforced & Resolved ✓"
         victim["summary"] = f"{victim.get('summary', '')} | RESOLVED by {officer_name}"
 
+    # Also resolve all active emergency alerts associated with this victim_id
+    for alert in db.alerts:
+        if alert.get("victim_id") == victim_id:
+            alert["status"] = "RESOLVED"
+            alert["assigned_officer"] = officer_name
+
     try:
-        from app.database_neon import neon_db
+        from app.services.alert_service import alert_hub
+        for alert in alert_hub.active_alerts:
+            if alert.get("victim_id") == victim_id:
+                alert["status"] = "RESOLVED"
+                alert["assigned_officer"] = officer_name
+    except Exception:
+        pass
+
+    try:
+        from app.database_neon import neon_db, AuthorityCaseDocketModel, PoliceDispatchAlertModel
         if neon_db.is_connected and neon_db.SessionLocal:
             session = neon_db.SessionLocal()
             try:
-                from app.database_neon import AuthorityCaseDocketModel
                 docket = session.query(AuthorityCaseDocketModel).filter_by(victim_id=victim_id).first()
                 if docket:
                     docket.current_risk_level = "RESOLVED"
                     docket.trend_status = "Protection Enforced & Resolved ✓"
-                    session.commit()
+
+                alerts = session.query(PoliceDispatchAlertModel).filter_by(victim_id=victim_id).all()
+                for a in alerts:
+                    a.status = "RESOLVED"
+                    a.dispatched_by = officer_name
+
+                session.commit()
             except Exception:
                 session.rollback()
             finally:

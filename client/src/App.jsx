@@ -5,7 +5,6 @@ import OfficialDashboard from './components/OfficialDashboard';
 import CounsellorWorkbench from './components/CounsellorWorkbench';
 import AnalyticsView from './components/AnalyticsView';
 import VictimPortal from './components/VictimPortal';
-import LiveAlertsBanner from './components/LiveAlertsBanner';
 import AlertsDrawer from './components/AlertsDrawer';
 import EmergencySosModal from './components/EmergencySosModal';
 
