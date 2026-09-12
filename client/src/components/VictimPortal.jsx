@@ -430,69 +430,6 @@ export default function VictimPortal({
               </div>
             )}
           </div>
-
-          {/* Quick Situational Scenarios (1-Click Fill) */}
-          <div className="space-y-1.5 pt-1">
-            <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
-              <span>Quick Test Scenarios (1-Click Fill):</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => applyScenarioPreset('threat')}
-                className="p-2 text-left rounded-lg border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-900 font-semibold transition-colors truncate"
-              >
-                🚨 Threat by Accused Associates
-              </button>
-              <button
-                type="button"
-                onClick={() => applyScenarioPreset('court')}
-                className="p-2 text-left rounded-lg border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-900 font-semibold transition-colors truncate"
-              >
-                ⚠️ Special Court Summons Fear
-              </button>
-              <button
-                type="button"
-                onClick={() => applyScenarioPreset('boycott')}
-                className="p-2 text-left rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-purple-900 font-semibold transition-colors truncate"
-              >
-                🌧️ Social Boycott & Ration Block
-              </button>
-              <button
-                type="button"
-                onClick={() => applyScenarioPreset('stable')}
-                className="p-2 text-left rounded-lg border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 font-semibold transition-colors truncate"
-              >
-                🌱 Stable / Routine Check-in
-              </button>
-            </div>
-          </div>
-
-          {/* Written Statement (Optional) */}
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 block">
-              Additional Notes or Incident Description:
-            </label>
-            <textarea
-              rows={3}
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-              placeholder="Share any recent incidents, threats, court apprehensions, or how you are coping..."
-              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 text-slate-800 placeholder-slate-400 font-normal"
-            />
-          </div>
-
-          {/* Submit Action Bar */}
-          <div className="flex items-center justify-end pt-1 border-t border-slate-100">
-            <button
-              onClick={handleSubmitCheckin}
-              disabled={isSubmitting || (!audioBlob && !textContent.trim())}
-              className="btn-navy text-xs disabled:opacity-50 font-bold flex items-center gap-1.5"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
-              <span>{isSubmitting ? 'Analyzing Voice & Biomarkers...' : 'Analyze & Submit Official Check-in'}</span>
-            </button>
-          </div>
         </div>
 
         {/* Clinical Biomarker Assessment & Metrics Card (Left Column continuation) */}
