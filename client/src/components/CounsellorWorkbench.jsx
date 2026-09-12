@@ -14,7 +14,8 @@ import {
   Stethoscope,
   UserCheck,
   ClipboardList,
-  HeartPulse
+  HeartPulse,
+  MessageSquare
 } from 'lucide-react';
 
 export default function CounsellorWorkbench({
@@ -23,11 +24,40 @@ export default function CounsellorWorkbench({
   onSelectVictim,
   userLocation
 }) {
-  const [activeVictimId, setActiveVictimId] = useState(selectedVictimId || (cases[0]?.victim_id ?? 'VIC-MH-2024-114'));
+  const [activeVictimId, setActiveVictimId] = useState(selectedVictimId || (cases[0]?.victim_id ?? 'VIC-MH-114'));
   const [caseFile, setCaseFile] = useState(null);
   const [officerNote, setOfficerNote] = useState('');
   const [noteSuccess, setNoteSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Helper: Format ISO date string into readable Date & Time
+  const formatDateTime = (isoString) => {
+    if (!isoString) return 'Just now';
+    try {
+      const d = new Date(isoString);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } catch (e) {}
+    return isoString;
+  };
+
+  // Helper: Get Clean Code Name without # or 2024
+  const getCleanCodeName = (item) => {
+    if (!item) return 'SURVIVOR';
+    let code = typeof item === 'string' ? item : (item.victim_code || item.code_name || item.victim_id || 'SURVIVOR');
+    code = code.replace(/#/g, '')
+               .replace(/-2024-/g, '-')
+               .replace(/ \([^)]*\)/g, '');
+    return code;
+  };
 
   const lineChartRef = useRef(null);
   const lineChartInstance = useRef(null);
@@ -265,7 +295,7 @@ export default function CounsellorWorkbench({
               className="bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-purple-600"
             >
               {cases.map((c) => {
-                const cleanCode = c.code_name || (c.victim_code ? c.victim_code.replace(' (Anonymized)', '') : 'Case');
+                const cleanCode = getCleanCodeName(c);
                 return (
                   <option key={c.victim_id} value={c.victim_id}>
                     {cleanCode} ({c.district}, {c.state})
@@ -354,52 +384,54 @@ export default function CounsellorWorkbench({
             </p>
           </div>
 
-          {/* Voice Biomarker Metrics Card */}
-          <div className="gov-card p-4 space-y-2.5">
-            <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Voice Biomarker Metrics (Audio)</span>
-              </h3>
-              <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
-                {acoustic.acoustic_stress_score !== undefined ? `${acoustic.acoustic_stress_score} / 100` : 'N/A'}
-              </span>
-            </div>
+          {/* Voice Biomarker Metrics Card (Rendered ONLY if voice was used) */}
+          {acoustic && acoustic.acoustic_stress_score !== undefined && acoustic.acoustic_stress_score !== null && (
+            <div className="gov-card p-4 space-y-2.5">
+              <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Voice Biomarker Metrics (Audio)</span>
+                </h3>
+                <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                  {acoustic.acoustic_stress_score} / 100
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                <span className="text-[10px] text-slate-500 font-semibold block">Tremor Intensity</span>
-                <span className="font-bold text-rose-700 text-sm">
-                  {acoustic.tremor_intensity !== undefined ? `${acoustic.tremor_intensity} / 100` : 'N/A'}
-                </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-semibold block">Tremor Intensity</span>
+                  <span className="font-bold text-rose-700 text-sm">
+                    {acoustic.tremor_intensity !== undefined ? `${acoustic.tremor_intensity} / 100` : 'N/A'}
+                  </span>
+                </div>
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-semibold block">Vocal Jitter</span>
+                  <span className="font-bold text-indigo-700 text-sm">
+                    {acoustic.jitter_pct !== undefined ? `${acoustic.jitter_pct}%` : 'N/A'}
+                  </span>
+                </div>
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-semibold block">Vocal Shimmer</span>
+                  <span className="font-bold text-amber-700 text-sm">
+                    {acoustic.shimmer_pct !== undefined ? `${acoustic.shimmer_pct}%` : 'N/A'}
+                  </span>
+                </div>
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-semibold block">Mean Pitch (F0)</span>
+                  <span className="font-bold text-teal-700 text-sm">
+                    {acoustic.pitch_mean_hz !== undefined ? `${acoustic.pitch_mean_hz} Hz` : 'N/A'}
+                  </span>
+                </div>
               </div>
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                <span className="text-[10px] text-slate-500 font-semibold block">Vocal Jitter</span>
-                <span className="font-bold text-indigo-700 text-sm">
-                  {acoustic.jitter_pct !== undefined ? `${acoustic.jitter_pct}%` : 'N/A'}
-                </span>
-              </div>
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                <span className="text-[10px] text-slate-500 font-semibold block">Vocal Shimmer</span>
-                <span className="font-bold text-amber-700 text-sm">
-                  {acoustic.shimmer_pct !== undefined ? `${acoustic.shimmer_pct}%` : 'N/A'}
-                </span>
-              </div>
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                <span className="text-[10px] text-slate-500 font-semibold block">Mean Pitch (F0)</span>
-                <span className="font-bold text-teal-700 text-sm">
-                  {acoustic.pitch_mean_hz !== undefined ? `${acoustic.pitch_mean_hz} Hz` : 'N/A'}
-                </span>
-              </div>
-            </div>
 
-            <div className="p-2.5 bg-indigo-50/60 rounded border border-indigo-200 text-xs">
-              <span className="text-[10px] text-indigo-900 font-bold block mb-0.5">Classification</span>
-              <p className="text-[11px] text-indigo-950 font-medium">
-                {acoustic.acoustic_classification || 'No audio sample recorded yet for this session'}
-              </p>
+              <div className="p-2.5 bg-indigo-50/60 rounded border border-indigo-200 text-xs">
+                <span className="text-[10px] text-indigo-900 font-bold block mb-0.5">Classification</span>
+                <p className="text-[11px] text-indigo-950 font-medium">
+                  {acoustic.acoustic_classification || 'No audio sample recorded yet for this session'}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Chat & Text Metrics Card */}
           <div className="gov-card p-4 space-y-2.5">

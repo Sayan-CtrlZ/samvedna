@@ -33,6 +33,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   const [cases, setCases] = useState([]);
   const [activeCase, setActiveCase] = useState(null);
   const [caseFile, setCaseFile] = useState(null);
+  const [alertsFeed, setAlertsFeed] = useState([]);
   const [filterRisk, setFilterRisk] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionSuccess, setActionSuccess] = useState(null);
@@ -41,12 +42,42 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   const [noteSuccess, setNoteSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load summary metrics and cases
+  // Helper: Format Date & Time cleanly
+  const formatDateTime = (isoString) => {
+    if (!isoString) return new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    try {
+      const d = new Date(isoString);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } catch (e) {}
+    return isoString;
+  };
+
+  // Helper: Get Clean Code Name without # or 2024
+  const getCleanCodeName = (item) => {
+    if (!item) return 'SURVIVOR';
+    let code = item.victim_code || item.code_name || item.victim_id || 'SURVIVOR';
+    code = code.replace(/#/g, '')
+               .replace(/-2024-/g, '-')
+               .replace(/ \([^)]*\)/g, '');
+    return code;
+  };
+
+  // Load summary metrics, cases, and live police alerts feed
   const loadData = async () => {
     try {
-      const [resMetrics, resCases] = await Promise.all([
+      const [resMetrics, resCases, resAlerts] = await Promise.all([
         fetch('/api/v1/dashboard/metrics'),
-        fetch('/api/v1/dashboard/cases')
+        fetch('/api/v1/dashboard/cases'),
+        fetch('/api/v1/alerts/feed')
       ]);
 
       if (resMetrics.ok) {
@@ -65,6 +96,11 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
         } else if (loadedCases.length > 0) {
           setActiveCase(loadedCases[0]);
         }
+      }
+
+      if (resAlerts.ok) {
+        const dataAlerts = await resAlerts.json();
+        setAlertsFeed(dataAlerts.alerts || []);
       }
     } catch (err) {
       console.warn('Dashboard sync warning:', err);
@@ -100,6 +136,29 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   const handleSelect = (c) => {
     setActiveCase(c);
     if (onSelectVictim) onSelectVictim(c.victim_id);
+  };
+
+  // 1-Click Acknowledge / Dispatch Protection Alert
+  const handleAcknowledgeAlert = async (alertId) => {
+    try {
+      const formData = new FormData();
+      formData.append('alert_id', alertId);
+      formData.append('officer_name', 'District SP / Special Protection Cell');
+      formData.append('action_taken', 'Dispatched Armed Police Protection & Patrol Unit');
+
+      const res = await fetch('/api/v1/alerts/acknowledge', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        setActionSuccess(`Protection Patrol Order Dispatched for Alert #${alertId}`);
+        loadData();
+        setTimeout(() => setActionSuccess(null), 5000);
+      }
+    } catch (e) {
+      console.error('Failed acknowledging alert:', e);
+    }
   };
 
   // Issue Statutory Intervention (Section 15A)
@@ -191,7 +250,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
   return (
     <div className="space-y-4">
       {/* 1. Executive Metric Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-[#0f2557]">
           <div className="flex items-center justify-between text-slate-500 mb-1">
             <span className="text-[10px] font-bold uppercase tracking-wider">Monitored Roster</span>
@@ -214,29 +273,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
           <span className="text-[10px] text-rose-600 font-semibold">Immediate Action Queue</span>
         </div>
 
-        <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-amber-600 bg-amber-50/15">
-          <div className="flex items-center justify-between text-amber-800 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Accused Granted Bail</span>
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-          </div>
-          <div className="text-xl font-bold text-amber-800">
-            {metrics?.vulnerability_flags?.accused_out_on_bail ?? 3}
-          </div>
-          <span className="text-[10px] text-amber-700 font-semibold">Proximity Threat Active</span>
-        </div>
-
-        <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-blue-600 bg-blue-50/15">
-          <div className="flex items-center justify-between text-blue-800 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Relief DBT Pending</span>
-            <FileSpreadsheet className="w-3.5 h-3.5 text-blue-600" />
-          </div>
-          <div className="text-xl font-bold text-blue-800">
-            {metrics?.vulnerability_flags?.compensation_delayed ?? 3}
-          </div>
-          <span className="text-[10px] text-blue-700 font-semibold">Annexure I Mandate</span>
-        </div>
-
-        <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-purple-600 col-span-2 lg:col-span-1">
+        <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-purple-600">
           <div className="flex items-center justify-between text-slate-500 mb-1">
             <span className="text-[10px] font-bold uppercase tracking-wider">Avg Vulnerability Index</span>
             <Activity className="w-3.5 h-3.5 text-purple-600" />
@@ -246,7 +283,75 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
           </div>
           <span className="text-[10px] text-purple-700 font-semibold">Multi-Modal Composite</span>
         </div>
+
+        <div className="gov-card p-3.5 flex flex-col justify-between border-t-2 border-t-indigo-600 bg-indigo-50/15">
+          <div className="flex items-center justify-between text-indigo-900 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider">Active Emergency Alerts</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-indigo-600" />
+          </div>
+          <div className="text-xl font-bold text-indigo-950">
+            {alertsFeed.length}
+          </div>
+          <span className="text-[10px] text-indigo-700 font-semibold">Realtime Sync Active</span>
+        </div>
       </div>
+
+      {/* Realtime Police Emergency Dispatch Alerts Banner */}
+      {alertsFeed.length > 0 && (
+        <div className="gov-card p-3.5 bg-rose-50/70 border border-rose-300 space-y-2.5">
+          <div className="flex items-center justify-between border-b border-rose-200 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+              </span>
+              <h3 className="text-xs font-bold text-rose-950 uppercase tracking-wider flex items-center gap-1.5">
+                <BadgeAlert className="w-4 h-4 text-rose-600" />
+                <span>Realtime Police Emergency Dispatch Alerts ({alertsFeed.length} Active Notifications)</span>
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono text-rose-800 bg-white px-2 py-0.5 rounded border border-rose-200 font-bold flex items-center gap-1">
+              <Clock className="w-3 h-3 text-rose-600" />
+              {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+            {alertsFeed.slice(0, 4).map((alt) => (
+              <div key={alt.alert_id} className="p-2.5 bg-white rounded-lg border border-rose-200 text-xs flex flex-col justify-between gap-1.5 shadow-2xs">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-rose-900 font-mono text-xs">{getCleanCodeName(alt)}</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">
+                      {alt.severity || 'EMERGENCY'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-800 leading-tight">
+                    {alt.trigger_reason}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
+                    <span className="flex items-center gap-1 font-mono font-semibold text-indigo-700">
+                      <MapPin className="w-3 h-3 text-indigo-600" />
+                      <span>{alt.district ? `${alt.district}, ${alt.state}` : 'Live GPS Location'}</span>
+                    </span>
+                    <span className="font-mono text-slate-500">
+                      {formatDateTime(alt.timestamp)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleAcknowledgeAlert(alt.alert_id)}
+                  className="w-full mt-1 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>{alt.status === 'DISPATCHED' ? 'Patrol Dispatched ✓' : 'Dispatch Emergency Police Patrol'}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 2. Main Master-Detail Workstation */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -293,7 +398,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID, FIR, District, Sections..."
+              placeholder="Search by ID, District, Keywords..."
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 text-slate-800 placeholder-slate-400"
             />
           </div>
@@ -307,6 +412,7 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
             ) : (
               filteredCases.map((item) => {
                 const isSelected = activeCase?.victim_id === item.victim_id;
+                const cleanName = getCleanCodeName(item);
 
                 return (
                   <div
@@ -322,14 +428,11 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="font-bold text-xs text-slate-900">
-                            {item.code_name || (item.victim_code ? item.victim_code.replace(' (Anonymized)', '') : 'Case')}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-mono font-medium">
-                            [{item.victim_id}]
+                            {cleanName}
                           </span>
                         </div>
                         <span className="text-[11px] text-slate-600 font-medium line-clamp-1">
-                          {item.sections_invoked || item.summary}
+                          {item.summary}
                         </span>
                       </div>
 
@@ -348,16 +451,9 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
                         <span>{item.district}, {item.state}</span>
                       </span>
 
-                      <div className="flex items-center gap-2">
-                        {item.accused_on_bail && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">
-                            Bail Alert
-                          </span>
-                        )}
-                        <span className="font-bold text-slate-900">
-                          {item.current_dds} <span className="text-[9px] text-slate-400 font-normal">DDS</span>
-                        </span>
-                      </div>
+                      <span className="font-bold text-slate-900">
+                        {item.current_dds} <span className="text-[9px] text-slate-400 font-normal">DDS</span>
+                      </span>
                     </div>
                   </div>
                 );
@@ -374,15 +470,16 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                      DOCKET #{activeCase.victim_id}
+                    <span className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      Survivor Code: {getCleanCodeName(activeCase)}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      // LAW ENFORCEMENT SENSITIVE
+                    <span className="text-[10px] font-semibold text-slate-500 font-mono flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
+                      Date & Time: {formatDateTime(activeCase.updated_at || new Date().toISOString())}
                     </span>
                   </div>
                   <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <span className="font-mono">{activeCase.code_name || (activeCase.victim_code ? activeCase.victim_code.replace(' (Anonymized)', '') : 'Case')}</span>
+                    <span className="font-mono">{getCleanCodeName(activeCase)}</span>
                     <span className={getRiskBadgeClass(activeCase.current_risk_level)}>
                       {activeCase.current_risk_level} PRIORITY
                     </span>
@@ -432,104 +529,112 @@ export default function OfficialDashboard({ selectedVictimId, onSelectVictim, us
 
               {/* SURVIVOR ISSUE & INTAKE DESCRIPTION */}
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-1">
-                <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Survivor Issue & Reported Predicament</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Survivor Issue & Reported Predicament</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {formatDateTime(activeCase.updated_at)}
+                  </span>
                 </div>
                 <p className="text-xs text-slate-800 leading-relaxed font-medium">
                   {activeCase.summary || 'Awaiting initial survivor intake description...'}
                 </p>
               </div>
 
-              {/* SEPARATE METRICS CARDS: VOICE METRICS & CHAT METRICS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                {/* Voice Biomarker Metrics Card */}
-                <div className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-3.5 space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-indigo-100 pb-2">
-                    <span className="font-bold text-indigo-950 flex items-center gap-1.5">
-                      <Volume2 className="w-4 h-4 text-indigo-600" />
-                      Voice Biomarker Metrics (Audio)
-                    </span>
-                    <span className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
-                      {caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== undefined && caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== null
-                        ? `${caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score} / 100`
-                        : 'N/A'}
-                    </span>
-                  </div>
-                  
-                  <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== undefined && caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== null
-                            ? caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score
-                            : 0
-                        }%`
-                      }}
-                    ></div>
-                  </div>
+              {/* METRICS CARDS: CONDITIONALLY RENDER VOICE METRICS ONLY IF VOICE AUDIO WAS USED */}
+              {(() => {
+                const hasVoiceMetrics = caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== undefined &&
+                                        caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_stress_score !== null;
 
-                  <div className="text-[11px] text-indigo-900 space-y-1">
-                    <p className="font-semibold text-slate-800">
-                      Classification: <span className="font-normal text-indigo-900">{
-                        caseFile?.latest_voice_spectrogram_biomarkers?.acoustic_classification ||
-                        (caseFile?.latest_voice_spectrogram_biomarkers ? 'Acoustic Signal Analyzed' : 'No voice sample recorded yet')
-                      }</span>
-                    </p>
-                    {caseFile?.latest_voice_spectrogram_biomarkers?.tremor_intensity !== undefined && (
-                      <p className="text-[10px] text-slate-600">
-                        Tremor Intensity: {caseFile.latest_voice_spectrogram_biomarkers.tremor_intensity}/100 • Pitch: {caseFile.latest_voice_spectrogram_biomarkers.pitch_mean_hz ?? 'Normal'} Hz
-                      </p>
-                    )}
-                  </div>
-                </div>
+                return (
+                  <div className={hasVoiceMetrics ? "grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" : "space-y-3 text-xs"}>
+                    {/* Voice Biomarker Metrics Card (Rendered ONLY if voice was used) */}
+                    {hasVoiceMetrics && (
+                      <div className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-indigo-100 pb-2">
+                          <span className="font-bold text-indigo-950 flex items-center gap-1.5">
+                            <Volume2 className="w-4 h-4 text-indigo-600" />
+                            Voice Biomarker Metrics (Audio)
+                          </span>
+                          <span className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
+                            {caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score} / 100
+                          </span>
+                        </div>
+                        
+                        <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+                            style={{
+                              width: `${caseFile.latest_voice_spectrogram_biomarkers.acoustic_stress_score}%`
+                            }}
+                          ></div>
+                        </div>
 
-                {/* Chat & Linguistic Metrics Card */}
-                <div className="bg-purple-50/60 border border-purple-200 rounded-lg p-3.5 space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-purple-100 pb-2">
-                    <span className="font-bold text-purple-950 flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4 text-purple-600" />
-                      Chat & Text Metrics (NLP)
-                    </span>
-                    <span className="font-mono font-bold text-purple-700 bg-white px-2 py-0.5 rounded border border-purple-200">
-                      {caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
-                        ? `${caseFile.latest_nlp_emotion_matrix.nlp_distress_score} / 100`
-                        : 'N/A'}
-                    </span>
-                  </div>
-
-                  <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
-                            ? caseFile.latest_nlp_emotion_matrix.nlp_distress_score
-                            : 0
-                        }%`
-                      }}
-                    ></div>
-                  </div>
-
-                  <div className="text-[11px] text-purple-900 space-y-1">
-                    {caseFile?.latest_nlp_emotion_matrix ? (
-                      <>
-                        <p className="font-semibold text-slate-800">
-                          Fear Score: <span className="font-normal text-purple-900">{caseFile.latest_nlp_emotion_matrix.fear_score ?? 0}%</span> • Hopelessness: <span className="font-normal text-purple-900">{caseFile.latest_nlp_emotion_matrix.hopelessness_score ?? 0}%</span>
-                        </p>
-                        {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords?.length > 0 && (
-                          <p className="text-[10px] text-purple-800">
-                            Threat Cues: {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords.join(', ')}
+                        <div className="text-[11px] text-indigo-900 space-y-1">
+                          <p className="font-semibold text-slate-800">
+                            Classification: <span className="font-normal text-indigo-900">{
+                              caseFile.latest_voice_spectrogram_biomarkers.acoustic_classification || 'Acoustic Signal Analyzed'
+                            }</span>
                           </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-slate-500 font-normal">No chat or text transcripts analyzed yet for this session</p>
+                          {caseFile.latest_voice_spectrogram_biomarkers.tremor_intensity !== undefined && (
+                            <p className="text-[10px] text-slate-600">
+                              Tremor Intensity: {caseFile.latest_voice_spectrogram_biomarkers.tremor_intensity}/100 • Pitch: {caseFile.latest_voice_spectrogram_biomarkers.pitch_mean_hz ?? 'Normal'} Hz
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     )}
+
+                    {/* Chat & Linguistic Metrics Card */}
+                    <div className="bg-purple-50/60 border border-purple-200 rounded-lg p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-purple-100 pb-2">
+                        <span className="font-bold text-purple-950 flex items-center gap-1.5">
+                          <MessageSquare className="w-4 h-4 text-purple-600" />
+                          Chat & Text Metrics (NLP)
+                        </span>
+                        <span className="font-mono font-bold text-purple-700 bg-white px-2 py-0.5 rounded border border-purple-200">
+                          {caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
+                            ? `${caseFile.latest_nlp_emotion_matrix.nlp_distress_score} / 100`
+                            : 'N/A'}
+                        </span>
+                      </div>
+
+                      <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== undefined && caseFile?.latest_nlp_emotion_matrix?.nlp_distress_score !== null
+                                ? caseFile.latest_nlp_emotion_matrix.nlp_distress_score
+                                : 0
+                            }%`
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="text-[11px] text-purple-900 space-y-1">
+                        {caseFile?.latest_nlp_emotion_matrix ? (
+                          <>
+                            <p className="font-semibold text-slate-800">
+                              Fear Score: <span className="font-normal text-purple-900">{caseFile.latest_nlp_emotion_matrix.fear_score ?? 0}%</span> • Hopelessness: <span className="font-normal text-purple-900">{caseFile.latest_nlp_emotion_matrix.hopelessness_score ?? 0}%</span>
+                            </p>
+                            {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords?.length > 0 && (
+                              <p className="text-[10px] text-purple-800">
+                                Threat Cues: {caseFile.latest_nlp_emotion_matrix.extracted_threat_keywords.join(', ')}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-slate-500 font-normal">No chat or text transcripts analyzed yet for this session</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* 1-Click Actionable Statutory Directives (Section 15A SC/ST PoA Act) */}
               <div className="space-y-2">

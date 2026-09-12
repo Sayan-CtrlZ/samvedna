@@ -14,7 +14,7 @@ class AtrocityMonitoringDatabase:
     def _seed_initial_data(self):
         seed_cases = [
             {
-                "victim_id": "VIC-MP-2024-881",
+                "victim_id": "VIC-MP-881",
                 "victim_code": "SURVIVOR-MP-881",
                 "code_name": "SURVIVOR-MP-881",
                 "full_name_masked": "SURVIVOR-MP-881",
@@ -28,7 +28,7 @@ class AtrocityMonitoringDatabase:
                 "summary": "Threats and intimidation experienced outside home. Accused associates approaching family."
             },
             {
-                "victim_id": "VIC-UP-2024-409",
+                "victim_id": "VIC-UP-409",
                 "victim_code": "COMPLAINANT-UP-409",
                 "code_name": "COMPLAINANT-UP-409",
                 "full_name_masked": "COMPLAINANT-UP-409",
@@ -42,7 +42,7 @@ class AtrocityMonitoringDatabase:
                 "summary": "High anxiety regarding threats received in village area."
             },
             {
-                "victim_id": "VIC-RJ-2024-215",
+                "victim_id": "VIC-RJ-215",
                 "victim_code": "SURVIVOR-RJ-215",
                 "code_name": "SURVIVOR-RJ-215",
                 "full_name_masked": "SURVIVOR-RJ-215",
@@ -56,7 +56,7 @@ class AtrocityMonitoringDatabase:
                 "summary": "Dwelling damaged after dispute over village common well. Facing village social boycott."
             },
             {
-                "victim_id": "VIC-MH-2024-114",
+                "victim_id": "VIC-MH-114",
                 "victim_code": "SURVIVOR-MH-114",
                 "code_name": "SURVIVOR-MH-114",
                 "full_name_masked": "SURVIVOR-MH-114",
@@ -70,7 +70,7 @@ class AtrocityMonitoringDatabase:
                 "summary": "Approached by unknown individuals attempting to force signing retraction documents."
             },
             {
-                "victim_id": "VIC-TN-2024-531",
+                "victim_id": "VIC-TN-531",
                 "victim_code": "SURVIVOR-TN-531",
                 "code_name": "SURVIVOR-TN-531",
                 "full_name_masked": "SURVIVOR-TN-531",
@@ -84,7 +84,7 @@ class AtrocityMonitoringDatabase:
                 "summary": "Physical recovery progressing. Apprehensive regarding safety in dominant community neighborhood."
             },
             {
-                "victim_id": "VIC-BR-2024-712",
+                "victim_id": "VIC-BR-712",
                 "victim_code": "SURVIVOR-BR-712",
                 "code_name": "SURVIVOR-BR-712",
                 "full_name_masked": "SURVIVOR-BR-712",

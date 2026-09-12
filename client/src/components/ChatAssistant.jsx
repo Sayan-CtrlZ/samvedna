@@ -7,7 +7,7 @@ export default function ChatAssistant({
   isProcessing: externalIsProcessing,
   setIsProcessing: externalSetIsProcessing,
   latestVoiceResult,
-  selectedVictimId = 'VIC-MH-2024-114',
+  selectedVictimId = 'VIC-MH-114',
   language = 'en'
 }) {
   const [internalIsProcessing, setInternalIsProcessing] = useState(false);
@@ -392,7 +392,7 @@ export default function ChatAssistant({
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     try {
       const formData = new FormData();
-      formData.append('victim_id', 'VIC-MP-2024-881');
+      formData.append('victim_id', selectedVictimId || 'VIC-MP-881');
       await fetch('/api/v1/victim/reset', { method: 'POST', body: formData });
     } catch (e) {
       console.warn('Reset error:', e);

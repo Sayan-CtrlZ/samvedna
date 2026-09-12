@@ -21,7 +21,7 @@ import ChatAssistant from './ChatAssistant';
 export default function VictimPortal({
   cases = [],
   onCheckinSubmitted,
-  activeVictimId = 'VIC-MH-2024-114',
+  activeVictimId = 'VIC-MH-114',
   onTriggerSos,
   userLocation
 }) {
@@ -82,12 +82,12 @@ export default function VictimPortal({
 
   // Use dynamic cases from backend or default anonymous code names
   const displayedVictims = cases.length > 0 ? cases : [
-    { victim_id: 'VIC-MH-2024-114', victim_code: 'SURVIVOR-MH-114', code_name: 'SURVIVOR-MH-114 (Primary Eyewitness)', district: 'Ahmednagar', state: 'Maharashtra', summary: 'Eyewitness in Special Court Trial' },
-    { victim_id: 'VIC-MP-2024-881', victim_code: 'SURVIVOR-MP-881', code_name: 'SURVIVOR-MP-881 (Key Complainant)', district: 'Morena', state: 'Madhya Pradesh', summary: 'Key Complainant - Bail threat' },
-    { victim_id: 'VIC-UP-2024-409', victim_code: 'COMPLAINANT-UP-409', code_name: 'COMPLAINANT-UP-409 (Next of Kin)', district: 'Hathras', state: 'Uttar Pradesh', summary: 'Next-of-Kin in Bail Hearing' },
-    { victim_id: 'VIC-RJ-2024-215', victim_code: 'SURVIVOR-RJ-215', code_name: 'SURVIVOR-RJ-215 (Agricultural Worker)', district: 'Udaipur', state: 'Rajasthan', summary: 'Social Boycott & Relief Pending' },
-    { victim_id: 'VIC-BR-2024-712', victim_code: 'SURVIVOR-BR-712', code_name: 'SURVIVOR-BR-712 (Surviving Spouse)', district: 'Gaya', state: 'Bihar', summary: 'Surviving Spouse - Pension Delayed' },
-    { victim_id: 'VIC-TN-2024-531', victim_code: 'SURVIVOR-TN-531', code_name: 'SURVIVOR-TN-531 (Youth Applicant)', district: 'Tirunelveli', state: 'Tamil Nadu', summary: 'Youth Applicant in Trial Phase' }
+    { victim_id: 'VIC-MH-114', victim_code: 'SURVIVOR-MH-114', code_name: 'SURVIVOR-MH-114 (Primary Eyewitness)', district: 'Ahmednagar', state: 'Maharashtra', summary: 'Eyewitness in Special Court Trial' },
+    { victim_id: 'VIC-MP-881', victim_code: 'SURVIVOR-MP-881', code_name: 'SURVIVOR-MP-881 (Key Complainant)', district: 'Morena', state: 'Madhya Pradesh', summary: 'Key Complainant - Bail threat' },
+    { victim_id: 'VIC-UP-409', victim_code: 'COMPLAINANT-UP-409', code_name: 'COMPLAINANT-UP-409 (Next of Kin)', district: 'Hathras', state: 'Uttar Pradesh', summary: 'Next-of-Kin in Bail Hearing' },
+    { victim_id: 'VIC-RJ-215', victim_code: 'SURVIVOR-RJ-215', code_name: 'SURVIVOR-RJ-215 (Agricultural Worker)', district: 'Udaipur', state: 'Rajasthan', summary: 'Social Boycott & Relief Pending' },
+    { victim_id: 'VIC-BR-712', victim_code: 'SURVIVOR-BR-712', code_name: 'SURVIVOR-BR-712 (Surviving Spouse)', district: 'Gaya', state: 'Bihar', summary: 'Surviving Spouse - Pension Delayed' },
+    { victim_id: 'VIC-TN-531', victim_code: 'SURVIVOR-TN-531', code_name: 'SURVIVOR-TN-531 (Youth Applicant)', district: 'Tirunelveli', state: 'Tamil Nadu', summary: 'Youth Applicant in Trial Phase' }
   ];
 
   const handleAudioUpload = (e) => {
