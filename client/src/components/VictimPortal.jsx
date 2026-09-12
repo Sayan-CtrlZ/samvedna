@@ -13,8 +13,10 @@ import {
   FileAudio,
   Upload,
   Sparkles,
-  HeartPulse
+  HeartPulse,
+  Globe
 } from 'lucide-react';
+import ChatAssistant from './ChatAssistant';
 
 export default function VictimPortal({
   cases = [],
@@ -28,7 +30,7 @@ export default function VictimPortal({
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [textContent, setTextContent] = useState('');
-  const [language, setLanguage] = useState('hi');
+  const [language, setLanguage] = useState('en');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastResponse, setLastResponse] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -57,17 +59,13 @@ export default function VictimPortal({
 
   const applyScenarioPreset = (type) => {
     if (type === 'threat') {
-      setTextContent("आरोपी के लोग कल रात हमारे घर के बाहर आकर धमकी दे रहे थे कि केस वापस ले लो वरना जान से मार देंगे। हमें बहुत डर लग रहा है।");
-      setLanguage('hi');
+      setTextContent("Accused associates visited our home last night and threatened to kill us if we don't withdraw the case. We are extremely terrified.");
     } else if (type === 'court') {
-      setTextContent("विशेष अदालत में गवाही की तारीख बहुत नजदीक आ गई है। हमें अदालत जाने में अपनी सुरक्षा को लेकर बहुत ज्यादा चिंता और घबराहट हो रही है।");
-      setLanguage('hi');
+      setTextContent("Special court witness testimony date is very close. We are feeling severe panic and anxiety about our safety while traveling to court.");
     } else if (type === 'boycott') {
-      setTextContent("गांव में हमारा सामाजिक बहिष्कार कर दिया गया है। कुएं से पानी नहीं लेने दे रहे और मजदूरी भी बंद करवा दी है। घर में राशन खत्म हो गया है।");
-      setLanguage('hi');
+      setTextContent("A complete social boycott has been enforced in our village. We are prevented from taking water from the community well and lost our wages.");
     } else if (type === 'stable') {
-      setTextContent("आज स्थिति सामान्य है। पुलिस गश्त आई थी और हमें थोड़ा सुरक्षित महसूस हो रहा है। हम नियमित रूप से दवाएं ले रहे हैं।");
-      setLanguage('hi');
+      setTextContent("Today the situation is peaceful and stable. Police patrol visited our area and we feel somewhat safer. Taking prescribed medicines regularly.");
     }
   };
 
@@ -202,13 +200,14 @@ export default function VictimPortal({
       }
 
       const data = await res.json();
-      setLastResponse(data);
+      const payload = { ...data, _ts: Date.now() };
+      setLastResponse(payload);
       setTextContent('');
       setAudioBlob(null);
       setAudioUrl(null);
 
       if (onCheckinSubmitted) {
-        onCheckinSubmitted(data);
+        onCheckinSubmitted(payload);
       }
     } catch (err) {
       console.error('Checkin submit error:', err);
@@ -234,7 +233,7 @@ export default function VictimPortal({
               </span>
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-white">
-              आप सुरक्षित हैं • Survivor Well-being & Care Portal
+              You Are Protected • Survivor Well-being & Care Portal
             </h2>
             <p className="text-xs text-slate-200 max-w-2xl mt-1 leading-relaxed">
               Your safety and dignity are protected by law under the SC/ST (Prevention of Atrocities) Act. Share regular updates so the District Protection Officer and Tele-MANAS counsellors can stand with you.
@@ -252,29 +251,47 @@ export default function VictimPortal({
           </div>
         </div>
 
-        {/* Case Profile Selector */}
-        <div className="mt-4 pt-3 border-t border-white/15 flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
-          <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
-            <User className="w-3.5 h-3.5 text-indigo-300" /> Case Code:
-          </label>
-          <select
-            value={selectedVictim}
-            onChange={(e) => setSelectedVictim(e.target.value)}
-            className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md font-mono"
-          >
-            {displayedVictims.map((v) => (
-              <option key={v.victim_id} value={v.victim_id} className="bg-slate-900 text-white font-sans">
-                {v.code_name || v.victim_code} — {v.district}, {v.state}
-              </option>
-            ))}
-          </select>
+        {/* Top Bar Selectors: Case Profile & Language */}
+        <div className="mt-4 pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
+              <User className="w-3.5 h-3.5 text-indigo-300" /> Case Code:
+            </label>
+            <select
+              value={selectedVictim}
+              onChange={(e) => setSelectedVictim(e.target.value)}
+              className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-md font-mono"
+            >
+              {displayedVictims.map((v) => (
+                <option key={v.victim_id} value={v.victim_id} className="bg-slate-900 text-white font-sans">
+                  {v.code_name || v.victim_code} — {v.district}, {v.state}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="font-semibold text-slate-300 flex items-center gap-1.5 flex-shrink-0">
+              <Globe className="w-3.5 h-3.5 text-indigo-300" /> Select Language:
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-[#061024] border border-indigo-400/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-medium"
+            >
+              <option value="en">English (Default)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="mr">मराठी (Marathi)</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Main Check-in Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Column: Voice Recording & Statement Input (7 cols) */}
-        <div className="lg:col-span-7 gov-card p-5 space-y-4">
+        {/* Left Column: Voice Recording & Statement Input (6 cols) */}
+        <div className="lg:col-span-6 gov-card p-5 space-y-4">
           <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
             <div>
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -424,52 +441,28 @@ export default function VictimPortal({
             />
           </div>
 
-          {/* Language Selector & Submit Button */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 font-medium">Language:</span>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="text-xs border border-slate-300 rounded px-2 py-1 bg-white font-medium focus:outline-none"
-              >
-                <option value="hi">हिन्दी (Hindi)</option>
-                <option value="en">English</option>
-                <option value="mr">मराठी (Marathi)</option>
-                <option value="ta">தமிழ் (Tamil)</option>
-              </select>
-            </div>
-
+          {/* Submit Action Bar */}
+          <div className="flex items-center justify-end pt-1 border-t border-slate-100">
             <button
               onClick={handleSubmitCheckin}
               disabled={isSubmitting || (!audioBlob && !textContent.trim())}
-              className="btn-navy text-xs disabled:opacity-50 font-bold"
+              className="btn-navy text-xs disabled:opacity-50 font-bold flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
-              <span>{isSubmitting ? 'Analyzing Biomarkers...' : 'Analyze & Submit Official Check-in'}</span>
+              <span>{isSubmitting ? 'Analyzing Voice & Biomarkers...' : 'Analyze & Submit Official Check-in'}</span>
             </button>
           </div>
         </div>
 
-        {/* Right Column: Trauma Guidance & Response (5 cols) */}
-        <div className="lg:col-span-5 gov-card p-5 space-y-4">
-          <div className="border-b border-slate-200 pb-2.5">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
-              <span>Counsellor Assessment & Trauma Guidance</span>
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              Trauma-informed guidance and grounding exercises grounded in Tele-MANAS care.
-            </p>
-          </div>
-
-          {lastResponse ? (
-            <div className="space-y-3">
-              {/* Score Assessment Card */}
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center justify-between">
+        {/* Right Column: Interactive AI Companion Chat & Clinical Assessment (6 cols) */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Clinical Distress Determination Score summary card if check-in analyzed */}
+          {lastResponse && (
+            <div className="gov-card p-4 space-y-2.5 border-l-4 border-l-indigo-600 animate-fadeIn">
+              <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Distress Determination Score
+                    Latest Distress Determination Score (DDS)
                   </span>
                   <div className="flex items-baseline gap-1 mt-0.5">
                     <span className="text-xl font-bold text-slate-900">
@@ -480,56 +473,27 @@ export default function VictimPortal({
                 </div>
 
                 <span className={lastResponse.risk_level === 'CRITICAL' ? 'badge-critical' : lastResponse.risk_level === 'HIGH' ? 'badge-high' : 'badge-low'}>
-                  {lastResponse.risk_level}
+                  {lastResponse.risk_level} Risk
                 </span>
               </div>
 
-              {/* Empathetic AI Response */}
-              <div className="bg-purple-50/70 border border-purple-200 rounded-lg p-3.5 space-y-1.5">
-                <span className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
-                  <HeartHandshake className="w-3.5 h-3.5 text-purple-700" />
-                  <span>Counsellor Supportive Guidance:</span>
-                </span>
-                <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-line">
-                  {lastResponse.ai_response}
-                </p>
-              </div>
-
-              {/* Official notification */}
-              <div className="p-2.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-medium flex items-center gap-2">
+              {/* Official status bar */}
+              <div className="p-2 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 text-[11px] font-medium flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                 <span>
-                  Check-in saved to official case docket. District Nodal Officer notified.
+                  Check-in saved to official case docket. Synchronized with AI Chat & Nodal Officer.
                 </span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3 py-4 text-center">
-              <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center mx-auto">
-                <Activity className="w-6 h-6 text-indigo-700" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">Awaiting Your Check-in</h4>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto mt-0.5">
-                  Record voice, upload audio, or choose a scenario on the left. Your assessment will sync directly with district protection authorities.
-                </p>
-              </div>
-
-              {/* 5-4-3-2-1 Sensory Grounding Support */}
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-left space-y-1.5 text-xs">
-                <span className="font-bold text-slate-800 block">
-                  Grounding Technique (If You Feel Stressed or Anxious):
-                </span>
-                <ul className="text-slate-600 space-y-1 text-[11px]">
-                  <li>• <strong>5 things</strong> you can see around you right now</li>
-                  <li>• <strong>4 things</strong> you can physically touch (clothing, phone)</li>
-                  <li>• <strong>3 things</strong> you can hear</li>
-                  <li>• <strong>2 things</strong> you can smell</li>
-                  <li>• <strong>1 deep, slow breath</strong> (inhale 4s, exhale 6s)</li>
-                </ul>
               </div>
             </div>
           )}
+
+          {/* Interactive AI Chat Assistant */}
+          <ChatAssistant
+            latestVoiceResult={lastResponse}
+            selectedVictimId={selectedVictim}
+            language={language}
+            onCheckinComplete={onCheckinSubmitted}
+          />
         </div>
       </div>
     </div>

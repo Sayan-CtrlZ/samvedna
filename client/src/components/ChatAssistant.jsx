@@ -1,7 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2, RotateCcw, MessageSquare, ShieldCheck, User } from 'lucide-react';
 
-export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsProcessing, latestVoiceResult }) {
+export default function ChatAssistant({
+  onCheckinComplete,
+  isProcessing: externalIsProcessing,
+  setIsProcessing: externalSetIsProcessing,
+  latestVoiceResult,
+  selectedVictimId = 'VIC-MH-2024-114',
+  language = 'en'
+}) {
+  const [internalIsProcessing, setInternalIsProcessing] = useState(false);
+  const isProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
+  const setIsProcessing = externalSetIsProcessing || setInternalIsProcessing;
+
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
@@ -31,19 +42,20 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
         latestVoiceResult.ai_response ||
         'Thank you for sharing your voice check-in. Your emotional stability and distress indicators have been assessed.';
 
+      const ts = latestVoiceResult._ts || Date.now();
       const userMessage = {
-        id: `voice-user-${latestVoiceResult.id}`,
+        id: `voice-user-${latestVoiceResult.checkin_id || ts}`,
         sender: 'user',
         isVoice: true,
         text: userText,
-        time: latestVoiceResult.time,
+        time: latestVoiceResult.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       const assistantMessage = {
-        id: `voice-assistant-${latestVoiceResult.id}`,
+        id: `voice-assistant-${latestVoiceResult.checkin_id || ts}`,
         sender: 'assistant',
         text: assistantText,
-        time: latestVoiceResult.time,
+        time: latestVoiceResult.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);
@@ -61,7 +73,7 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-IN';
+      recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -79,7 +91,7 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [language]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -194,9 +206,10 @@ export default function ChatAssistant({ onCheckinComplete, isProcessing, setIsPr
 
     try {
       const formData = new FormData();
-      formData.append('victim_id', 'VIC-MP-2024-881');
+      formData.append('victim_id', selectedVictimId);
       formData.append('channel', 'Web_Text_Chat');
       formData.append('text_content', text);
+      formData.append('language', language);
 
       const response = await fetch('/api/v1/victim/checkin', {
         method: 'POST',
