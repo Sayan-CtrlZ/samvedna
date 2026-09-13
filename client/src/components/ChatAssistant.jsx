@@ -280,7 +280,7 @@ export default function ChatAssistant({
     try {
       const formData = new FormData();
       formData.append('text', text);
-      formData.append('language', language);
+      formData.append('language', 'auto');
 
       const res = await fetch(getApiUrl('/api/v1/victim/tts'), {
         method: 'POST',
@@ -338,7 +338,7 @@ export default function ChatAssistant({
       formData.append('victim_id', selectedVictimId);
       formData.append('channel', 'Web_Text_Chat');
       formData.append('text_content', text);
-      formData.append('language', language);
+      formData.append('language', 'auto');
 
       const response = await fetch(getApiUrl('/api/v1/victim/checkin'), {
         method: 'POST',

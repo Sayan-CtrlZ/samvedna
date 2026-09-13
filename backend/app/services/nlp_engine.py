@@ -138,7 +138,54 @@ class MultilingualNLPEmotionEngine:
             }
         }
 
-    def analyze_text(self, text: str, declared_language: str = "hi") -> Dict[str, Any]:
+    def detect_language(self, text: str, stt_language_code: Optional[str] = None) -> str:
+        """
+        Auto-detects language code ('hi', 'ta', 'te', 'mr', 'bn', 'kn', 'ml', 'gu', 'pa', 'en')
+        from input text script, STT language code, or Romanized/Hinglish lexicons.
+        """
+        if stt_language_code and stt_language_code not in ["unknown", "auto", ""]:
+            code = stt_language_code.lower().split("-")[0]
+            if code in ["hi", "ta", "te", "mr", "bn", "kn", "ml", "gu", "pa", "or", "en"]:
+                return code
+
+        if not text or not text.strip():
+            return "hi"
+
+        # Unicode Script Range Inspection across Indic Languages
+        counts = {
+            "hi_mr": len(re.findall(r'[\u0900-\u097F]', text)), # Devanagari (Hindi/Marathi)
+            "bn": len(re.findall(r'[\u0980-\u09FF]', text)),    # Bengali
+            "pa": len(re.findall(r'[\u0A00-\u0A7F]', text)),    # Gurmukhi/Punjabi
+            "gu": len(re.findall(r'[\u0A80-\u0AFF]', text)),    # Gujarati
+            "ta": len(re.findall(r'[\u0B80-\u0BFF]', text)),    # Tamil
+            "te": len(re.findall(r'[\u0C00-\u0C7F]', text)),    # Telugu
+            "kn": len(re.findall(r'[\u0C80-\u0CFF]', text)),    # Kannada
+            "ml": len(re.findall(r'[\u0D00-\u0D7F]', text)),    # Malayalam
+        }
+
+        max_script = max(counts, key=counts.get)
+        if counts[max_script] > 0:
+            if max_script == "hi_mr":
+                marathi_markers = ["आहे", "नाही", "मागे", "टाकीन", "कोर्टात", "भीती", "तुला", "मदत", "कसे", "मला", "काही", "झाले", "आलो"]
+                if any(m in text for m in marathi_markers):
+                    return "mr"
+                return "hi"
+            return max_script
+
+        # Romanized / Latin Script Analysis (Hinglish, Tanglish, English)
+        clean_lower = text.lower()
+        hinglish_markers = [
+            "namaste", "namaskar", "kaise", "kya", "kar", "raha", "rahi", "hai", "ho", "mujhe",
+            "dhamki", "maar", "dar", "lag", "madad", "chahiye", "police", "court", "batao", "bataen",
+            "shukriya", "dhanyawad", "baat", "bhi", "hum", "aap", "gussa", "samjhauta", "puchna", "achha"
+        ]
+        tokens = set(clean_lower.split())
+        if any(m in tokens or m in clean_lower for m in hinglish_markers):
+            return "hi"
+
+        return "en"
+
+    def analyze_text(self, text: str, declared_language: str = "hi", stt_language_code: Optional[str] = None) -> Dict[str, Any]:
         """
         Primary semantic analysis of user text.
         Extracts: intent, valence, emotion, distress_level, urgency, confidence, indicators.
@@ -146,6 +193,8 @@ class MultilingualNLPEmotionEngine:
         """
         if not text or not text.strip():
             return self._default_metrics(declared_language)
+
+        detected_lang = self.detect_language(text, stt_language_code)
 
         clean_text = text.lower().strip()
         extracted_threats: List[str] = []
@@ -344,7 +393,7 @@ class MultilingualNLPEmotionEngine:
                         urgency = "medium"
 
         # 11. Categories, Spans & Calibrated Confidence
-        target_lang = declared_language if declared_language in self.response_templates else "hi"
+        target_lang = detected_lang if detected_lang in self.response_templates else "hi"
         categories: List[str] = []
         if witness_threat_detected:
             categories.append("intimidation_or_retraction_pressure")
@@ -377,7 +426,7 @@ class MultilingualNLPEmotionEngine:
             "witness_threat_detected": witness_threat_detected,
             "social_boycott_detected": social_boycott_detected,
             "self_harm_ideation_detected": self_harm_ideation,
-            "detected_language": target_lang,
+            "detected_language": detected_lang,
             "extracted_threat_keywords": list(set(extracted_threats)),
             "detected_cues": all_detected_cues,
             "nlp_distress_score": nlp_distress_score,

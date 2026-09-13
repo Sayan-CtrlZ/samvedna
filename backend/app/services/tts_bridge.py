@@ -46,11 +46,12 @@ class SarvamTTSBridge:
     def synthesize(
         self,
         text: str,
-        language: str = "hi",
+        language: str = "auto",
         speaker: str = "meera"
     ) -> Dict[str, Any]:
         """
         Converts text string to speech audio base64 via Sarvam AI Bulbul v1.
+        Auto-detects script language from text if language=='auto' or missing.
         """
         self.refresh_key_if_needed()
 
@@ -61,7 +62,17 @@ class SarvamTTSBridge:
             logger.info("[SARVAM-TTS] SARVAM_API_KEY not configured. Falling back to browser TTS.")
             return {"success": False, "reason": "SARVAM_API_KEY not configured", "provider": "fallback"}
 
-        target_lang = self.LANGUAGE_MAP.get(language.lower(), "hi-IN")
+        # Language Auto-Detection from Text Script
+        if not language or language == "auto" or language not in self.LANGUAGE_MAP:
+            from app.services.nlp_engine import nlp_engine
+            detected = nlp_engine.detect_language(text)
+            target_lang = self.LANGUAGE_MAP.get(detected, "hi-IN")
+        else:
+            # Double check if text contains native script of a different language (e.g. Tamil text passed with language='hi')
+            from app.services.nlp_engine import nlp_engine
+            detected = nlp_engine.detect_language(text)
+            target_lang = self.LANGUAGE_MAP.get(detected, self.LANGUAGE_MAP.get(language.lower(), "hi-IN"))
+
         t_start = time.time()
 
         # Sanitize text length (Sarvam TTS operates best on <= 500 chars per chunk)

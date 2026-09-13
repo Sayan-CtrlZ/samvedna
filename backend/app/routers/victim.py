@@ -166,8 +166,12 @@ async def process_victim_checkin(
                 "calculated_features": {}
             }
 
-        # Step 4: Multilingual NLP Threat & Sentiment Analysis
+        # Step 4: Multilingual NLP Threat & Sentiment Analysis with Language Auto-Detection
         logger.debug(f"[TRACE] NLP_INPUT [session={victim_id}]: {text_content or ''}")
+        stt_lang_code = stt_res.get("language_code") if 'stt_res' in locals() and isinstance(stt_res, dict) else None
+        detected_language = nlp_engine.detect_language(text_content or "", stt_lang_code)
+        logger.info(f"[LANG-AUTO-DETECT] Detected chatbot language: {detected_language} (UI interface language was: {language})")
+
         if not text_content or text_content.strip() == "":
             # Graceful degradation per PRD v2 Section 6.2
             nlp_metrics = {
@@ -181,10 +185,11 @@ async def process_victim_checkin(
                 "self_harm_ideation_detected": False,
                 "extracted_threat_keywords": [],
                 "detected_cues": [],
+                "detected_language": detected_language,
                 "nlp_confidence": "low"
             }
         else:
-            nlp_metrics = nlp_engine.analyze_text(text_content, language)
+            nlp_metrics = nlp_engine.analyze_text(text_content, declared_language=language, stt_language_code=stt_lang_code)
             nlp_metrics["nlp_confidence"] = transcription_confidence or "high"
 
         # Step 5: Multimodal Mood & Emotional State Estimation
@@ -193,7 +198,7 @@ async def process_victim_checkin(
             nlp_metrics=nlp_metrics,
             voice_metrics=voice_metrics,
             recent_history=history,
-            language=language
+            language=detected_language
         )
         emotional_state = multimodal_fusion_engine.interpret(nlp_metrics, voice_metrics, history)
         emotional_state["legacy_mood_state"] = legacy_mood_state
@@ -262,7 +267,7 @@ async def process_victim_checkin(
                 emotional_state=emotional_state,
                 voice_analysis=voice_metrics,
                 legal_context=victim,
-                language=language,
+                language=detected_language,
                 dds_context={"composite_dds": dds_result["composite_dds"], "risk_level": dds_result["risk_level"]}
             )
         

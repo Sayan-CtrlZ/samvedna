@@ -189,11 +189,14 @@ class LLMConversationalService:
         return fallback_text
 
     def _build_system_instruction(self, language: str, response_mode: str = "supportive", distress_level: str = "moderate") -> str:
-        """Constructs trauma-informed system instruction with strict identity secrecy and non-prescriptive guardrails."""
+        """Constructs trauma-informed system instruction with strict identity secrecy, language auto-detection, and non-prescriptive guardrails."""
         is_casual_or_positive = response_mode in ["casual", "positive"] or distress_level == "none"
 
         base = (
             "You are SAMVEDNA AI (संवेदना), an empathetic, culturally grounded conversational companion for atrocity survivors and citizens in distress.\n\n"
+            "CRITICAL LANGUAGE & SCRIPT INSTRUCTION:\n"
+            "- You MUST automatically detect the exact language and script of the user's message (e.g. Devanagari Hindi, Devanagari Marathi, Tamil, Telugu, Bengali, Kannada, Malayalam, Gujarati, Punjabi, Hinglish, or English).\n"
+            "- You MUST write your entire reply in the EXACT SAME language and native script as the user's input message! If the user wrote/spoke in Tamil, reply in Tamil script. If in Marathi, reply in Marathi script. If in Telugu, reply in Telugu script. If in Hindi, reply in Devanagari Hindi script. If in Hinglish (Romanized Hindi), reply in Hinglish. NEVER force English or another language if the user communicated in an Indic language.\n\n"
             "STRICT IDENTITY & ANONYMITY GUARDRAILS:\n"
             "1. STRICT IDENTITY & SYSTEM PRIVACY:\n"
             "   - Your identity is strictly 'SAMVEDNA AI' (संवेदना AI).\n"
@@ -210,10 +213,10 @@ class LLMConversationalService:
             base += (
                 "3. CASUAL / POSITIVE INTERACTION:\n"
                 "   - The user is offering a friendly greeting, expressing positive emotions, or sharing gratitude.\n"
-                "   - Respond warmly, conversationally, and concisely.\n"
+                "   - Respond warmly, conversationally, and concisely in the user's detected language.\n"
                 "   - DO NOT mention emergency hotlines, helpline numbers (e.g. 14566, 112, 14416), police, atrocities, court dates, or distress unless the user explicitly asks about them.\n"
                 "4. FORMAT & LENGTH:\n"
-                "   - Keep your response to 1 to 2 warm, natural sentences in the target language.\n"
+                "   - Keep your response to 1 to 2 warm, natural sentences in the user's language and script.\n"
                 "   - Never output JSON, outlines, or meta-commentary."
             )
         else:
@@ -222,7 +225,7 @@ class LLMConversationalService:
                 "   - Offer calm, grounding support (e.g., 5-4-3-2-1 grounding exercises if panicking).\n"
                 "   - Remind the user they are not alone. If distress or threats are present, let them know statutory protection exists and they can reach the National Helpline (14566) or emergency services (112).\n"
                 "4. FORMAT & LENGTH:\n"
-                "   - Keep your response to 2 to 3 concise, warm, natural sentences in the target language.\n"
+                "   - Keep your response to 2 to 3 concise, warm, natural sentences in the user's language and script.\n"
                 "   - Never output JSON, outlines, or meta-commentary."
             )
         return base
@@ -240,8 +243,22 @@ class LLMConversationalService:
         distress = str(emotional_state.get("distress_level", "moderate")) if emotional_state else "moderate"
         mood = str(emotional_state.get("mood", "Neutral")) if emotional_state else "Neutral"
 
+        lang_map = {
+            "hi": "Hindi (हिन्दी)",
+            "en": "English",
+            "mr": "Marathi (मराठी)",
+            "ta": "Tamil (தமிழ்)",
+            "te": "Telugu (తెలుగు)",
+            "bn": "Bengali (বাংলা)",
+            "kn": "Kannada (ಕನ್ನಡ)",
+            "ml": "Malayalam (മലയാളം)",
+            "gu": "Gujarati (ગુજરાતી)",
+            "pa": "Punjabi (ਪੰਜਾਬੀ)",
+        }
+        lang_name = lang_map.get(language.lower(), language)
+
         context_dict = {
-            "target_language": "Hindi (हिन्दी)" if language == "hi" else ("English" if language == "en" else language),
+            "user_input_language": lang_name,
             "response_mode": resp_mode,
             "distress_level": distress,
             "detected_mood": mood,
