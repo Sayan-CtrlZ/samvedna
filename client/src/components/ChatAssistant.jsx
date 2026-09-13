@@ -236,6 +236,35 @@ export default function ChatAssistant({
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
+    // Detect language script to set matching browser voice language
+    if (/[\u0980-\u09FF]/.test(text)) {
+      utterance.lang = 'bn-IN';
+    } else if (/[\u0900-\u097F]/.test(text)) {
+      utterance.lang = 'hi-IN';
+    } else if (/[\u0B80-\u0BFF]/.test(text)) {
+      utterance.lang = 'ta-IN';
+    } else if (/[\u0C00-\u0C7F]/.test(text)) {
+      utterance.lang = 'te-IN';
+    } else if (/[\u0A80-\u0AFF]/.test(text)) {
+      utterance.lang = 'gu-IN';
+    } else if (/[\u0C80-\u0CFF]/.test(text)) {
+      utterance.lang = 'kn-IN';
+    } else if (/[\u0D00-\u0D7F]/.test(text)) {
+      utterance.lang = 'ml-IN';
+    } else if (/[\u0A00-\u0A7F]/.test(text)) {
+      utterance.lang = 'pa-IN';
+    } else {
+      utterance.lang = 'en-IN';
+    }
+
+    // Match native voice in browser if available
+    const voices = window.speechSynthesis.getVoices() || [];
+    const targetLangPrefix = utterance.lang.split('-')[0];
+    const matchingVoice = voices.find(v => v.lang && (v.lang.toLowerCase().startsWith(targetLangPrefix) || v.lang.toLowerCase().includes(targetLangPrefix)));
+    if (matchingVoice) {
+      utterance.voice = matchingVoice;
+    }
+
     utterance.onend = () => {
       setSpeakingMessageId(null);
       setIsTtsLoading(false);

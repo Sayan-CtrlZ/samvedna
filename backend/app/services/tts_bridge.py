@@ -34,9 +34,22 @@ class SarvamTTSBridge:
         "or": "or-IN",
     }
 
+    DEFAULT_SPEAKERS = {
+        "hi-IN": "roopa",
+        "en-IN": "roopa",
+        "bn-IN": "roopa",
+        "mr-IN": "roopa",
+        "ta-IN": "roopa",
+        "te-IN": "roopa",
+        "gu-IN": "roopa",
+        "pa-IN": "roopa",
+        "kn-IN": "roopa",
+        "ml-IN": "roopa",
+    }
+
     def __init__(self):
         self.api_key = getattr(settings, "SARVAM_API_KEY", None) or os.getenv("SARVAM_API_KEY", "")
-        self.model = "bulbul:v1"
+        self.model = "bulbul:v3"
 
     def refresh_key_if_needed(self):
         current_key = getattr(settings, "SARVAM_API_KEY", None) or os.getenv("SARVAM_API_KEY", "")
@@ -47,10 +60,10 @@ class SarvamTTSBridge:
         self,
         text: str,
         language: str = "auto",
-        speaker: str = "meera"
+        speaker: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Converts text string to speech audio base64 via Sarvam AI Bulbul v1.
+        Converts text string to speech audio base64 via Sarvam AI Bulbul v3.
         Auto-detects script language from text if language=='auto' or missing.
         """
         self.refresh_key_if_needed()
@@ -73,6 +86,9 @@ class SarvamTTSBridge:
             detected = nlp_engine.detect_language(text)
             target_lang = self.LANGUAGE_MAP.get(detected, self.LANGUAGE_MAP.get(language.lower(), "hi-IN"))
 
+        # Select native speaker matching target language (roopa supports all Indic languages in bulbul:v3)
+        target_speaker = speaker if (speaker and speaker not in ["meera", "anushka", "default"]) else self.DEFAULT_SPEAKERS.get(target_lang, "roopa")
+
         t_start = time.time()
 
         # Sanitize text length (Sarvam TTS operates best on <= 500 chars per chunk)
@@ -81,7 +97,7 @@ class SarvamTTSBridge:
         payload = {
             "inputs": [clean_text],
             "target_language_code": target_lang,
-            "speaker": speaker,
+            "speaker": target_speaker,
             "pitch": 0,
             "pace": 1.0,
             "loudness": 1.5,

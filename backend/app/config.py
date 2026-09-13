@@ -6,14 +6,18 @@ from pydantic import BaseModel
 try:
     from dotenv import load_dotenv
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    root_env = os.path.join(current_dir, "..", "..", ".env")
-    backend_env = os.path.join(current_dir, "..", ".env")
-    if os.path.exists(root_env):
-        load_dotenv(root_env)
-    elif os.path.exists(backend_env):
-        load_dotenv(backend_env)
+    possible_envs = [
+        os.path.abspath(os.path.join(current_dir, "..", "..", ".env")),
+        os.path.abspath(os.path.join(current_dir, "..", ".env")),
+        os.path.abspath(os.path.join(os.getcwd(), ".env")),
+        os.path.abspath(os.path.join(os.getcwd(), "..", ".env")),
+    ]
+    for env_path in possible_envs:
+        if os.path.exists(env_path):
+            load_dotenv(env_path, override=True)
+            break
     else:
-        load_dotenv()
+        load_dotenv(override=True)
 except ImportError:
     pass
 
