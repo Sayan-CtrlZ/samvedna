@@ -1,6 +1,6 @@
 import re
 import unicodedata
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 
 class CaseInsensitiveStr(str):
